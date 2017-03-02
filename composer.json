@@ -1,0 +1,22 @@
+{
+  "name": "sitkoru/context-cache",
+  "description": "Context data accessor with cache",
+  "type": "library",
+  "authors": [
+    {
+      "name": "George Drak",
+      "email": "sonicgd@gmail.com"
+    }
+  ],
+  "minimum-stability": "stable",
+  "require": {
+    "sitkoru/yandex-direct-api": "dev-master",
+    "googleads/googleads-php-lib": "25.3.0",
+    "mongodb/mongodb": "^1.1.2"
+  },
+  "autoload": {
+    "psr-4": {
+      "sitkoru\\contextcache\\": "src"
+    }
+  }
+}
