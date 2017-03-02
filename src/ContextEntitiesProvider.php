@@ -3,17 +3,20 @@
 namespace sitkoru\contextcache;
 
 
-use sitkoru\contextcache\common\MongoDbCacheProvider;
+use sitkoru\contextcache\common\ICacheProvider;
 use sitkoru\contextcache\google\GoogleProvider;
 use sitkoru\contextcache\yandex\YandexProvider;
 
 class ContextEntitiesProvider
 {
+    /**
+     * @var ICacheProvider
+     */
     private $cache;
 
-    public function __construct(string $mongoDbUrl)
+    public function __construct(ICacheProvider $cacheProvider)
     {
-        $this->cache = new MongoDbCacheProvider($mongoDbUrl);
+        $this->cache = $cacheProvider;
     }
 
     public function getYandexProvider(string $accessToken, string $clientLogin): YandexProvider
