@@ -10,6 +10,7 @@ use directapi\services\keywords\enum\KeywordFieldEnum;
 use directapi\services\keywords\models\KeywordGetItem;
 use sitkoru\contextcache\common\ICacheProvider;
 use sitkoru\contextcache\common\IEntitiesProvider;
+use sitkoru\contextcache\helpers\ArrayHelper;
 
 class DirectKeywordsProvider extends DirectEntitiesProvider implements IEntitiesProvider
 {
@@ -28,7 +29,7 @@ class DirectKeywordsProvider extends DirectEntitiesProvider implements IEntities
         /**
          * @var KeywordGetItem[] $keywords
          */
-        $keywords = $this->getFromCache('Id', $ids);
+        $keywords = $this->getFromCache($ids, 'Id');
         $found = array_keys($keywords);
         $notFound = array_values(array_diff($ids, $found));
         if ($notFound) {
@@ -54,6 +55,31 @@ class DirectKeywordsProvider extends DirectEntitiesProvider implements IEntities
             return reset($entities);
         }
         return null;
+    }
+
+    /**
+     * @param array $ids
+     * @return array
+     * @throws \Exception
+     */
+    public function getByAdGroupIds(array $ids): array
+    {
+        /**
+         * @var KeywordGetItem[] $keywords
+         */
+        $keywords = $this->getFromCache($ids, 'AdGroupId', 'Id');
+        $found = array_unique(ArrayHelper::getColumn($keywords, 'AdGroupId'));
+        $notFound = array_values(array_diff($ids, $found));
+        if ($notFound) {
+            $criteria = new KeywordsSelectionCriteria();
+            $criteria->AdGroupIds = $notFound;
+            $fromService = $this->directApiService->getKeywordsService()->get($criteria, KeywordFieldEnum::getValues());
+            foreach ($fromService as $keywordGetItem) {
+                $keywords[$keywordGetItem->Id] = $keywordGetItem;
+            }
+            $this->addToCache($fromService);
+        }
+        return $keywords;
     }
 
 

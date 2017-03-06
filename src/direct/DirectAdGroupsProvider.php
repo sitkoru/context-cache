@@ -12,6 +12,7 @@ use directapi\services\changes\enum\FieldNamesEnum;
 use directapi\services\changes\models\CheckResponse;
 use sitkoru\contextcache\common\ICacheProvider;
 use sitkoru\contextcache\common\IEntitiesProvider;
+use sitkoru\contextcache\helpers\ArrayHelper;
 
 class DirectAdGroupsProvider extends DirectEntitiesProvider implements IEntitiesProvider
 {
@@ -31,7 +32,7 @@ class DirectAdGroupsProvider extends DirectEntitiesProvider implements IEntities
         /**
          * @var AdGroupGetItem[] $adGroups
          */
-        $adGroups = $this->getFromCache('Id', $ids);
+        $adGroups = $this->getFromCache($ids, 'Id');
         $found = array_keys($adGroups);
         $notFound = array_values(array_diff($ids, $found));
         if ($notFound) {
@@ -59,6 +60,32 @@ class DirectAdGroupsProvider extends DirectEntitiesProvider implements IEntities
             return reset($ads);
         }
         return null;
+    }
+
+    /**
+     * @param array $ids
+     * @return array
+     * @throws \Exception
+     */
+    public function getByCampaignIds(array $ids): array
+    {
+        /**
+         * @var AdGroupGetItem[] $adGroups
+         */
+        $adGroups = $this->getFromCache($ids, 'CampaignId', 'Id');
+        $found = array_unique(ArrayHelper::getColumn($adGroups, 'CampaignId'));
+        $notFound = array_values(array_diff($ids, $found));
+        if ($notFound) {
+            $criteria = new AdGroupsSelectionCriteria();
+            $criteria->CampaignIds = $notFound;
+            $fromService = $this->directApiService->getAdGroupsService()->get($criteria, AdGroupFieldEnum::getValues(),
+                MobileAppAdGroupFieldEnum::getValues());
+            foreach ($fromService as $adGroupGetItem) {
+                $adGroups[$adGroupGetItem->Id] = $adGroupGetItem;
+            }
+            $this->addToCache($fromService);
+        }
+        return $adGroups;
     }
 
 

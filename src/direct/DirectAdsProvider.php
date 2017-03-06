@@ -13,6 +13,7 @@ use directapi\services\changes\enum\FieldNamesEnum;
 use directapi\services\changes\models\CheckResponse;
 use sitkoru\contextcache\common\ICacheProvider;
 use sitkoru\contextcache\common\IEntitiesProvider;
+use sitkoru\contextcache\helpers\ArrayHelper;
 
 class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvider
 {
@@ -31,12 +32,38 @@ class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvi
         /**
          * @var AdGetItem[] $ads
          */
-        $ads = $this->getFromCache('Id', $ids);
+        $ads = $this->getFromCache($ids, 'Id');
         $found = array_keys($ads);
         $notFound = array_values(array_diff($ids, $found));
         if ($notFound) {
             $criteria = new AdsSelectionCriteria();
             $criteria->Ids = $notFound;
+            $fromService = $this->directApiService->getAdsService()->get($criteria, AdFieldEnum::getValues(),
+                TextAdFieldEnum::getValues(), MobileAppAdFieldEnum::getValues(), DynamicTextAdFieldEnum::getValues());
+            foreach ($fromService as $adGetItem) {
+                $ads[$adGetItem->Id] = $adGetItem;
+            }
+            $this->addToCache($fromService);
+        }
+        return $ads;
+    }
+
+    /**
+     * @param array $ids
+     * @return array
+     * @throws \Exception
+     */
+    public function getByAdGroupIds(array $ids): array
+    {
+        /**
+         * @var AdGetItem[] $ads
+         */
+        $ads = $this->getFromCache($ids, 'AdGroupId', 'Id');
+        $found = array_unique(ArrayHelper::getColumn($ads, 'AdGroupId'));
+        $notFound = array_values(array_diff($ids, $found));
+        if ($notFound) {
+            $criteria = new AdsSelectionCriteria();
+            $criteria->AdGroupIds = $notFound;
             $fromService = $this->directApiService->getAdsService()->get($criteria, AdFieldEnum::getValues(),
                 TextAdFieldEnum::getValues(), MobileAppAdFieldEnum::getValues(), DynamicTextAdFieldEnum::getValues());
             foreach ($fromService as $adGetItem) {
