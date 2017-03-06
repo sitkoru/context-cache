@@ -1,53 +1,57 @@
 <?php
 
-namespace sitkoru\contextcache\yandex;
+namespace sitkoru\contextcache\direct;
 
 use directapi\DirectApiService;
+use directapi\services\ads\criterias\AdsSelectionCriteria;
+use directapi\services\ads\enum\AdFieldEnum;
+use directapi\services\ads\enum\DynamicTextAdFieldEnum;
+use directapi\services\ads\enum\MobileAppAdFieldEnum;
+use directapi\services\ads\enum\TextAdFieldEnum;
+use directapi\services\ads\models\AdGetItem;
 use directapi\services\changes\enum\FieldNamesEnum;
 use directapi\services\changes\models\CheckResponse;
-use directapi\services\keywords\criterias\KeywordsSelectionCriteria;
-use directapi\services\keywords\enum\KeywordFieldEnum;
-use directapi\services\keywords\models\KeywordGetItem;
 use sitkoru\contextcache\common\ICacheProvider;
 use sitkoru\contextcache\common\IEntitiesProvider;
 
-class YandexKeywordsProvider extends YandexEntitiesProvider implements IEntitiesProvider
+class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvider
 {
     public function __construct(DirectApiService $directApiService, ICacheProvider $cacheProvider)
     {
         parent::__construct($directApiService, $cacheProvider);
-        $this->collection = 'keywords';
+        $this->collection = 'ads';
     }
 
     /**
      * @param array $ids
-     * @return KeywordGetItem[]
+     * @return AdGetItem[]
      */
     public function getAll(array $ids): array
     {
         /**
-         * @var KeywordGetItem[] $keywords
+         * @var AdGetItem[] $ads
          */
-        $keywords = $this->getFromCache('Id', $ids, KeywordGetItem::class);
-        $found = array_keys($keywords);
+        $ads = $this->getFromCache('Id', $ids, AdGetItem::class);
+        $found = array_keys($ads);
         $notFound = array_values(array_diff($ids, $found));
         if ($notFound) {
-            $criteria = new KeywordsSelectionCriteria();
+            $criteria = new AdsSelectionCriteria();
             $criteria->Ids = $notFound;
-            $fromService = $this->directApiService->getKeywordsService()->get($criteria, KeywordFieldEnum::getValues());
-            foreach ($fromService as $keywordGetItem) {
-                $keywords[$keywordGetItem->Id] = $keywordGetItem;
+            $fromService = $this->directApiService->getAdsService()->get($criteria, AdFieldEnum::getValues(),
+                TextAdFieldEnum::getValues(), MobileAppAdFieldEnum::getValues(), DynamicTextAdFieldEnum::getValues());
+            foreach ($fromService as $adGetItem) {
+                $ads[$adGetItem->Id] = $adGetItem;
             }
             $this->addToCache($fromService);
         }
-        return $keywords;
+        return $ads;
     }
 
     /**
      * @param $id
-     * @return KeywordGetItem|null
+     * @return AdGetItem|null
      */
-    public function getOne($id): KeywordGetItem
+    public function getOne($id): AdGetItem
     {
         $entities = $this->getAll([$id]);
         if ($entities) {

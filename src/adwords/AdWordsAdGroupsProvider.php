@@ -1,6 +1,6 @@
 <?php
 
-namespace sitkoru\contextcache\google;
+namespace sitkoru\contextcache\adwords;
 
 use Google\AdsApi\AdWords\v201702\cm\AdGroup;
 use Google\AdsApi\AdWords\v201702\cm\AdGroupService;
@@ -10,7 +10,7 @@ use Google\AdsApi\AdWords\v201702\cm\Selector;
 use sitkoru\contextcache\common\ICacheProvider;
 use sitkoru\contextcache\common\IEntitiesProvider;
 
-class GoogleAdGroupsProvider extends GoogleEntitiesProvider implements IEntitiesProvider
+class AdWordsAdGroupsProvider extends AdWordsEntitiesProvider implements IEntitiesProvider
 {
     /**
      * @var AdGroupService

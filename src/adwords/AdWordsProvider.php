@@ -1,6 +1,6 @@
 <?php
 
-namespace sitkoru\contextcache\google;
+namespace sitkoru\contextcache\adwords;
 
 
 use Google\AdsApi\AdWords\AdWordsServices;
@@ -11,7 +11,7 @@ use Google\AdsApi\Common\OAuth2TokenBuilder;
 use Google\Auth\CredentialsLoader;
 use sitkoru\contextcache\common\ICacheProvider;
 
-class GoogleProvider
+class AdWordsProvider
 {
 
     public $adGroups;
@@ -59,7 +59,7 @@ class GoogleProvider
          * @var AdGroupService $adGroupService
          */
         $adGroupService = $services->get($session, AdGroupService::class);
-        $this->adGroups = new GoogleAdGroupsProvider($adGroupService, $cacheProvider);
+        $this->adGroups = new AdWordsAdGroupsProvider($adGroupService, $cacheProvider);
 
 
     }

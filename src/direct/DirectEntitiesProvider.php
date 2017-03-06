@@ -1,6 +1,6 @@
 <?php
 
-namespace sitkoru\contextcache\yandex;
+namespace sitkoru\contextcache\direct;
 
 
 use directapi\DirectApiService;
@@ -8,7 +8,7 @@ use directapi\services\changes\models\CheckResponse;
 use sitkoru\contextcache\common\EntitiesProvider;
 use sitkoru\contextcache\common\ICacheProvider;
 
-abstract class YandexEntitiesProvider extends EntitiesProvider
+abstract class DirectEntitiesProvider extends EntitiesProvider
 {
     /**
      * @var DirectApiService

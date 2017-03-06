@@ -2,10 +2,9 @@
 
 namespace sitkoru\contextcache;
 
-
+use sitkoru\contextcache\adwords\AdWordsProvider;
 use sitkoru\contextcache\common\ICacheProvider;
-use sitkoru\contextcache\google\GoogleProvider;
-use sitkoru\contextcache\yandex\YandexProvider;
+use sitkoru\contextcache\direct\DirectProvider;
 
 class ContextEntitiesProvider
 {
@@ -19,16 +18,16 @@ class ContextEntitiesProvider
         $this->cache = $cacheProvider;
     }
 
-    public function getYandexProvider(string $accessToken, string $clientLogin): YandexProvider
+    public function getDirectProvider(string $accessToken, string $clientLogin): DirectProvider
     {
-        return new YandexProvider($accessToken, $clientLogin, $this->cache);
+        return new DirectProvider($accessToken, $clientLogin, $this->cache);
     }
 
-    public function getGoogleProvider(
+    public function getAdWordsProvider(
         int $customerId,
         string $oAuthFilePath,
         ?string $refreshToken = null
-    ): GoogleProvider {
-        return new GoogleProvider($customerId, $oAuthFilePath, $refreshToken, $this->cache);
+    ): AdWordsProvider {
+        return new AdWordsProvider($customerId, $oAuthFilePath, $refreshToken, $this->cache);
     }
 }

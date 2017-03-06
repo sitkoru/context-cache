@@ -1,6 +1,6 @@
 <?php
 
-namespace sitkoru\contextcache\yandex;
+namespace sitkoru\contextcache\direct;
 
 use directapi\DirectApiService;
 use directapi\services\campaigns\criterias\CampaignsSelectionCriteria;
@@ -13,7 +13,7 @@ use directapi\services\changes\models\CheckResponse;
 use sitkoru\contextcache\common\ICacheProvider;
 use sitkoru\contextcache\common\IEntitiesProvider;
 
-class YandexCampaignsProvider extends YandexEntitiesProvider implements IEntitiesProvider
+class DirectCampaignsProvider extends DirectEntitiesProvider implements IEntitiesProvider
 {
     public function __construct(DirectApiService $directApiService, ICacheProvider $cacheProvider)
     {

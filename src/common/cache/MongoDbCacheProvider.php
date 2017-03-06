@@ -1,9 +1,10 @@
 <?php
 
-namespace sitkoru\contextcache\common;
+namespace sitkoru\contextcache\common\cache;
 
 
 use MongoDB\Client;
+use sitkoru\contextcache\common\ICacheProvider;
 
 class MongoDbCacheProvider implements ICacheProvider
 {

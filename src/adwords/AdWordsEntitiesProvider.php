@@ -1,12 +1,12 @@
 <?php
 
-namespace sitkoru\contextcache\google;
+namespace sitkoru\contextcache\adwords;
 
 use ReflectionClass;
 use sitkoru\contextcache\common\EntitiesProvider;
 use sitkoru\contextcache\common\ICacheProvider;
 
-abstract class GoogleEntitiesProvider extends EntitiesProvider
+abstract class AdWordsEntitiesProvider extends EntitiesProvider
 {
     public function __construct(ICacheProvider $cacheProvider)
     {

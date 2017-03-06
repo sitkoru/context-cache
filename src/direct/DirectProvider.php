@@ -1,27 +1,27 @@
 <?php
 
-namespace sitkoru\contextcache\yandex;
+namespace sitkoru\contextcache\direct;
 
 
 use directapi\DirectApiService;
 use sitkoru\contextcache\common\ICacheProvider;
 
-class YandexProvider
+class DirectProvider
 {
     /**
-     * @var YandexAdGroupsProvider
+     * @var DirectAdGroupsProvider
      */
     public $adGroups;
     /**
-     * @var YandexAdsProvider
+     * @var DirectAdsProvider
      */
     public $ads;
     /**
-     * @var YandexCampaignsProvider
+     * @var DirectCampaignsProvider
      */
     public $campaigns;
     /**
-     * @var YandexKeywordsProvider
+     * @var DirectKeywordsProvider
      */
     public $keywords;
 
@@ -54,10 +54,10 @@ class YandexProvider
         $this->yandexService = new DirectApiService($accessToken, $clientLogin);
         $this->cacheProvider = $cacheProvider;
 
-        $this->adGroups = new YandexAdGroupsProvider($this->yandexService, $this->cacheProvider);
-        $this->ads = new YandexAdsProvider($this->yandexService, $this->cacheProvider);
-        $this->keywords = new YandexKeywordsProvider($this->yandexService, $this->cacheProvider);
-        $this->campaigns = new YandexCampaignsProvider($this->yandexService, $this->cacheProvider);
+        $this->adGroups = new DirectAdGroupsProvider($this->yandexService, $this->cacheProvider);
+        $this->ads = new DirectAdsProvider($this->yandexService, $this->cacheProvider);
+        $this->keywords = new DirectKeywordsProvider($this->yandexService, $this->cacheProvider);
+        $this->campaigns = new DirectCampaignsProvider($this->yandexService, $this->cacheProvider);
 
     }
 }
