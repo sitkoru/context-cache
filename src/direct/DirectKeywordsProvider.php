@@ -28,7 +28,7 @@ class DirectKeywordsProvider extends DirectEntitiesProvider implements IEntities
         /**
          * @var KeywordGetItem[] $keywords
          */
-        $keywords = $this->getFromCache('Id', $ids, KeywordGetItem::class);
+        $keywords = $this->getFromCache('Id', $ids);
         $found = array_keys($keywords);
         $notFound = array_values(array_diff($ids, $found));
         if ($notFound) {

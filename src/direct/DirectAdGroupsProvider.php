@@ -31,7 +31,7 @@ class DirectAdGroupsProvider extends DirectEntitiesProvider implements IEntities
         /**
          * @var AdGroupGetItem[] $adGroups
          */
-        $adGroups = $this->getFromCache('Id', $ids, AdGroupGetItem::class);
+        $adGroups = $this->getFromCache('Id', $ids);
         $found = array_keys($adGroups);
         $notFound = array_values(array_diff($ids, $found));
         if ($notFound) {

@@ -28,41 +28,30 @@ abstract class EntitiesProvider
         $this->mapper = $mapper;
     }
 
-    protected function getFromCache(string $field, array $ids, string $class): array
+    protected function getFromCache(string $field, array $ids): array
     {
         if ($this->hasChanges($ids)) {
             $this->clearCache();
             return [];
         }
-        return $this->getEntitiesFromCache($field, $ids, $class);
+        return $this->getEntitiesFromCache($field, $ids);
     }
 
-    protected function getEntitiesFromCache(string $field, array $ids, string $class): array
+    protected function getEntitiesFromCache(string $field, array $ids): array
     {
-        $entities = [];
-        $data = $this->cacheProvider->get($this->serviceKey, $this->collection, $field, $ids);
-        foreach ($data as $entry) {
-            $object = json_decode(json_encode($entry));
-            $entity = $this->mapper->map($object, new $class);
-            $entities[$entity->$field] = $entity;
-        }
+        $entities = $this->cacheProvider->collection($this->serviceKey, $this->collection)->get($field, $ids);
         return $entities;
     }
 
     protected function addToCache(array $entities)
     {
-        $preparedEntities = [];
-        foreach ($entities as $entity) {
-            $preparedEntity = json_decode(json_encode($entity));
-            $preparedEntities[] = $preparedEntity;
-        }
-        $this->cacheProvider->set($this->serviceKey, $this->collection, $preparedEntities);
+        $this->cacheProvider->collection($this->serviceKey, $this->collection)->set($entities);
         $this->cacheProvider->setTimeStamp($this->serviceKey, time());
     }
 
     protected function clearCache()
     {
-        $this->cacheProvider->clear($this->serviceKey, $this->collection);
+        $this->cacheProvider->collection($this->serviceKey, $this->collection)->clear();
     }
 
     protected function hasChanges($ids): bool

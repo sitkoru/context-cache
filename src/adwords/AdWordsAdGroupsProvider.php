@@ -35,7 +35,7 @@ class AdWordsAdGroupsProvider extends AdWordsEntitiesProvider implements IEntiti
         /**
          * @var AdGroup[] $adGroups
          */
-        $adGroups = $this->getFromCache('id', $ids, AdGroup::class);
+        $adGroups = $this->getFromCache('id', $ids);
         if ($adGroups) {
             $found = array_keys($adGroups);
             $notFound = array_values(array_diff($ids, $found));

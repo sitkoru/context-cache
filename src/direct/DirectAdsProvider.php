@@ -31,7 +31,7 @@ class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvi
         /**
          * @var AdGetItem[] $ads
          */
-        $ads = $this->getFromCache('Id', $ids, AdGetItem::class);
+        $ads = $this->getFromCache('Id', $ids);
         $found = array_keys($ads);
         $notFound = array_values(array_diff($ids, $found));
         if ($notFound) {

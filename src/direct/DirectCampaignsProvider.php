@@ -30,7 +30,7 @@ class DirectCampaignsProvider extends DirectEntitiesProvider implements IEntitie
         /**
          * @var CampaignGetItem[] $campaigns
          */
-        $campaigns = $this->getFromCache('Id', $ids, CampaignGetItem::class);
+        $campaigns = $this->getFromCache('Id', $ids);
         $found = array_keys($campaigns);
         $notFound = array_values(array_diff($ids, $found));
         if ($notFound) {
