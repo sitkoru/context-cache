@@ -6,7 +6,10 @@ namespace sitkoru\contextcache\adwords;
 use Google\AdsApi\AdWords\AdWordsServices;
 use Google\AdsApi\AdWords\AdWordsSession;
 use Google\AdsApi\AdWords\AdWordsSessionBuilder;
+use Google\AdsApi\AdWords\v201702\cm\AdGroupAdService;
+use Google\AdsApi\AdWords\v201702\cm\AdGroupCriterionService;
 use Google\AdsApi\AdWords\v201702\cm\AdGroupService;
+use Google\AdsApi\AdWords\v201702\cm\CampaignService;
 use Google\AdsApi\Common\OAuth2TokenBuilder;
 use Google\Auth\CredentialsLoader;
 use sitkoru\contextcache\common\ICacheProvider;
@@ -20,7 +23,7 @@ class AdWordsProvider
 
     public $campaigns;
 
-    public $keywords;
+    public $criterions;
     /**
      * @var
      */
@@ -55,11 +58,30 @@ class AdWordsProvider
 
         $services = new AdWordsServices();
         $session = $this->getSession();
+
+        /**
+         * @var CampaignService $campaignService
+         */
+        $campaignService = $services->get($session, CampaignService::class);
+        $this->campaigns = new AdWordsCampaignsProvider($campaignService, $cacheProvider);
+
         /**
          * @var AdGroupService $adGroupService
          */
         $adGroupService = $services->get($session, AdGroupService::class);
         $this->adGroups = new AdWordsAdGroupsProvider($adGroupService, $cacheProvider);
+
+        /**
+         * @var AdGroupAdService $adGroupAdService
+         */
+        $adGroupAdService = $services->get($session, AdGroupAdService::class);
+        $this->ads = new AdWordsAdsProvider($adGroupAdService, $cacheProvider);
+
+        /**
+         * @var AdGroupCriterionService $adGroupCriterionService
+         */
+        $adGroupCriterionService = $services->get($session, AdGroupCriterionService::class);
+        $this->criterions = new AdWordsAdGroupCriterionsProvider($adGroupCriterionService, $cacheProvider);
 
 
     }
