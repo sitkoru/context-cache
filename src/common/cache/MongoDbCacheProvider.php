@@ -59,7 +59,7 @@ class MongoDbCacheProvider implements ICacheProvider
         if ($setting) {
             return $setting->value;
         }
-        return null;
+        return 0;
     }
 
     public function setTimeStamp(string $service, int $timestamp)
