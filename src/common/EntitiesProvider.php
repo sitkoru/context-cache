@@ -28,28 +28,30 @@ abstract class EntitiesProvider
         $this->mapper = $mapper;
     }
 
-    protected function getFromCache(string $field, array $ids): array
+    protected function getFromCache(array $ids, string $field, $indexBy = null): array
     {
         if ($this->hasChanges($ids)) {
             $this->clearCache();
             return [];
         }
-        return $this->getEntitiesFromCache($field, $ids);
+        return $this->getEntitiesFromCache($ids, $field, $indexBy);
     }
 
-    protected function getEntitiesFromCache(string $field, array $ids): array
+    protected function getEntitiesFromCache(array $ids, string $field, $indexBy = null): array
     {
-        $entities = $this->cacheProvider->collection($this->serviceKey, $this->collection)->get($field, $ids);
+        $entities = $this->cacheProvider->collection($this->serviceKey, $this->collection)->get($ids, $field, $indexBy);
         return $entities;
     }
 
     protected function addToCache(array $entities)
     {
-        $this->cacheProvider->collection($this->serviceKey, $this->collection)->set($entities);
-        $this->cacheProvider->setTimeStamp($this->serviceKey, time());
+        if ($entities) {
+            $this->cacheProvider->collection($this->serviceKey, $this->collection)->set($entities);
+            $this->cacheProvider->setTimeStamp($this->serviceKey, time());
+        }
     }
 
-    protected function clearCache()
+    public function clearCache()
     {
         $this->cacheProvider->collection($this->serviceKey, $this->collection)->clear();
     }

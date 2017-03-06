@@ -6,6 +6,7 @@ namespace sitkoru\contextcache\common\cache;
 use MongoDB\Client;
 use ReflectionClass;
 use sitkoru\contextcache\common\ICacheCollection;
+use sitkoru\contextcache\helpers\ArrayHelper;
 
 class MongoDbCacheCollection implements ICacheCollection
 {
@@ -27,19 +28,28 @@ class MongoDbCacheCollection implements ICacheCollection
     }
 
     /**
-     * @param string $field
-     * @param array  $ids
+     * @param string      $field
+     * @param array       $ids
+     * @param string|null $indexBy
      * @return array
      * @throws \MongoDB\Exception\UnsupportedException
      * @throws \MongoDB\Exception\InvalidArgumentException
      * @throws \MongoDB\Driver\Exception\RuntimeException
      */
-    public function get(string $field, array $ids): array
+    public function get(array $ids, string $field, $indexBy = null): array
     {
-        $entities = $this->collection->find([
-            $field => ['$in' => $ids]
-        ])->toArray();
-        return $this->deserializeEntities($entities, $field);
+        $filter = [
+            $field => [
+                '$in' => $ids
+            ]
+        ];
+        $entities = $this->collection->find($filter)->toArray();
+        $entities = $this->deserializeEntities($entities);
+        if (!$indexBy) {
+            $indexBy = $field;
+        }
+        $entities = ArrayHelper::index($entities, $indexBy);
+        return $entities;
     }
 
     /**
@@ -63,13 +73,13 @@ class MongoDbCacheCollection implements ICacheCollection
         return $preparedEntities;
     }
 
-    private function deserializeEntities(array $serializedEntities, string $field): array
+    private function deserializeEntities(array $serializedEntities): array
     {
         $entities = [];
         foreach ($serializedEntities as $entry) {
             $object = json_decode(json_encode($entry), true);
             $entity = unserialize($object['serialized']);
-            $entities[$object[$field]] = $entity;
+            $entities[] = $entity;
         }
         return $entities;
     }
