@@ -17,13 +17,26 @@ use sitkoru\contextcache\common\ICacheProvider;
 class AdWordsProvider
 {
 
+    /**
+     * @var AdWordsAdGroupsProvider
+     */
     public $adGroups;
 
+    /**
+     * @var AdWordsAdsProvider
+     */
     public $ads;
 
+    /**
+     * @var AdWordsCampaignsProvider
+     */
     public $campaigns;
 
+    /**
+     * @var AdWordsAdGroupCriterionsProvider
+     */
     public $criterions;
+    
     /**
      * @var
      */
