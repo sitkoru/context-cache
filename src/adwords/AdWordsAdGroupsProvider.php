@@ -56,11 +56,11 @@ class AdWordsAdGroupsProvider extends AdWordsEntitiesProvider implements IEntiti
             $selector->setFields(self::$fields);
             $predicates[] = new Predicate('Id', PredicateOperator::IN, $ids);
             $selector->setPredicates($predicates);
-            $fromService = $this->adGroupService->get($selector);
-            foreach ($fromService->getEntries() as $adGroupItem) {
+            $fromService = (array)$this->adGroupService->get($selector)->getEntries();
+            foreach ($fromService as $adGroupItem) {
                 $adGroups[$adGroupItem->getId()] = $adGroupItem;
             }
-            $this->addToCache($fromService->getEntries());
+            $this->addToCache($fromService);
         }
         return $adGroups;
     }
@@ -100,11 +100,11 @@ class AdWordsAdGroupsProvider extends AdWordsEntitiesProvider implements IEntiti
             $selector->setFields(self::$fields);
             $predicates[] = new Predicate('CampaignId', PredicateOperator::IN, $notFound);
             $selector->setPredicates($predicates);
-            $fromService = $this->adGroupService->get($selector);
-            foreach ($fromService->getEntries() as $adGroupItem) {
+            $fromService = (array)$this->adGroupService->get($selector)->getEntries();
+            foreach ($fromService as $adGroupItem) {
                 $adGroups[$adGroupItem->getId()] = $adGroupItem;
             }
-            $this->addToCache($fromService->getEntries());
+            $this->addToCache($fromService);
         }
         return $adGroups;
     }

@@ -50,11 +50,11 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
             $selector->setFields(self::$fields);
             $predicates[] = new Predicate('Id', PredicateOperator::IN, $ids);
             $selector->setPredicates($predicates);
-            $fromService = $this->adGroupAdService->get($selector);
-            foreach ($fromService->getEntries() as $adGroupAdItem) {
+            $fromService = (array)$this->adGroupAdService->get($selector)->getEntries();
+            foreach ($fromService as $adGroupAdItem) {
                 $adGroupAds[$adGroupAdItem->getAd()->getId()] = $adGroupAdItem;
             }
-            $this->addToCache($fromService->getEntries());
+            $this->addToCache($fromService);
         }
         return $adGroupAds;
     }
@@ -85,11 +85,14 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
             $selector->setFields(self::$fields);
             $predicates[] = new Predicate('AdGroupId', PredicateOperator::IN, $notFound);
             $selector->setPredicates($predicates);
-            $fromService = $this->adGroupAdService->get($selector);
-            foreach ($fromService->getEntries() as $adGroupAdItem) {
+            $fromService = (array)$this->adGroupAdService->get($selector)->getEntries();
+            foreach ($fromService as $adGroupAdItem) {
+                /**
+                 * @var AdGroupAd $adGroupAdItem
+                 */
                 $adGroupAds[$adGroupAdItem->getAd()->getId()] = $adGroupAdItem;
             }
-            $this->addToCache((array)$fromService->getEntries());
+            $this->addToCache((array)$fromService);
         }
         return $adGroupAds;
     }

@@ -58,11 +58,11 @@ class AdWordsCampaignsProvider extends AdWordsEntitiesProvider implements IEntit
             $selector->setFields(self::$fields);
             $predicates[] = new Predicate('Id', PredicateOperator::IN, $ids);
             $selector->setPredicates($predicates);
-            $fromService = $this->campaignService->get($selector);
-            foreach ($fromService->getEntries() as $campaignItem) {
+            $fromService = (array)$this->campaignService->get($selector)->getEntries();
+            foreach ($fromService as $campaignItem) {
                 $campaigns[$campaignItem->getId()] = $campaignItem;
             }
-            $this->addToCache($fromService->getEntries());
+            $this->addToCache($fromService);
         }
         return $campaigns;
     }

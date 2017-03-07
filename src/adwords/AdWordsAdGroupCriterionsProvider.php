@@ -58,12 +58,12 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
             $selector->setFields(self::$fields);
             $predicates[] = new Predicate('Id', PredicateOperator::IN, $ids);
             $selector->setPredicates($predicates);
-            $fromService = $this->adGroupCriterionService->get($selector);
-            foreach ($fromService->getEntries() as $criterionItem) {
+            $fromService = (array)$this->adGroupCriterionService->get($selector)->getEntries();
+            foreach ($fromService as $criterionItem) {
                 $index = $indexBy($criterionItem);
                 $criterions[$index] = $criterionItem;
             }
-            $this->addToCache($fromService->getEntries());
+            $this->addToCache($fromService);
         }
         return $criterions;
     }
@@ -97,12 +97,12 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
             $selector->setFields(self::$fields);
             $predicates[] = new Predicate('AdGroupId', PredicateOperator::IN, $notFound);
             $selector->setPredicates($predicates);
-            $fromService = $this->adGroupCriterionService->get($selector);
-            foreach ($fromService->getEntries() as $criterionItem) {
+            $fromService = (array)$this->adGroupCriterionService->get($selector)->getEntries();
+            foreach ($fromService as $criterionItem) {
                 $index = $indexBy($criterionItem);
                 $criterions[$index] = $criterionItem;
             }
-            $this->addToCache((array)$fromService->getEntries());
+            $this->addToCache($fromService);
         }
         return $criterions;
     }
