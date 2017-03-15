@@ -9,7 +9,6 @@ use directapi\services\ads\enum\DynamicTextAdFieldEnum;
 use directapi\services\ads\enum\MobileAppAdFieldEnum;
 use directapi\services\ads\enum\TextAdFieldEnum;
 use directapi\services\ads\models\AdGetItem;
-use directapi\services\ads\models\AdUpdateItem;
 use directapi\services\changes\enum\FieldNamesEnum;
 use directapi\services\changes\models\CheckResponse;
 use sitkoru\contextcache\common\ICacheProvider;
@@ -18,6 +17,8 @@ use sitkoru\contextcache\helpers\ArrayHelper;
 
 class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvider
 {
+    const MAX_ADS_PER_UPDATE = 1000;
+
     public function __construct(DirectApiService $directApiService, ICacheProvider $cacheProvider)
     {
         parent::__construct($directApiService, $cacheProvider);
@@ -128,7 +129,9 @@ class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvi
     public function update(array $entities): bool
     {
         $updEntities = $this->directApiService->getAdsService()->toUpdateEntities($entities);
-        $this->directApiService->getAdsService()->update($updEntities);
+        foreach (array_chunk($updEntities, self::MAX_ADS_PER_UPDATE) as $entitiesChunk) {
+            $this->directApiService->getAdsService()->update($entitiesChunk);
+        }
         $this->clearCache();
         return true;
     }
