@@ -48,7 +48,7 @@ class DirectKeywordsProvider extends DirectEntitiesProvider implements IEntities
      * @param $id
      * @return KeywordGetItem|null
      */
-    public function getOne($id): KeywordGetItem
+    public function getOne($id): ?KeywordGetItem
     {
         $entities = $this->getAll([$id]);
         if ($entities) {
@@ -58,8 +58,8 @@ class DirectKeywordsProvider extends DirectEntitiesProvider implements IEntities
     }
 
     /**
-     * @param array $ids
-     * @return array
+     * @param int[] $ids
+     * @return KeywordGetItem[]
      * @throws \Exception
      */
     public function getByAdGroupIds(array $ids): array
@@ -97,6 +97,7 @@ class DirectKeywordsProvider extends DirectEntitiesProvider implements IEntities
     {
         $updEntities = $this->directApiService->getKeywordsService()->toUpdateEntities($entities);
         $this->directApiService->getKeywordsService()->update($updEntities);
+        $this->clearCache();
         return true;
     }
 }

@@ -65,4 +65,9 @@ class DirectCampaignsProvider extends DirectEntitiesProvider implements IEntitie
     {
         return $this->directApiService->getChangesService()->check([], [], $ids, [FieldNamesEnum::AD_IDS], $date);
     }
+
+    public function update(array $entities): bool
+    {
+        return false;
+    }
 }

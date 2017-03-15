@@ -79,7 +79,7 @@ class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvi
      * @param $id
      * @return AdGetItem|null
      */
-    public function getOne($id): AdGetItem
+    public function getOne($id): ?AdGetItem
     {
         $entities = $this->getAll([$id]);
         if ($entities) {
@@ -103,6 +103,7 @@ class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvi
     {
         $updEntities = $this->directApiService->getAdsService()->toUpdateEntities($entities);
         $this->directApiService->getAdsService()->update($updEntities);
+        $this->clearCache();
         return true;
     }
 }

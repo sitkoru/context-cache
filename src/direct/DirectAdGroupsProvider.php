@@ -54,7 +54,7 @@ class DirectAdGroupsProvider extends DirectEntitiesProvider implements IEntities
      * @return AdGroupGetItem|null
      * @throws \Exception
      */
-    public function getOne($id): AdGroupGetItem
+    public function getOne($id): ?AdGroupGetItem
     {
         $ads = $this->getAll([$id]);
         if ($ads) {
@@ -105,6 +105,7 @@ class DirectAdGroupsProvider extends DirectEntitiesProvider implements IEntities
     {
         $updEntities = $this->directApiService->getAdGroupsService()->toUpdateEntities($entities);
         $this->directApiService->getAdGroupsService()->update($updEntities);
+        $this->clearCache();
         return true;
     }
 }
