@@ -3,6 +3,7 @@
 namespace sitkoru\contextcache\adwords;
 
 
+use Google\AdsApi\AdWords\AdWordsSession;
 use Google\AdsApi\AdWords\v201702\cm\Campaign;
 use Google\AdsApi\AdWords\v201702\cm\CampaignService;
 use Google\AdsApi\AdWords\v201702\cm\Predicate;
@@ -35,9 +36,12 @@ class AdWordsCampaignsProvider extends AdWordsEntitiesProvider implements IEntit
         'AdvertisingChannelType'
     ];
 
-    public function __construct(CampaignService $campaignService, ICacheProvider $cacheProvider)
-    {
-        parent::__construct($cacheProvider);
+    public function __construct(
+        CampaignService $campaignService,
+        ICacheProvider $cacheProvider,
+        AdWordsSession $adWordsSession
+    ) {
+        parent::__construct($cacheProvider, $adWordsSession);
         $this->collection = 'campaigns';
         $this->campaignService = $campaignService;
     }

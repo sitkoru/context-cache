@@ -36,7 +36,7 @@ class AdWordsProvider
      * @var AdWordsAdGroupCriterionsProvider
      */
     public $criterions;
-    
+
     /**
      * @var
      */
@@ -76,25 +76,25 @@ class AdWordsProvider
          * @var CampaignService $campaignService
          */
         $campaignService = $services->get($session, CampaignService::class);
-        $this->campaigns = new AdWordsCampaignsProvider($campaignService, $cacheProvider);
+        $this->campaigns = new AdWordsCampaignsProvider($campaignService, $cacheProvider, $session);
 
         /**
          * @var AdGroupService $adGroupService
          */
         $adGroupService = $services->get($session, AdGroupService::class);
-        $this->adGroups = new AdWordsAdGroupsProvider($adGroupService, $cacheProvider);
+        $this->adGroups = new AdWordsAdGroupsProvider($adGroupService, $cacheProvider, $session);
 
         /**
          * @var AdGroupAdService $adGroupAdService
          */
         $adGroupAdService = $services->get($session, AdGroupAdService::class);
-        $this->ads = new AdWordsAdsProvider($adGroupAdService, $cacheProvider);
+        $this->ads = new AdWordsAdsProvider($adGroupAdService, $cacheProvider, $session);
 
         /**
          * @var AdGroupCriterionService $adGroupCriterionService
          */
         $adGroupCriterionService = $services->get($session, AdGroupCriterionService::class);
-        $this->criterions = new AdWordsAdGroupCriterionsProvider($adGroupCriterionService, $cacheProvider);
+        $this->criterions = new AdWordsAdGroupCriterionsProvider($adGroupCriterionService, $cacheProvider, $session);
 
 
     }

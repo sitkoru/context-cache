@@ -3,6 +3,7 @@
 namespace sitkoru\contextcache\adwords;
 
 
+use Google\AdsApi\AdWords\AdWordsSession;
 use Google\AdsApi\AdWords\v201702\cm\AdGroupCriterion;
 use Google\AdsApi\AdWords\v201702\cm\AdGroupCriterionService;
 use Google\AdsApi\AdWords\v201702\cm\Predicate;
@@ -29,9 +30,12 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
         'CpcBid'
     ];
 
-    public function __construct(AdGroupCriterionService $adGroupCriterionService, ICacheProvider $cacheProvider)
-    {
-        parent::__construct($cacheProvider);
+    public function __construct(
+        AdGroupCriterionService $adGroupCriterionService,
+        ICacheProvider $cacheProvider,
+        AdWordsSession $adWordsSession
+    ) {
+        parent::__construct($cacheProvider, $adWordsSession);
         $this->collection = 'adGroupCriterions';
         $this->adGroupCriterionService = $adGroupCriterionService;
     }
@@ -105,5 +109,15 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
             $this->addToCache($fromService);
         }
         return $criterions;
+    }
+
+    /**
+     * @param AdGroupCriterion[] $entities
+     * @return bool
+     * @throws \Exception
+     */
+    public function update(array $entities): bool
+    {
+        return false;
     }
 }

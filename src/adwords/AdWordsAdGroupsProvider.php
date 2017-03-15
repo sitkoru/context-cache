@@ -2,6 +2,7 @@
 
 namespace sitkoru\contextcache\adwords;
 
+use Google\AdsApi\AdWords\AdWordsSession;
 use Google\AdsApi\AdWords\v201702\cm\AdGroup;
 use Google\AdsApi\AdWords\v201702\cm\AdGroupService;
 use Google\AdsApi\AdWords\v201702\cm\Predicate;
@@ -28,9 +29,12 @@ class AdWordsAdGroupsProvider extends AdWordsEntitiesProvider implements IEntiti
         'CpcBid',
     ];
 
-    public function __construct(AdGroupService $adGroupService, ICacheProvider $cacheProvider)
-    {
-        parent::__construct($cacheProvider);
+    public function __construct(
+        AdGroupService $adGroupService,
+        ICacheProvider $cacheProvider,
+        AdWordsSession $adWordsSession
+    ) {
+        parent::__construct($cacheProvider, $adWordsSession);
         $this->collection = 'adGroups';
         $this->adGroupService = $adGroupService;
     }
@@ -107,5 +111,15 @@ class AdWordsAdGroupsProvider extends AdWordsEntitiesProvider implements IEntiti
             $this->addToCache($fromService);
         }
         return $adGroups;
+    }
+
+    /**
+     * @param AdGroup[] $entities
+     * @return bool
+     * @throws \Exception
+     */
+    public function update(array $entities): bool
+    {
+        return false;
     }
 }
