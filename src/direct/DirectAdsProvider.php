@@ -9,6 +9,7 @@ use directapi\services\ads\enum\DynamicTextAdFieldEnum;
 use directapi\services\ads\enum\MobileAppAdFieldEnum;
 use directapi\services\ads\enum\TextAdFieldEnum;
 use directapi\services\ads\models\AdGetItem;
+use directapi\services\ads\models\AdUpdateItem;
 use directapi\services\changes\enum\FieldNamesEnum;
 use directapi\services\changes\models\CheckResponse;
 use sitkoru\contextcache\common\ICacheProvider;
@@ -91,5 +92,17 @@ class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvi
     protected function getChanges(array $ids, string $date): CheckResponse
     {
         return $this->directApiService->getChangesService()->check([], [], $ids, [FieldNamesEnum::AD_IDS], $date);
+    }
+
+    /**
+     * @param AdGetItem[] $entities
+     * @return bool
+     * @throws \Exception
+     */
+    public function update(array $entities): bool
+    {
+        $updEntities = $this->directApiService->getAdsService()->toUpdateEntities($entities);
+        $this->directApiService->getAdsService()->update($updEntities);
+        return true;
     }
 }

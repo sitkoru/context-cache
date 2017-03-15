@@ -87,4 +87,16 @@ class DirectKeywordsProvider extends DirectEntitiesProvider implements IEntities
     {
         return $this->directApiService->getChangesService()->check([], [], $ids, [FieldNamesEnum::AD_IDS], $date);
     }
+
+    /**
+     * @param KeywordGetItem[] $entities
+     * @return bool
+     * @throws \Exception
+     */
+    public function update(array $entities): bool
+    {
+        $updEntities = $this->directApiService->getKeywordsService()->toUpdateEntities($entities);
+        $this->directApiService->getKeywordsService()->update($updEntities);
+        return true;
+    }
 }

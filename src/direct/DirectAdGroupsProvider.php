@@ -8,6 +8,7 @@ use directapi\services\adgroups\criterias\AdGroupsSelectionCriteria;
 use directapi\services\adgroups\enum\AdGroupFieldEnum;
 use directapi\services\adgroups\enum\MobileAppAdGroupFieldEnum;
 use directapi\services\adgroups\models\AdGroupGetItem;
+use directapi\services\adgroups\models\AdGroupUpdateItem;
 use directapi\services\changes\enum\FieldNamesEnum;
 use directapi\services\changes\models\CheckResponse;
 use sitkoru\contextcache\common\ICacheProvider;
@@ -93,5 +94,17 @@ class DirectAdGroupsProvider extends DirectEntitiesProvider implements IEntities
     {
         return $this->directApiService->getChangesService()->check([], $ids, [], [FieldNamesEnum::AD_GROUP_IDS],
             $date);
+    }
+
+    /**
+     * @param AdGroupGetItem[] $entities
+     * @return bool
+     * @throws \Exception
+     */
+    public function update(array $entities): bool
+    {
+        $updEntities = $this->directApiService->getAdGroupsService()->toUpdateEntities($entities);
+        $this->directApiService->getAdGroupsService()->update($updEntities);
+        return true;
     }
 }
