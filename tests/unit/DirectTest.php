@@ -117,6 +117,23 @@ class DirectTest extends TestCase
      * @dataProvider cacheProvider
      * @param bool $clearCache
      */
+    public function testLoadAdsByCampaignIds($clearCache): void
+    {
+        $this->assertInstanceOf(DirectAdsProvider::class, $this->provider->ads);
+        if ($clearCache) {
+            $this->provider->ads->clearCache();
+        }
+        $ads = $this->provider->ads->getByCampaignIds([YDCampaignId]);
+        $this->assertTrue(count($ads) > 0);
+        foreach ($ads as $ad) {
+            $this->assertInstanceOf(AdGetItem::class, $ad);
+        }
+    }
+
+    /**
+     * @dataProvider cacheProvider
+     * @param bool $clearCache
+     */
     public function testLoadCriterions($clearCache): void
     {
         $this->assertInstanceOf(DirectKeywordsProvider::class, $this->provider->keywords);

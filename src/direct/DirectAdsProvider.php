@@ -51,7 +51,7 @@ class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvi
 
     /**
      * @param array $ids
-     * @return array
+     * @return AdGetItem[]
      * @throws \Exception
      */
     public function getByAdGroupIds(array $ids): array
@@ -65,6 +65,32 @@ class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvi
         if ($notFound) {
             $criteria = new AdsSelectionCriteria();
             $criteria->AdGroupIds = $notFound;
+            $fromService = $this->directApiService->getAdsService()->get($criteria, AdFieldEnum::getValues(),
+                TextAdFieldEnum::getValues(), MobileAppAdFieldEnum::getValues(), DynamicTextAdFieldEnum::getValues());
+            foreach ($fromService as $adGetItem) {
+                $ads[$adGetItem->Id] = $adGetItem;
+            }
+            $this->addToCache($fromService);
+        }
+        return $ads;
+    }
+
+    /**
+     * @param array $ids
+     * @return AdGetItem[]
+     * @throws \Exception
+     */
+    public function getByCampaignIds(array $ids): array
+    {
+        /**
+         * @var AdGetItem[] $ads
+         */
+        $ads = $this->getFromCache($ids, 'CampaignId', 'Id');
+        $found = array_unique(ArrayHelper::getColumn($ads, 'CampaignId'));
+        $notFound = array_values(array_diff($ids, $found));
+        if ($notFound) {
+            $criteria = new AdsSelectionCriteria();
+            $criteria->CampaignIds = $notFound;
             $fromService = $this->directApiService->getAdsService()->get($criteria, AdFieldEnum::getValues(),
                 TextAdFieldEnum::getValues(), MobileAppAdFieldEnum::getValues(), DynamicTextAdFieldEnum::getValues());
             foreach ($fromService as $adGetItem) {
