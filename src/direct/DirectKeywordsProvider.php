@@ -8,12 +8,16 @@ use directapi\services\changes\models\CheckResponse;
 use directapi\services\keywords\criterias\KeywordsSelectionCriteria;
 use directapi\services\keywords\enum\KeywordFieldEnum;
 use directapi\services\keywords\models\KeywordGetItem;
+use directapi\services\keywords\models\KeywordUpdateItem;
 use sitkoru\contextcache\common\ICacheProvider;
 use sitkoru\contextcache\common\IEntitiesProvider;
+use sitkoru\contextcache\common\models\UpdateResult;
 use sitkoru\contextcache\helpers\ArrayHelper;
 
 class DirectKeywordsProvider extends DirectEntitiesProvider implements IEntitiesProvider
 {
+    const MAX_KEYWORDS_PER_UPDATE = 10000;
+
     public function __construct(DirectApiService $directApiService, ICacheProvider $cacheProvider)
     {
         parent::__construct($directApiService, $cacheProvider);
@@ -90,14 +94,35 @@ class DirectKeywordsProvider extends DirectEntitiesProvider implements IEntities
 
     /**
      * @param KeywordGetItem[] $entities
-     * @return bool
+     * @return UpdateResult
      * @throws \Exception
      */
-    public function update(array $entities): bool
+    public function update(array $entities): UpdateResult
     {
+        $result = new UpdateResult();
         $updEntities = $this->directApiService->getKeywordsService()->toUpdateEntities($entities);
-        $this->directApiService->getKeywordsService()->update($updEntities);
+        foreach (array_chunk($updEntities, self::MAX_KEYWORDS_PER_UPDATE) as $entitiesChunk) {
+            $chunkResults = $this->directApiService->getKeywordsService()->update($entitiesChunk);
+            foreach ($chunkResults as $i => $chunkResult) {
+                if (!array_key_exists($i, $entitiesChunk)) {
+
+                    continue;
+                }
+                /**
+                 * @var KeywordUpdateItem $keyword
+                 */
+                $keyword = $entitiesChunk[$i];
+                if ($chunkResult->Errors) {
+                    $result->success = false;
+                    $keywordErrors = [];
+                    foreach ($chunkResult->Errors as $error) {
+                        $keywordErrors[] = $error->Message . ' ' . $error->Details;
+                    }
+                    $result->errors[$keyword->Id] = $keywordErrors;
+                }
+            }
+        }
         $this->clearCache();
-        return true;
+        return $result;
     }
 }

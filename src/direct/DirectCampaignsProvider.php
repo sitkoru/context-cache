@@ -12,6 +12,7 @@ use directapi\services\changes\enum\FieldNamesEnum;
 use directapi\services\changes\models\CheckResponse;
 use sitkoru\contextcache\common\ICacheProvider;
 use sitkoru\contextcache\common\IEntitiesProvider;
+use sitkoru\contextcache\common\models\UpdateResult;
 
 class DirectCampaignsProvider extends DirectEntitiesProvider implements IEntitiesProvider
 {
@@ -66,8 +67,8 @@ class DirectCampaignsProvider extends DirectEntitiesProvider implements IEntitie
         return $this->directApiService->getChangesService()->check([], [], $ids, [FieldNamesEnum::AD_IDS], $date);
     }
 
-    public function update(array $entities): bool
+    public function update(array $entities): UpdateResult
     {
-        return false;
+        return new UpdateResult();
     }
 }

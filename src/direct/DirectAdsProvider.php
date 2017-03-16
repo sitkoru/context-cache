@@ -9,10 +9,12 @@ use directapi\services\ads\enum\DynamicTextAdFieldEnum;
 use directapi\services\ads\enum\MobileAppAdFieldEnum;
 use directapi\services\ads\enum\TextAdFieldEnum;
 use directapi\services\ads\models\AdGetItem;
+use directapi\services\ads\models\AdUpdateItem;
 use directapi\services\changes\enum\FieldNamesEnum;
 use directapi\services\changes\models\CheckResponse;
 use sitkoru\contextcache\common\ICacheProvider;
 use sitkoru\contextcache\common\IEntitiesProvider;
+use sitkoru\contextcache\common\models\UpdateResult;
 use sitkoru\contextcache\helpers\ArrayHelper;
 
 class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvider
@@ -123,16 +125,35 @@ class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvi
 
     /**
      * @param AdGetItem[] $entities
-     * @return bool
+     * @return UpdateResult
      * @throws \Exception
      */
-    public function update(array $entities): bool
+    public function update(array $entities): UpdateResult
     {
+        $result = new UpdateResult();
         $updEntities = $this->directApiService->getAdsService()->toUpdateEntities($entities);
         foreach (array_chunk($updEntities, self::MAX_ADS_PER_UPDATE) as $entitiesChunk) {
-            $this->directApiService->getAdsService()->update($entitiesChunk);
+            $chunkResults = $this->directApiService->getAdsService()->update($entitiesChunk);
+            foreach ($chunkResults as $i => $chunkResult) {
+                if (!array_key_exists($i, $entitiesChunk)) {
+
+                    continue;
+                }
+                /**
+                 * @var AdUpdateItem $ad
+                 */
+                $ad = $entitiesChunk[$i];
+                if ($chunkResult->Errors) {
+                    $result->success = false;
+                    $adErrors = [];
+                    foreach ($chunkResult->Errors as $error) {
+                        $adErrors[] = $error->Message . ' ' . $error->Details;
+                    }
+                    $result->errors[$ad->Id] = $adErrors;
+                }
+            }
         }
         $this->clearCache();
-        return true;
+        return $result;
     }
 }

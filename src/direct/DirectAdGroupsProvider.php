@@ -13,10 +13,14 @@ use directapi\services\changes\enum\FieldNamesEnum;
 use directapi\services\changes\models\CheckResponse;
 use sitkoru\contextcache\common\ICacheProvider;
 use sitkoru\contextcache\common\IEntitiesProvider;
+use sitkoru\contextcache\common\models\UpdateResult;
 use sitkoru\contextcache\helpers\ArrayHelper;
 
 class DirectAdGroupsProvider extends DirectEntitiesProvider implements IEntitiesProvider
 {
+
+    const MAX_AD_GROUPS_PER_UPDATE = 1000;
+
     public function __construct(DirectApiService $directApiService, ICacheProvider $cacheProvider)
     {
         parent::__construct($directApiService, $cacheProvider);
@@ -98,14 +102,35 @@ class DirectAdGroupsProvider extends DirectEntitiesProvider implements IEntities
 
     /**
      * @param AdGroupGetItem[] $entities
-     * @return bool
+     * @return UpdateResult
      * @throws \Exception
      */
-    public function update(array $entities): bool
+    public function update(array $entities): UpdateResult
     {
+        $result = new UpdateResult();
         $updEntities = $this->directApiService->getAdGroupsService()->toUpdateEntities($entities);
-        $this->directApiService->getAdGroupsService()->update($updEntities);
+        foreach (array_chunk($updEntities, self::MAX_AD_GROUPS_PER_UPDATE) as $entitiesChunk) {
+            $chunkResults = $this->directApiService->getAdGroupsService()->update($entitiesChunk);
+            foreach ($chunkResults as $i => $chunkResult) {
+                if (!array_key_exists($i, $entitiesChunk)) {
+
+                    continue;
+                }
+                /**
+                 * @var AdGroupUpdateItem $adGroup
+                 */
+                $adGroup = $entitiesChunk[$i];
+                if ($chunkResult->Errors) {
+                    $result->success = false;
+                    $adGroupErrors = [];
+                    foreach ($chunkResult->Errors as $error) {
+                        $adGroupErrors[] = $error->Message . ' ' . $error->Details;
+                    }
+                    $result->errors[$adGroup->Id] = $adGroupErrors;
+                }
+            }
+        }
         $this->clearCache();
-        return true;
+        return $result;
     }
 }
