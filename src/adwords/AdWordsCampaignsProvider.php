@@ -11,6 +11,7 @@ use Google\AdsApi\AdWords\v201702\cm\PredicateOperator;
 use Google\AdsApi\AdWords\v201702\cm\Selector;
 use sitkoru\contextcache\common\ICacheProvider;
 use sitkoru\contextcache\common\IEntitiesProvider;
+use sitkoru\contextcache\common\models\UpdateResult;
 
 class AdWordsCampaignsProvider extends AdWordsEntitiesProvider implements IEntitiesProvider
 {
@@ -78,5 +79,10 @@ class AdWordsCampaignsProvider extends AdWordsEntitiesProvider implements IEntit
             return reset($campaigns);
         }
         return null;
+    }
+
+    public function update(array $entities): UpdateResult
+    {
+        return new UpdateResult();
     }
 }

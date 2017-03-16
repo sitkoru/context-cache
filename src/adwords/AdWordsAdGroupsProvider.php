@@ -10,6 +10,7 @@ use Google\AdsApi\AdWords\v201702\cm\PredicateOperator;
 use Google\AdsApi\AdWords\v201702\cm\Selector;
 use sitkoru\contextcache\common\ICacheProvider;
 use sitkoru\contextcache\common\IEntitiesProvider;
+use sitkoru\contextcache\common\models\UpdateResult;
 use sitkoru\contextcache\helpers\ArrayHelper;
 
 class AdWordsAdGroupsProvider extends AdWordsEntitiesProvider implements IEntitiesProvider
@@ -115,11 +116,11 @@ class AdWordsAdGroupsProvider extends AdWordsEntitiesProvider implements IEntiti
 
     /**
      * @param AdGroup[] $entities
-     * @return bool
+     * @return UpdateResult
      * @throws \Exception
      */
-    public function update(array $entities): bool
+    public function update(array $entities): UpdateResult
     {
-        return false;
+        return new UpdateResult();
     }
 }
