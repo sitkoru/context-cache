@@ -47,6 +47,11 @@ class AdWordsCampaignsProvider extends AdWordsEntitiesProvider implements IEntit
         $this->campaignService = $campaignService;
     }
 
+    /**
+     * @param array $ids
+     * @return Campaign[]
+     * @throws \Google\AdsApi\AdWords\v201702\cm\ApiException
+     */
     public function getAll(array $ids): array
     {
         $notFound = $ids;
@@ -72,6 +77,11 @@ class AdWordsCampaignsProvider extends AdWordsEntitiesProvider implements IEntit
         return $campaigns;
     }
 
+    /**
+     * @param $id
+     * @return Campaign
+     * @throws \Google\AdsApi\AdWords\v201702\cm\ApiException
+     */
     public function getOne($id): Campaign
     {
         $campaigns = $this->getAll([$id]);
@@ -81,6 +91,10 @@ class AdWordsCampaignsProvider extends AdWordsEntitiesProvider implements IEntit
         return null;
     }
 
+    /**
+     * @return array
+     * @throws \Google\AdsApi\AdWords\v201702\cm\ApiException
+     */
     public function getForService(): array
     {
         $campaigns = [];

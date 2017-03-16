@@ -48,6 +48,9 @@ class DirectCampaignsProvider extends DirectEntitiesProvider implements IEntitie
         return $campaigns;
     }
 
+    /**
+     * @return CampaignGetItem[]
+     */
     public function getForService(): array
     {
         $campaigns = [];
