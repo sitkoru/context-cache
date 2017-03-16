@@ -25,13 +25,15 @@ class DirectUpdateTest extends TestCase
         $this->assertNotNull($adGroup);
         $oldTitle = $adGroup->Name;
         $adGroup->Name = 'Updated group title';
-        $this->provider->adGroups->update([$adGroup]);
+        $result = $this->provider->adGroups->update([$adGroup]);
+        $this->assertTrue($result->success);
 
         $updAdGroup = $this->provider->adGroups->getOne(YDUpdateAdGroupId);
         $this->assertEquals('Updated group title', $updAdGroup->Name);
 
         $adGroup->Name = $oldTitle;
-        $this->provider->adGroups->update([$adGroup]);
+        $result = $this->provider->adGroups->update([$adGroup]);
+        $this->assertTrue($result->success);
     }
 
     public function testUpdateAd()
@@ -41,23 +43,27 @@ class DirectUpdateTest extends TestCase
         $oldTitle = $ad->TextAd->Title;
         $newTitle = 'Updated ad title';
         $ad->TextAd->Title = $newTitle;
-        $this->provider->ads->update([$ad]);
+        $result = $this->provider->ads->update([$ad]);
+        $this->assertTrue($result->success);
 
         $updAd = $this->provider->ads->getOne(YDUpdateAdId);
         $this->assertEquals($newTitle, $updAd->TextAd->Title);
 
         $updAd->TextAd->Title = $oldTitle;
-        $this->provider->ads->update([$updAd]);
+        $result = $this->provider->ads->update([$updAd]);
+        $this->assertTrue($result->success);
     }
 
     public function testUpdateKeyword()
     {
-        $keyword = $this->provider->keywords->getOne(YDUpdateKeywordId);
-        $this->assertNotNull($keyword);
+        $keywords = $this->provider->keywords->getByAdGroupIds([YDUpdateAdGroupId]);
+        $this->assertNotEmpty($keywords);
+        $keyword = reset($keywords);
         $oldText = $keyword->Keyword;
-        $newText = 'Updated query ' . uniqid();
+        $newText = 'Updated query ' . uniqid('prefix', true);
         $keyword->Keyword = $newText;
-        $this->provider->keywords->update([$keyword]);
+        $result = $this->provider->keywords->update([$keyword]);
+        $this->assertTrue($result->success);
 
         $groupKeywords = $this->provider->keywords->getByAdGroupIds([$keyword->AdGroupId]);
         $updKeyword = null;
@@ -69,7 +75,20 @@ class DirectUpdateTest extends TestCase
         $this->assertNotNull($updKeyword);
 
         $updKeyword->Keyword = $oldText;
-        $this->provider->keywords->update([$updKeyword]);
+        $result = $this->provider->keywords->update([$updKeyword]);
+        $this->assertTrue($result->success);
+    }
+
+    public function testUpdateErrors()
+    {
+        $ad = $this->provider->ads->getOne(YDUpdateAdId);
+        $this->assertNotNull($ad);
+        $badTitle = md5('bad') . md5('ad') . md5('title');
+        $ad->TextAd->Title = $badTitle;
+        $result = $this->provider->ads->update([$ad]);
+        $this->assertFalse($result->success);
+        $this->assertNotEmpty($result->errors);
+        $this->assertCount(1, $result->errors[$ad->Id]);
     }
 
 }
