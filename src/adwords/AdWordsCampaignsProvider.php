@@ -81,6 +81,18 @@ class AdWordsCampaignsProvider extends AdWordsEntitiesProvider implements IEntit
         return null;
     }
 
+    public function getForService(): array
+    {
+        $campaigns = [];
+        $selector = new Selector();
+        $selector->setFields(self::$fields);
+        $fromService = (array)$this->campaignService->get($selector)->getEntries();
+        foreach ($fromService as $campaignItem) {
+            $campaigns[$campaignItem->getId()] = $campaignItem;
+        }
+        return $campaigns;
+    }
+
     public function update(array $entities): UpdateResult
     {
         return new UpdateResult();

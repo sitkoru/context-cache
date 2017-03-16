@@ -48,6 +48,19 @@ class DirectCampaignsProvider extends DirectEntitiesProvider implements IEntitie
         return $campaigns;
     }
 
+    public function getForService(): array
+    {
+        $campaigns = [];
+        $criteria = new CampaignsSelectionCriteria();
+        $fromService = $this->directApiService->getCampaignsService()->get($criteria,
+            CampaignFieldEnum::getValues(),
+            TextCampaignFieldEnum::getValues(), MobileAppCampaignFieldEnum::getValues());
+        foreach ($fromService as $campaignGetItem) {
+            $campaigns[$campaignGetItem->Id] = $campaignGetItem;
+        }
+        return $campaigns;
+    }
+
     /**
      * @param $id
      * @return CampaignGetItem|null
