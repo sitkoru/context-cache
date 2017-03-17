@@ -11,6 +11,7 @@ use directapi\services\adgroups\models\AdGroupGetItem;
 use directapi\services\adgroups\models\AdGroupUpdateItem;
 use directapi\services\changes\enum\FieldNamesEnum;
 use directapi\services\changes\models\CheckResponse;
+use Psr\Log\LoggerInterface;
 use sitkoru\contextcache\common\ICacheProvider;
 use sitkoru\contextcache\common\IEntitiesProvider;
 use sitkoru\contextcache\common\models\UpdateResult;
@@ -21,10 +22,27 @@ class DirectAdGroupsProvider extends DirectEntitiesProvider implements IEntities
 
     const MAX_AD_GROUPS_PER_UPDATE = 1000;
 
-    public function __construct(DirectApiService $directApiService, ICacheProvider $cacheProvider)
-    {
-        parent::__construct($directApiService, $cacheProvider);
+    public function __construct(
+        DirectApiService $directApiService,
+        ICacheProvider $cacheProvider,
+        LoggerInterface $logger
+    ) {
+        parent::__construct($directApiService, $cacheProvider, $logger);
         $this->collection = 'adGroups';
+    }
+
+    /**
+     * @param $id
+     * @return AdGroupGetItem|null
+     * @throws \Exception
+     */
+    public function getOne($id): ?AdGroupGetItem
+    {
+        $ads = $this->getAll([$id]);
+        if ($ads) {
+            return reset($ads);
+        }
+        return null;
     }
 
     /**
@@ -54,20 +72,6 @@ class DirectAdGroupsProvider extends DirectEntitiesProvider implements IEntities
     }
 
     /**
-     * @param $id
-     * @return AdGroupGetItem|null
-     * @throws \Exception
-     */
-    public function getOne($id): ?AdGroupGetItem
-    {
-        $ads = $this->getAll([$id]);
-        if ($ads) {
-            return reset($ads);
-        }
-        return null;
-    }
-
-    /**
      * @param array $ids
      * @return array
      * @throws \Exception
@@ -93,13 +97,6 @@ class DirectAdGroupsProvider extends DirectEntitiesProvider implements IEntities
         return $adGroups;
     }
 
-
-    protected function getChanges(array $ids, string $date): CheckResponse
-    {
-        return $this->directApiService->getChangesService()->check([], $ids, [], [FieldNamesEnum::AD_GROUP_IDS],
-            $date);
-    }
-
     /**
      * @param AdGroupGetItem[] $entities
      * @return UpdateResult
@@ -108,18 +105,21 @@ class DirectAdGroupsProvider extends DirectEntitiesProvider implements IEntities
     public function update(array $entities): UpdateResult
     {
         $result = new UpdateResult();
-        $updEntities = $this->directApiService->getAdGroupsService()->toUpdateEntities($entities);
-        foreach (array_chunk($updEntities, self::MAX_AD_GROUPS_PER_UPDATE) as $entitiesChunk) {
-            $chunkResults = $this->directApiService->getAdGroupsService()->update($entitiesChunk);
+        $this->logger->info('Update ad groups: ' . count($entities));
+        foreach (array_chunk($entities, self::MAX_AD_GROUPS_PER_UPDATE) as $index => $entitiesChunk) {
+            $this->logger->info('Chunk: ' . $index . '. Upload.');
+            $updEntities = $this->directApiService->getAdGroupsService()->toUpdateEntities($entitiesChunk);
+            $chunkResults = $this->directApiService->getAdGroupsService()->update($updEntities);
+            $this->logger->info('Chunk: ' . $index . '. Uploaded.');
             foreach ($chunkResults as $i => $chunkResult) {
-                if (!array_key_exists($i, $entitiesChunk)) {
+                if (!array_key_exists($i, $updEntities)) {
 
                     continue;
                 }
                 /**
                  * @var AdGroupUpdateItem $adGroup
                  */
-                $adGroup = $entitiesChunk[$i];
+                $adGroup = $updEntities[$i];
                 if ($chunkResult->Errors) {
                     $result->success = false;
                     $adGroupErrors = [];
@@ -129,8 +129,15 @@ class DirectAdGroupsProvider extends DirectEntitiesProvider implements IEntities
                     $result->errors[$adGroup->Id] = $adGroupErrors;
                 }
             }
+            $this->logger->info('Chunk: ' . $index . '. Results processed.');
         }
         $this->clearCache();
         return $result;
+    }
+
+    protected function getChanges(array $ids, string $date): CheckResponse
+    {
+        return $this->directApiService->getChangesService()->check([], $ids, [], [FieldNamesEnum::AD_GROUP_IDS],
+            $date);
     }
 }

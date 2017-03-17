@@ -4,6 +4,7 @@ namespace sitkoru\contextcache\direct;
 
 
 use directapi\DirectApiService;
+use Psr\Log\LoggerInterface;
 use sitkoru\contextcache\common\ICacheProvider;
 
 class DirectProvider
@@ -26,38 +27,25 @@ class DirectProvider
     public $keywords;
 
     /**
-     * @var
-     */
-    private $accessToken;
-    /**
-     * @var
-     */
-    private $clientLogin;
-
-    private $yandexService;
-    /**
-     * @var ICacheProvider
-     */
-    private $cacheProvider;
-
-    /**
      * YandexAdGroupsProvider constructor.
-     * @param string         $accessToken
-     * @param string         $clientLogin
-     * @param ICacheProvider $cacheProvider
+     * @param string          $accessToken
+     * @param string          $clientLogin
+     * @param ICacheProvider  $cacheProvider
+     * @param LoggerInterface $logger
      */
-    public function __construct(string $accessToken, string $clientLogin, ICacheProvider $cacheProvider)
-    {
+    public function __construct(
+        string $accessToken,
+        string $clientLogin,
+        ICacheProvider $cacheProvider,
+        LoggerInterface $logger
+    ) {
+        $yandexService = new DirectApiService($accessToken, $clientLogin);
 
-        $this->accessToken = $accessToken;
-        $this->clientLogin = $clientLogin;
-        $this->yandexService = new DirectApiService($accessToken, $clientLogin);
-        $this->cacheProvider = $cacheProvider;
+        $this->adGroups = new DirectAdGroupsProvider($yandexService, $cacheProvider, $logger);
+        $this->ads = new DirectAdsProvider($yandexService, $cacheProvider, $logger);
+        $this->keywords = new DirectKeywordsProvider($yandexService, $cacheProvider, $logger);
+        $this->campaigns = new DirectCampaignsProvider($yandexService, $cacheProvider, $logger);
 
-        $this->adGroups = new DirectAdGroupsProvider($this->yandexService, $this->cacheProvider);
-        $this->ads = new DirectAdsProvider($this->yandexService, $this->cacheProvider);
-        $this->keywords = new DirectKeywordsProvider($this->yandexService, $this->cacheProvider);
-        $this->campaigns = new DirectCampaignsProvider($this->yandexService, $this->cacheProvider);
 
     }
 }

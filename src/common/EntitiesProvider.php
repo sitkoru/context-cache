@@ -3,6 +3,8 @@
 namespace sitkoru\contextcache\common;
 
 
+use Psr\Log\LoggerInterface;
+
 abstract class EntitiesProvider
 {
     /**
@@ -10,22 +12,18 @@ abstract class EntitiesProvider
      */
     protected $cacheProvider;
 
-    /**
-     * @var \JsonMapper
-     */
-    private $mapper;
-
     protected $serviceKey;
 
     protected $collection;
+    /**
+     * @var LoggerInterface
+     */
+    protected $logger;
 
-    public function __construct(ICacheProvider $cacheProvider)
+    public function __construct(ICacheProvider $cacheProvider, LoggerInterface $logger)
     {
         $this->cacheProvider = $cacheProvider;
-        $mapper = new \JsonMapper();
-        $mapper->bStrictNullTypes = false;
-        $mapper->bIgnoreVisibility = true;
-        $this->mapper = $mapper;
+        $this->logger = $logger;
     }
 
     protected function getFromCache(array $ids, string $field, $indexBy = null): array

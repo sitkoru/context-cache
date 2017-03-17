@@ -5,6 +5,7 @@ namespace sitkoru\contextcache\direct;
 
 use directapi\DirectApiService;
 use directapi\services\changes\models\CheckResponse;
+use Psr\Log\LoggerInterface;
 use sitkoru\contextcache\common\EntitiesProvider;
 use sitkoru\contextcache\common\ICacheProvider;
 
@@ -15,9 +16,12 @@ abstract class DirectEntitiesProvider extends EntitiesProvider
      */
     protected $directApiService;
 
-    public function __construct(DirectApiService $directApiService, ICacheProvider $cacheProvider)
-    {
-        parent::__construct($cacheProvider);
+    public function __construct(
+        DirectApiService $directApiService,
+        ICacheProvider $cacheProvider,
+        LoggerInterface $logger
+    ) {
+        parent::__construct($cacheProvider, $logger);
         $this->directApiService = $directApiService;
         $this->serviceKey = 'yandex';
     }

@@ -9,6 +9,7 @@ use Google\AdsApi\AdWords\v201702\cm\CampaignService;
 use Google\AdsApi\AdWords\v201702\cm\Predicate;
 use Google\AdsApi\AdWords\v201702\cm\PredicateOperator;
 use Google\AdsApi\AdWords\v201702\cm\Selector;
+use Psr\Log\LoggerInterface;
 use sitkoru\contextcache\common\ICacheProvider;
 use sitkoru\contextcache\common\IEntitiesProvider;
 use sitkoru\contextcache\common\models\UpdateResult;
@@ -40,9 +41,10 @@ class AdWordsCampaignsProvider extends AdWordsEntitiesProvider implements IEntit
     public function __construct(
         CampaignService $campaignService,
         ICacheProvider $cacheProvider,
-        AdWordsSession $adWordsSession
+        AdWordsSession $adWordsSession,
+        LoggerInterface $logger
     ) {
-        parent::__construct($cacheProvider, $adWordsSession);
+        parent::__construct($cacheProvider, $adWordsSession, $logger);
         $this->collection = 'campaigns';
         $this->campaignService = $campaignService;
     }

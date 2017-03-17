@@ -8,6 +8,7 @@ use Google\AdsApi\AdWords\v201702\cm\AdGroupService;
 use Google\AdsApi\AdWords\v201702\cm\Predicate;
 use Google\AdsApi\AdWords\v201702\cm\PredicateOperator;
 use Google\AdsApi\AdWords\v201702\cm\Selector;
+use Psr\Log\LoggerInterface;
 use sitkoru\contextcache\common\ICacheProvider;
 use sitkoru\contextcache\common\IEntitiesProvider;
 use sitkoru\contextcache\common\models\UpdateResult;
@@ -33,9 +34,10 @@ class AdWordsAdGroupsProvider extends AdWordsEntitiesProvider implements IEntiti
     public function __construct(
         AdGroupService $adGroupService,
         ICacheProvider $cacheProvider,
-        AdWordsSession $adWordsSession
+        AdWordsSession $adWordsSession,
+        LoggerInterface $logger
     ) {
-        parent::__construct($cacheProvider, $adWordsSession);
+        parent::__construct($cacheProvider, $adWordsSession, $logger);
         $this->collection = 'adGroups';
         $this->adGroupService = $adGroupService;
     }

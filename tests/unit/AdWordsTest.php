@@ -8,6 +8,8 @@ use Google\AdsApi\AdWords\v201702\cm\AdGroup;
 use Google\AdsApi\AdWords\v201702\cm\AdGroupAd;
 use Google\AdsApi\AdWords\v201702\cm\AdGroupCriterion;
 use Google\AdsApi\AdWords\v201702\cm\Campaign;
+use Monolog\Handler\ErrorLogHandler;
+use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
 use sitkoru\contextcache\adwords\AdWordsAdGroupCriterionsProvider;
 use sitkoru\contextcache\adwords\AdWordsAdGroupsProvider;
@@ -20,13 +22,13 @@ class AdWordsTest extends TestCase
 {
     private $provider;
 
-
-
     public function __construct($name = null, array $data = [], $dataName = '')
     {
         parent::__construct($name, $data, $dataName);
         $cacheProvider = new MongoDbCacheProvider('mongodb://mongodb');
-        $contextEntitiesProvider = new ContextEntitiesProvider($cacheProvider);
+        $logger = new Logger('adWordsLogger');
+        $logger->pushHandler(new ErrorLogHandler());
+        $contextEntitiesProvider = new ContextEntitiesProvider($cacheProvider, $logger);
         $this->provider = $contextEntitiesProvider->getAdWordsProvider(ADWORDS_CUSTOMER_ID, ADWORDS_AUTH_FILE_PATH);
     }
 

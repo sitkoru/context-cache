@@ -3,6 +3,8 @@
 namespace sitkoru\contextcache\tests\unit;
 
 
+use Monolog\Handler\ErrorLogHandler;
+use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
 use sitkoru\contextcache\common\cache\MongoDbCacheProvider;
 use sitkoru\contextcache\ContextEntitiesProvider;
@@ -15,7 +17,9 @@ class DirectUpdateTest extends TestCase
     {
         parent::__construct($name, $data, $dataName);
         $cacheProvider = new MongoDbCacheProvider('mongodb://mongodb');
-        $contextEntitiesProvider = new ContextEntitiesProvider($cacheProvider);
+        $logger = new Logger('directUpdateLogger');
+        $logger->pushHandler(new ErrorLogHandler());
+        $contextEntitiesProvider = new ContextEntitiesProvider($cacheProvider, $logger);
         $this->provider = $contextEntitiesProvider->getDirectProvider(DIRECT_UPDATE_ACCESS_TOKEN, DIRECT_UPDATE_LOGIN);
     }
 

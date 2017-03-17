@@ -9,6 +9,7 @@ use directapi\services\keywords\criterias\KeywordsSelectionCriteria;
 use directapi\services\keywords\enum\KeywordFieldEnum;
 use directapi\services\keywords\models\KeywordGetItem;
 use directapi\services\keywords\models\KeywordUpdateItem;
+use Psr\Log\LoggerInterface;
 use sitkoru\contextcache\common\ICacheProvider;
 use sitkoru\contextcache\common\IEntitiesProvider;
 use sitkoru\contextcache\common\models\UpdateResult;
@@ -18,10 +19,26 @@ class DirectKeywordsProvider extends DirectEntitiesProvider implements IEntities
 {
     const MAX_KEYWORDS_PER_UPDATE = 10000;
 
-    public function __construct(DirectApiService $directApiService, ICacheProvider $cacheProvider)
-    {
-        parent::__construct($directApiService, $cacheProvider);
+    public function __construct(
+        DirectApiService $directApiService,
+        ICacheProvider $cacheProvider,
+        LoggerInterface $logger
+    ) {
+        parent::__construct($directApiService, $cacheProvider, $logger);
         $this->collection = 'keywords';
+    }
+
+    /**
+     * @param $id
+     * @return KeywordGetItem|null
+     */
+    public function getOne($id): ?KeywordGetItem
+    {
+        $entities = $this->getAll([$id]);
+        if ($entities) {
+            return reset($entities);
+        }
+        return null;
     }
 
     /**
@@ -49,19 +66,6 @@ class DirectKeywordsProvider extends DirectEntitiesProvider implements IEntities
     }
 
     /**
-     * @param $id
-     * @return KeywordGetItem|null
-     */
-    public function getOne($id): ?KeywordGetItem
-    {
-        $entities = $this->getAll([$id]);
-        if ($entities) {
-            return reset($entities);
-        }
-        return null;
-    }
-
-    /**
      * @param int[] $ids
      * @return KeywordGetItem[]
      * @throws \Exception
@@ -86,12 +90,6 @@ class DirectKeywordsProvider extends DirectEntitiesProvider implements IEntities
         return $keywords;
     }
 
-
-    protected function getChanges(array $ids, string $date): CheckResponse
-    {
-        return $this->directApiService->getChangesService()->check([], [], $ids, [FieldNamesEnum::AD_IDS], $date);
-    }
-
     /**
      * @param KeywordGetItem[] $entities
      * @return UpdateResult
@@ -100,18 +98,21 @@ class DirectKeywordsProvider extends DirectEntitiesProvider implements IEntities
     public function update(array $entities): UpdateResult
     {
         $result = new UpdateResult();
-        $updEntities = $this->directApiService->getKeywordsService()->toUpdateEntities($entities);
-        foreach (array_chunk($updEntities, self::MAX_KEYWORDS_PER_UPDATE) as $entitiesChunk) {
-            $chunkResults = $this->directApiService->getKeywordsService()->update($entitiesChunk);
+        $this->logger->info('Update keywords: ' . count($entities));
+        foreach (array_chunk($entities, self::MAX_KEYWORDS_PER_UPDATE) as $index => $entitiesChunk) {
+            $this->logger->info('Chunk: ' . $index . '. Upload.');
+            $updEntities = $this->directApiService->getKeywordsService()->toUpdateEntities($entitiesChunk);
+            $chunkResults = $this->directApiService->getKeywordsService()->update($updEntities);
+            $this->logger->info('Chunk: ' . $index . '. Uploaded.');
             foreach ($chunkResults as $i => $chunkResult) {
-                if (!array_key_exists($i, $entitiesChunk)) {
+                if (!array_key_exists($i, $updEntities)) {
 
                     continue;
                 }
                 /**
                  * @var KeywordUpdateItem $keyword
                  */
-                $keyword = $entitiesChunk[$i];
+                $keyword = $updEntities[$i];
                 if ($chunkResult->Errors) {
                     $result->success = false;
                     $keywordErrors = [];
@@ -121,8 +122,14 @@ class DirectKeywordsProvider extends DirectEntitiesProvider implements IEntities
                     $result->errors[$keyword->Id] = $keywordErrors;
                 }
             }
+            $this->logger->info('Chunk: ' . $index . '. Results processed.');
         }
         $this->clearCache();
         return $result;
+    }
+
+    protected function getChanges(array $ids, string $date): CheckResponse
+    {
+        return $this->directApiService->getChangesService()->check([], [], $ids, [FieldNamesEnum::AD_IDS], $date);
     }
 }

@@ -14,6 +14,7 @@ use Google\AdsApi\AdWords\v201702\cm\Operator;
 use Google\AdsApi\AdWords\v201702\cm\Predicate;
 use Google\AdsApi\AdWords\v201702\cm\PredicateOperator;
 use Google\AdsApi\AdWords\v201702\cm\Selector;
+use Psr\Log\LoggerInterface;
 use sitkoru\contextcache\common\EntitiesProvider;
 use sitkoru\contextcache\common\ICacheProvider;
 use SoapFault;
@@ -33,9 +34,9 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
      */
     private $adWordsSession;
 
-    public function __construct(ICacheProvider $cacheProvider, AdWordsSession $adWordsSession)
+    public function __construct(ICacheProvider $cacheProvider, AdWordsSession $adWordsSession, LoggerInterface $logger)
     {
-        parent::__construct($cacheProvider);
+        parent::__construct($cacheProvider, $logger);
         $this->serviceKey = 'google';
         $this->adWordsSession = $adWordsSession;
         $this->batchJobService = (new AdWordsServices())->get($adWordsSession, BatchJobService::class);

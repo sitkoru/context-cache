@@ -9,6 +9,7 @@ use Google\AdsApi\AdWords\v201702\cm\AdGroupCriterionService;
 use Google\AdsApi\AdWords\v201702\cm\Predicate;
 use Google\AdsApi\AdWords\v201702\cm\PredicateOperator;
 use Google\AdsApi\AdWords\v201702\cm\Selector;
+use Psr\Log\LoggerInterface;
 use sitkoru\contextcache\common\ICacheProvider;
 use sitkoru\contextcache\common\IEntitiesProvider;
 use sitkoru\contextcache\common\models\UpdateResult;
@@ -34,9 +35,10 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
     public function __construct(
         AdGroupCriterionService $adGroupCriterionService,
         ICacheProvider $cacheProvider,
-        AdWordsSession $adWordsSession
+        AdWordsSession $adWordsSession,
+        LoggerInterface $logger
     ) {
-        parent::__construct($cacheProvider, $adWordsSession);
+        parent::__construct($cacheProvider, $adWordsSession, $logger);
         $this->collection = 'adGroupCriterions';
         $this->adGroupCriterionService = $adGroupCriterionService;
     }
