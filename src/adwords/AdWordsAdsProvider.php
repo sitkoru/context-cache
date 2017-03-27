@@ -41,6 +41,10 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
         $this->adGroupAdService = $adGroupService;
     }
 
+    /**
+     * @param array $ids
+     * @return AdGroupAd[]
+     */
     public function getAll(array $ids): array
     {
         $notFound = $ids;
@@ -75,6 +79,10 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
         return null;
     }
 
+    /**
+     * @param array $adGroupIds
+     * @return AdGroupAd[]
+     */
     public function getByAdGroupIds(array $adGroupIds): array
     {
         $notFound = $adGroupIds;

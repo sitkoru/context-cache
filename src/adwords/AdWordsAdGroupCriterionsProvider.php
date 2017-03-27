@@ -43,6 +43,10 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
         $this->adGroupCriterionService = $adGroupCriterionService;
     }
 
+    /**
+     * @param array $ids
+     * @return AdGroupCriterion[]
+     */
     public function getAll(array $ids): array
     {
         $notFound = $ids;
@@ -75,7 +79,7 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
         return $criterions;
     }
 
-    public function getOne($id)
+    public function getOne($id): AdGroupCriterion
     {
         $criterions = $this->getAll([$id]);
         if ($criterions) {
@@ -84,6 +88,10 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
         return null;
     }
 
+    /**
+     * @param array $adGroupIds
+     * @return AdGroupCriterion[]
+     */
     public function getByAdGroupIds(array $adGroupIds): array
     {
         $notFound = $adGroupIds;
