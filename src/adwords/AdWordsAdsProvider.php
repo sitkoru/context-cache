@@ -4,8 +4,12 @@ namespace sitkoru\contextcache\adwords;
 
 
 use Google\AdsApi\AdWords\AdWordsSession;
-use Google\AdsApi\AdWords\v201609\cm\AdGroupAd;
+use Google\AdsApi\AdWords\v201702\cm\AdGroupAd;
+use Google\AdsApi\AdWords\v201702\cm\AdGroupAdOperation;
 use Google\AdsApi\AdWords\v201702\cm\AdGroupAdService;
+use Google\AdsApi\AdWords\v201702\cm\AdGroupAdStatus;
+use Google\AdsApi\AdWords\v201702\cm\Operand;
+use Google\AdsApi\AdWords\v201702\cm\Operator;
 use Google\AdsApi\AdWords\v201702\cm\Predicate;
 use Google\AdsApi\AdWords\v201702\cm\PredicateOperator;
 use Google\AdsApi\AdWords\v201702\cm\Selector;
@@ -23,11 +27,85 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
     private $adGroupAdService;
 
     private static $fields = [
-        'Id',
-        'Name',
-        'Url',
+        'AdGroupAdDisapprovalReasons',
+        'AdGroupAdTrademarkDisapproved',
+        'AdGroupCreativeApprovalStatus',
+        'AdGroupId',
+        'AdType',
+        'AdvertisingId',
+        'BaseAdGroupId',
+        'BaseCampaignId',
+        'BusinessName',
+        'CallOnlyAdBusinessName',
+        'CallOnlyAdCallTracked',
+        'CallOnlyAdConversionTypeId',
+        'CallOnlyAdCountryCode',
+        'CallOnlyAdDescription1',
+        'CallOnlyAdDescription2',
+        'CallOnlyAdDisableCallConversion',
+        'CallOnlyAdPhoneNumber',
+        'CallOnlyAdPhoneNumberVerificationUrl',
+        'CreationTime',
+        'CreativeFinalAppUrls',
+        'CreativeFinalMobileUrls',
         'CreativeFinalUrls',
-        'AdType'
+        'CreativeTrackingUrlTemplate',
+        'CreativeUrlCustomParameters',
+        'Description',
+        'Description1',
+        'Description2',
+        'DevicePreference',
+        'Dimensions',
+        'DisplayUrl',
+        'ExpandingDirections',
+        'FileSize',
+        'Headline',
+        'HeadlinePart1',
+        'HeadlinePart2',
+        'Height',
+        'Id',
+        'ImageCreativeName',
+        'IndustryStandardCommercialIdentifier',
+        'IsCookieTargeted',
+        'IsTagged',
+        'IsUserInterestTargeted',
+        'Labels',
+        'LogoImage',
+        'LongHeadline',
+        'MarketingImage',
+        'MediaId',
+        'MimeType',
+        'Path1',
+        'Path2',
+        'PolicySummary',
+        'ReadyToPlayOnTheWeb',
+        'ReferenceId',
+        'RichMediaAdCertifiedVendorFormatId',
+        'RichMediaAdDuration',
+        'RichMediaAdImpressionBeaconUrl',
+        'RichMediaAdName',
+        'RichMediaAdSnippet',
+        'RichMediaAdSourceUrl',
+        'RichMediaAdType',
+        'ShortHeadline',
+        'SourceUrl',
+        'Status',
+        'TemplateAdDuration',
+        'TemplateAdName',
+        'TemplateAdUnionId',
+        'TemplateElementFieldName',
+        'TemplateElementFieldText',
+        'TemplateElementFieldType',
+        'TemplateId',
+        'TemplateOriginAdId',
+        'Trademarks',
+        'UniqueName',
+        'Url',
+        'UrlData',
+        'Urls',
+        'VideoTypes',
+        'Width',
+        'YouTubeVideoIdString'
     ];
 
     public function __construct(
@@ -119,6 +197,48 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
      */
     public function update(array $entities): UpdateResult
     {
-        return new UpdateResult();
+        $result = new UpdateResult();
+        $deleteOperations = [];
+        $addOperations = [];
+        $this->logger->info('Build operations');
+        foreach ($entities as $entity) {
+            $newAd = clone $entity->getAd();
+            $entity->setStatus(AdGroupAdStatus::DISABLED);
+            $deleteOperation = new AdGroupAdOperation();
+            $deleteOperation->setOperand($entity);
+            $deleteOperation->setOperator(Operator::REMOVE);
+            $newAd->setId(null);
+            $adGroupAd = new AdGroupAd();
+            $adGroupAd->setAdGroupId($entity->getAdGroupId());
+            $adGroupAd->setStatus(AdGroupAdStatus::ENABLED);
+            $adGroupAd->setAd($newAd);
+            $addOperation = new AdGroupAdOperation();
+            $addOperation->setOperand($adGroupAd);
+            $addOperation->setOperator(Operator::ADD);
+            $deleteOperations[] = $deleteOperation;
+            $addOperations[] = $addOperation;
+        }
+        $this->logger->info('Delete operations: ' . count($deleteOperations));
+        $this->logger->info('Add operations: ' . count($addOperations));
+
+        foreach (array_chunk($deleteOperations, MAX_OPERATIONS_SIZE) as $i => $deleteChunk) {
+            $this->logger->info('Delete chunk #' . $i . '. Size: ' . count($deleteChunk));
+            $jobResults = $this->runMutateJob($deleteChunk);
+            $this->processJobResult($result, $jobResults);
+        }
+
+        foreach (array_chunk($addOperations, MAX_OPERATIONS_SIZE) as $i => $addChunk) {
+            $this->logger->info('Add chunk #' . $i . '. Size: ' . count($addChunk));
+            $jobResults = $this->runMutateJob($addChunk);
+            $this->processJobResult($result, $jobResults);
+        }
+        $this->logger->info('Done');
+        $this->clearCache();
+        return $result;
+    }
+
+    protected function getOperandEntity(Operand $operand)
+    {
+        return $operand->getAdGroupAd();
     }
 }

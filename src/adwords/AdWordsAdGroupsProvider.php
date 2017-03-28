@@ -4,7 +4,10 @@ namespace sitkoru\contextcache\adwords;
 
 use Google\AdsApi\AdWords\AdWordsSession;
 use Google\AdsApi\AdWords\v201702\cm\AdGroup;
+use Google\AdsApi\AdWords\v201702\cm\AdGroupOperation;
 use Google\AdsApi\AdWords\v201702\cm\AdGroupService;
+use Google\AdsApi\AdWords\v201702\cm\Operand;
+use Google\AdsApi\AdWords\v201702\cm\Operator;
 use Google\AdsApi\AdWords\v201702\cm\Predicate;
 use Google\AdsApi\AdWords\v201702\cm\PredicateOperator;
 use Google\AdsApi\AdWords\v201702\cm\Selector;
@@ -22,13 +25,31 @@ class AdWordsAdGroupsProvider extends AdWordsEntitiesProvider implements IEntiti
     private $adGroupService;
 
     private static $fields = [
-        'Id',
-        'Name',
-        'Status',
+        'AdGroupType',
+        'BaseAdGroupId',
+        'BaseCampaignId',
+        'BidType',
+        'BiddingStrategyId',
+        'BiddingStrategyName',
+        'BiddingStrategySource',
+        'BiddingStrategyType',
         'CampaignId',
         'CampaignName',
-        'BiddingStrategyType',
+        'ContentBidCriterionTypeGroup',
         'CpcBid',
+        'CpmBid',
+        'EnhancedCpcEnabled',
+        'Id',
+        'Labels',
+        'Name',
+        'Settings',
+        'Status',
+        'TargetCpa',
+        'TargetCpaBid',
+        'TargetCpaBidSource',
+        'TargetSpendEnhancedCpcEnabled',
+        'TrackingUrlTemplate',
+        'UrlCustomParameters'
     ];
 
     public function __construct(
@@ -123,6 +144,29 @@ class AdWordsAdGroupsProvider extends AdWordsEntitiesProvider implements IEntiti
      */
     public function update(array $entities): UpdateResult
     {
-        return new UpdateResult();
+        $result = new UpdateResult();
+        $addOperations = [];
+        $this->logger->info('Build operations');
+        foreach ($entities as $entity) {
+            $addOperation = new AdGroupOperation();
+            $addOperation->setOperand($entity);
+            $addOperation->setOperator(Operator::SET);
+            $addOperations[] = $addOperation;
+        }
+        $this->logger->info('Update operations: ' . count($addOperations));
+
+        foreach (array_chunk($addOperations, MAX_OPERATIONS_SIZE) as $i => $addChunk) {
+            $this->logger->info('Update chunk #' . $i . '. Size: ' . count($addChunk));
+            $jobResults = $this->runMutateJob($addChunk);
+            $this->processJobResult($result, $jobResults);
+        }
+        $this->logger->info('Done');
+        $this->clearCache();
+        return $result;
+    }
+
+    protected function getOperandEntity(Operand $operand)
+    {
+        return $operand->getAdGroup();
     }
 }

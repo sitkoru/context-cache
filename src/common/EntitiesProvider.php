@@ -51,6 +51,7 @@ abstract class EntitiesProvider
 
     public function clearCache()
     {
+        $this->logger->debug('Clear cache');
         $this->cacheProvider->collection($this->serviceKey, $this->collection)->clear();
     }
 
