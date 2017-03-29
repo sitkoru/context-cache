@@ -158,6 +158,40 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
     }
 
     /**
+     * @param int[] $campaignIds
+     * @return AdGroupAd[]
+     * @throws \Exception
+     */
+    public function getByCampaignIds(array $campaignIds): array
+    {
+        $notFound = $campaignIds;
+
+        /**
+         * @var AdGroupAd[] $adGroupAds
+         */
+        $adGroupAds = $this->getFromCache($campaignIds, 'campaignId', 'ad.id');
+        if ($adGroupAds) {
+            $found = array_unique(ArrayHelper::getColumn($adGroupAds, 'campaignId'));
+            $notFound = array_values(array_diff($campaignIds, $found));
+        }
+        if ($notFound) {
+            $selector = new Selector();
+            $selector->setFields(self::$fields);
+            $predicates[] = new Predicate('CampaignId', PredicateOperator::IN, $notFound);
+            $selector->setPredicates($predicates);
+            $fromService = (array)$this->adGroupAdService->get($selector)->getEntries();
+            foreach ($fromService as $adGroupAdItem) {
+                /**
+                 * @var AdGroupAd $adGroupAdItem
+                 */
+                $adGroupAds[$adGroupAdItem->getAd()->getId()] = $adGroupAdItem;
+            }
+            $this->addToCache((array)$fromService);
+        }
+        return $adGroupAds;
+    }
+
+    /**
      * @param array $adGroupIds
      * @return AdGroupAd[]
      */
