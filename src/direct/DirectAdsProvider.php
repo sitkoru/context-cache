@@ -21,6 +21,9 @@ use sitkoru\contextcache\helpers\ArrayHelper;
 class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvider
 {
     const MAX_ADS_PER_UPDATE = 1000;
+    const CRITERIA_MAX_CAMPAIGN_IDS = 10;
+    const CRITERIA_MAX_AD_GROUP_IDS = 1000;
+    const CRITERIA_MAX_AD_IDS = 10000;
 
     public function __construct(
         DirectApiService $directApiService,
@@ -45,14 +48,17 @@ class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvi
         $found = array_unique(ArrayHelper::getColumn($ads, 'AdGroupId'));
         $notFound = array_values(array_diff($ids, $found));
         if ($notFound) {
-            $criteria = new AdsSelectionCriteria();
-            $criteria->AdGroupIds = $notFound;
-            $fromService = $this->directApiService->getAdsService()->get($criteria, AdFieldEnum::getValues(),
-                TextAdFieldEnum::getValues(), MobileAppAdFieldEnum::getValues(), DynamicTextAdFieldEnum::getValues());
-            foreach ($fromService as $adGetItem) {
-                $ads[$adGetItem->Id] = $adGetItem;
+            foreach (array_chunk($notFound, self::CRITERIA_MAX_AD_GROUP_IDS) as $idsChunk) {
+                $criteria = new AdsSelectionCriteria();
+                $criteria->AdGroupIds = $idsChunk;
+                $fromService = $this->directApiService->getAdsService()->get($criteria, AdFieldEnum::getValues(),
+                    TextAdFieldEnum::getValues(), MobileAppAdFieldEnum::getValues(),
+                    DynamicTextAdFieldEnum::getValues());
+                foreach ($fromService as $adGetItem) {
+                    $ads[$adGetItem->Id] = $adGetItem;
+                }
+                $this->addToCache($fromService);
             }
-            $this->addToCache($fromService);
         }
         return $ads;
     }
@@ -71,14 +77,17 @@ class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvi
         $found = array_unique(ArrayHelper::getColumn($ads, 'CampaignId'));
         $notFound = array_values(array_diff($ids, $found));
         if ($notFound) {
-            $criteria = new AdsSelectionCriteria();
-            $criteria->CampaignIds = $notFound;
-            $fromService = $this->directApiService->getAdsService()->get($criteria, AdFieldEnum::getValues(),
-                TextAdFieldEnum::getValues(), MobileAppAdFieldEnum::getValues(), DynamicTextAdFieldEnum::getValues());
-            foreach ($fromService as $adGetItem) {
-                $ads[$adGetItem->Id] = $adGetItem;
+            foreach (array_chunk($notFound, self::CRITERIA_MAX_CAMPAIGN_IDS) as $idsChunk) {
+                $criteria = new AdsSelectionCriteria();
+                $criteria->CampaignIds = $idsChunk;
+                $fromService = $this->directApiService->getAdsService()->get($criteria, AdFieldEnum::getValues(),
+                    TextAdFieldEnum::getValues(), MobileAppAdFieldEnum::getValues(),
+                    DynamicTextAdFieldEnum::getValues());
+                foreach ($fromService as $adGetItem) {
+                    $ads[$adGetItem->Id] = $adGetItem;
+                }
+                $this->addToCache($fromService);
             }
-            $this->addToCache($fromService);
         }
         return $ads;
     }
@@ -109,14 +118,17 @@ class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvi
         $found = array_keys($ads);
         $notFound = array_values(array_diff($ids, $found));
         if ($notFound) {
-            $criteria = new AdsSelectionCriteria();
-            $criteria->Ids = $notFound;
-            $fromService = $this->directApiService->getAdsService()->get($criteria, AdFieldEnum::getValues(),
-                TextAdFieldEnum::getValues(), MobileAppAdFieldEnum::getValues(), DynamicTextAdFieldEnum::getValues());
-            foreach ($fromService as $adGetItem) {
-                $ads[$adGetItem->Id] = $adGetItem;
+            foreach (array_chunk($notFound, self::CRITERIA_MAX_AD_IDS) as $idsChunk) {
+                $criteria = new AdsSelectionCriteria();
+                $criteria->Ids = $idsChunk;
+                $fromService = $this->directApiService->getAdsService()->get($criteria, AdFieldEnum::getValues(),
+                    TextAdFieldEnum::getValues(), MobileAppAdFieldEnum::getValues(),
+                    DynamicTextAdFieldEnum::getValues());
+                foreach ($fromService as $adGetItem) {
+                    $ads[$adGetItem->Id] = $adGetItem;
+                }
+                $this->addToCache($fromService);
             }
-            $this->addToCache($fromService);
         }
         return $ads;
     }

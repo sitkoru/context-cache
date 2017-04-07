@@ -17,6 +17,8 @@ use sitkoru\contextcache\common\models\UpdateResult;
 
 class DirectCampaignsProvider extends DirectEntitiesProvider implements IEntitiesProvider
 {
+    const CRITERIA_MAX_CAMPAIGN_IDS = 1000;
+
     public function __construct(
         DirectApiService $directApiService,
         ICacheProvider $cacheProvider,
@@ -68,15 +70,17 @@ class DirectCampaignsProvider extends DirectEntitiesProvider implements IEntitie
         $found = array_keys($campaigns);
         $notFound = array_values(array_diff($ids, $found));
         if ($notFound) {
-            $criteria = new CampaignsSelectionCriteria();
-            $criteria->Ids = $notFound;
-            $fromService = $this->directApiService->getCampaignsService()->get($criteria,
-                CampaignFieldEnum::getValues(),
-                TextCampaignFieldEnum::getValues(), MobileAppCampaignFieldEnum::getValues());
-            foreach ($fromService as $campaignGetItem) {
-                $campaigns[$campaignGetItem->Id] = $campaignGetItem;
+            foreach (array_chunk($notFound, self::CRITERIA_MAX_CAMPAIGN_IDS) as $idsChunk) {
+                $criteria = new CampaignsSelectionCriteria();
+                $criteria->Ids = $idsChunk;
+                $fromService = $this->directApiService->getCampaignsService()->get($criteria,
+                    CampaignFieldEnum::getValues(),
+                    TextCampaignFieldEnum::getValues(), MobileAppCampaignFieldEnum::getValues());
+                foreach ($fromService as $campaignGetItem) {
+                    $campaigns[$campaignGetItem->Id] = $campaignGetItem;
+                }
+                $this->addToCache($fromService);
             }
-            $this->addToCache($fromService);
         }
         return $campaigns;
     }

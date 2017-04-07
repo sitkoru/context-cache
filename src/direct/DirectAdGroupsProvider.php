@@ -22,6 +22,10 @@ class DirectAdGroupsProvider extends DirectEntitiesProvider implements IEntities
 
     const MAX_AD_GROUPS_PER_UPDATE = 1000;
 
+    const CRITERIA_MAX_CAMPAIGN_IDS = 10;
+
+    const CRITERIA_MAX_AD_GROUP_IDS = 10000;
+
     public function __construct(
         DirectApiService $directApiService,
         ICacheProvider $cacheProvider,
@@ -59,21 +63,24 @@ class DirectAdGroupsProvider extends DirectEntitiesProvider implements IEntities
         $found = array_keys($adGroups);
         $notFound = array_values(array_diff($ids, $found));
         if ($notFound) {
-            $criteria = new AdGroupsSelectionCriteria();
-            $criteria->Ids = $notFound;
-            $fromService = $this->directApiService->getAdGroupsService()->get($criteria, AdGroupFieldEnum::getValues(),
-                MobileAppAdGroupFieldEnum::getValues());
-            foreach ($fromService as $adGroupGetItem) {
-                $adGroups[$adGroupGetItem->Id] = $adGroupGetItem;
+            foreach (array_chunk($notFound, self::CRITERIA_MAX_AD_GROUP_IDS) as $idsChunk) {
+                $criteria = new AdGroupsSelectionCriteria();
+                $criteria->Ids = $idsChunk;
+                $fromService = $this->directApiService->getAdGroupsService()->get($criteria,
+                    AdGroupFieldEnum::getValues(),
+                    MobileAppAdGroupFieldEnum::getValues());
+                foreach ($fromService as $adGroupGetItem) {
+                    $adGroups[$adGroupGetItem->Id] = $adGroupGetItem;
+                }
+                $this->addToCache($fromService);
             }
-            $this->addToCache($fromService);
         }
         return $adGroups;
     }
 
     /**
      * @param array $ids
-     * @return array
+     * @return AdGroupGetItem[]
      * @throws \Exception
      */
     public function getByCampaignIds(array $ids): array
@@ -85,14 +92,17 @@ class DirectAdGroupsProvider extends DirectEntitiesProvider implements IEntities
         $found = array_unique(ArrayHelper::getColumn($adGroups, 'CampaignId'));
         $notFound = array_values(array_diff($ids, $found));
         if ($notFound) {
-            $criteria = new AdGroupsSelectionCriteria();
-            $criteria->CampaignIds = $notFound;
-            $fromService = $this->directApiService->getAdGroupsService()->get($criteria, AdGroupFieldEnum::getValues(),
-                MobileAppAdGroupFieldEnum::getValues());
-            foreach ($fromService as $adGroupGetItem) {
-                $adGroups[$adGroupGetItem->Id] = $adGroupGetItem;
+            foreach (array_chunk($notFound, self::CRITERIA_MAX_CAMPAIGN_IDS) as $campaignIdsChunk) {
+                $criteria = new AdGroupsSelectionCriteria();
+                $criteria->CampaignIds = $campaignIdsChunk;
+                $fromService = $this->directApiService->getAdGroupsService()->get($criteria,
+                    AdGroupFieldEnum::getValues(),
+                    MobileAppAdGroupFieldEnum::getValues());
+                foreach ($fromService as $adGroupGetItem) {
+                    $adGroups[$adGroupGetItem->Id] = $adGroupGetItem;
+                }
+                $this->addToCache($fromService);
             }
-            $this->addToCache($fromService);
         }
         return $adGroups;
     }

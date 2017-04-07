@@ -18,6 +18,9 @@ use sitkoru\contextcache\helpers\ArrayHelper;
 class DirectKeywordsProvider extends DirectEntitiesProvider implements IEntitiesProvider
 {
     const MAX_KEYWORDS_PER_UPDATE = 10000;
+    const CRITERIA_MAX_IDS = 10000;
+    const CRITERIA_MAX_AD_GROUP_IDS = 1000;
+    const CRITERIA_MAX_CAMPAIGN_IDS = 10;
 
     public function __construct(
         DirectApiService $directApiService,
@@ -54,13 +57,16 @@ class DirectKeywordsProvider extends DirectEntitiesProvider implements IEntities
         $found = array_keys($keywords);
         $notFound = array_values(array_diff($ids, $found));
         if ($notFound) {
-            $criteria = new KeywordsSelectionCriteria();
-            $criteria->Ids = $notFound;
-            $fromService = $this->directApiService->getKeywordsService()->get($criteria, KeywordFieldEnum::getValues());
-            foreach ($fromService as $keywordGetItem) {
-                $keywords[$keywordGetItem->Id] = $keywordGetItem;
+            foreach (array_chunk($notFound, self::CRITERIA_MAX_IDS) as $idsChunk) {
+                $criteria = new KeywordsSelectionCriteria();
+                $criteria->Ids = $idsChunk;
+                $fromService = $this->directApiService->getKeywordsService()->get($criteria,
+                    KeywordFieldEnum::getValues());
+                foreach ($fromService as $keywordGetItem) {
+                    $keywords[$keywordGetItem->Id] = $keywordGetItem;
+                }
+                $this->addToCache($fromService);
             }
-            $this->addToCache($fromService);
         }
         return $keywords;
     }
@@ -79,13 +85,44 @@ class DirectKeywordsProvider extends DirectEntitiesProvider implements IEntities
         $found = array_unique(ArrayHelper::getColumn($keywords, 'AdGroupId'));
         $notFound = array_values(array_diff($ids, $found));
         if ($notFound) {
-            $criteria = new KeywordsSelectionCriteria();
-            $criteria->AdGroupIds = $notFound;
-            $fromService = $this->directApiService->getKeywordsService()->get($criteria, KeywordFieldEnum::getValues());
-            foreach ($fromService as $keywordGetItem) {
-                $keywords[$keywordGetItem->Id] = $keywordGetItem;
+            foreach (array_chunk($notFound, self::CRITERIA_MAX_AD_GROUP_IDS) as $idsChunk) {
+                $criteria = new KeywordsSelectionCriteria();
+                $criteria->AdGroupIds = $idsChunk;
+                $fromService = $this->directApiService->getKeywordsService()->get($criteria,
+                    KeywordFieldEnum::getValues());
+                foreach ($fromService as $keywordGetItem) {
+                    $keywords[$keywordGetItem->Id] = $keywordGetItem;
+                }
+                $this->addToCache($fromService);
             }
-            $this->addToCache($fromService);
+        }
+        return $keywords;
+    }
+
+    /**
+     * @param int[] $ids
+     * @return KeywordGetItem[]
+     * @throws \Exception
+     */
+    public function getByCampaignIds(array $ids): array
+    {
+        /**
+         * @var KeywordGetItem[] $keywords
+         */
+        $keywords = $this->getFromCache($ids, 'CampaignId', 'Id');
+        $found = array_unique(ArrayHelper::getColumn($keywords, 'CampaignId'));
+        $notFound = array_values(array_diff($ids, $found));
+        if ($notFound) {
+            foreach (array_chunk($notFound, self::CRITERIA_MAX_CAMPAIGN_IDS) as $idsChunk) {
+                $criteria = new KeywordsSelectionCriteria();
+                $criteria->CampaignIds = $idsChunk;
+                $fromService = $this->directApiService->getKeywordsService()->get($criteria,
+                    KeywordFieldEnum::getValues());
+                foreach ($fromService as $keywordGetItem) {
+                    $keywords[$keywordGetItem->Id] = $keywordGetItem;
+                }
+                $this->addToCache($fromService);
+            }
         }
         return $keywords;
     }
