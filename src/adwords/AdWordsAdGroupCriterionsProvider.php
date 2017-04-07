@@ -186,6 +186,40 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
     }
 
     /**
+     * @param array $campaignIds
+     * @return AdGroupCriterion[]
+     */
+    public function getByCampaignIds(array $campaignIds): array
+    {
+        $notFound = $campaignIds;
+
+        $indexBy = function (AdGroupCriterion $criterion) {
+            return $criterion->getBaseCampaignId() . $criterion->getCriterion()->getId();
+        };
+        /**
+         * @var AdGroupCriterion[] $criterions
+         */
+        $criterions = $this->getFromCache($campaignIds, 'campaignId', $indexBy);
+        if ($criterions) {
+            $found = array_unique(ArrayHelper::getColumn($criterions, 'campaignId'));
+            $notFound = array_values(array_diff($campaignIds, $found));
+        }
+        if ($notFound) {
+            $selector = new Selector();
+            $selector->setFields(self::$fields);
+            $predicates[] = new Predicate('CampaignId', PredicateOperator::IN, $notFound);
+            $selector->setPredicates($predicates);
+            $fromService = (array)$this->adGroupCriterionService->get($selector)->getEntries();
+            foreach ($fromService as $criterionItem) {
+                $index = $indexBy($criterionItem);
+                $criterions[$index] = $criterionItem;
+            }
+            $this->addToCache($fromService);
+        }
+        return $criterions;
+    }
+
+    /**
      * @param AdGroupCriterion[] $entities
      * @return UpdateResult
      * @throws \Exception
