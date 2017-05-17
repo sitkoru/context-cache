@@ -156,6 +156,7 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
      * @param MutateResult[] $jobResult
      *
      * @return array
+     * @throws \ErrorException
      */
     protected function processErrors($jobResult)
     {
@@ -163,6 +164,9 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
         $failed = [];
         $errors = [];
         $genericErrors = [];
+        if (!is_array($jobResult)) {
+            throw new \ErrorException('Empty result from google');
+        }
 
         foreach ($jobResult as $mutateResult) {
             if ($mutateResult->getErrorList()) {
@@ -191,7 +195,6 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
                 }
             }
         }
-
         return [$skipped, $failed, $errors, $genericErrors];
     }
 
