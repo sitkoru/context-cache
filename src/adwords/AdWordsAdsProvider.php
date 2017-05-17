@@ -235,6 +235,9 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
     {
         $result = new UpdateResult();
         $deleteOperations = [];
+        /**
+         * @var AdGroupAdOperation[] $addOperations
+         */
         $addOperations = [];
         $this->logger->info('Build operations');
         foreach ($entities as $entity) {
@@ -255,23 +258,36 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
             $addOperation = new AdGroupAdOperation();
             $addOperation->setOperand($adGroupAd);
             $addOperation->setOperator(Operator::ADD);
-            $deleteOperations[] = $deleteOperation;
+            $deleteOperations[$entity->getAd()->getId()] = $deleteOperation;
             $addOperations[] = $addOperation;
         }
-        $this->logger->info('Delete operations: ' . count($deleteOperations));
+
         $this->logger->info('Add operations: ' . count($addOperations));
 
+
+        foreach (array_chunk($addOperations, MAX_OPERATIONS_SIZE) as $i => $addChunk) {
+            /**
+             * @var AdGroupAdOperation[] $addChunk
+             */
+            $this->logger->info('Add chunk #' . $i . '. Size: ' . count($addChunk));
+            $jobResults = $this->runMutateJob($addChunk);
+            $this->processJobResult($result, $jobResults);
+            if (!$result->success) {
+                foreach ($result->errors as $adOperationId => $errors) {
+                    $adOperation = $addChunk[$adOperationId];
+                    $adId = $adOperation->getOperand()->getAd()->getId();
+                    unset($deleteOperations[$adId]);
+                }
+            }
+        }
+
+        $this->logger->info('Delete succeeded ads: ' . count($deleteOperations));
         foreach (array_chunk($deleteOperations, MAX_OPERATIONS_SIZE) as $i => $deleteChunk) {
             $this->logger->info('Delete chunk #' . $i . '. Size: ' . count($deleteChunk));
             $jobResults = $this->runMutateJob($deleteChunk);
             $this->processJobResult($result, $jobResults);
         }
 
-        foreach (array_chunk($addOperations, MAX_OPERATIONS_SIZE) as $i => $addChunk) {
-            $this->logger->info('Add chunk #' . $i . '. Size: ' . count($addChunk));
-            $jobResults = $this->runMutateJob($addChunk);
-            $this->processJobResult($result, $jobResults);
-        }
         $this->logger->info('Done');
         $this->clearCache();
         return $result;
