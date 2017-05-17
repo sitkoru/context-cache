@@ -13,6 +13,8 @@ use Google\AdsApi\AdWords\v201702\cm\Operator;
 use Google\AdsApi\AdWords\v201702\cm\Predicate;
 use Google\AdsApi\AdWords\v201702\cm\PredicateOperator;
 use Google\AdsApi\AdWords\v201702\cm\Selector;
+use Google\AdsApi\AdWords\v201702\cm\TempAdUnionId;
+use Google\AdsApi\AdWords\v201702\cm\TemplateAd;
 use Psr\Log\LoggerInterface;
 use sitkoru\contextcache\common\ICacheProvider;
 use sitkoru\contextcache\common\IEntitiesProvider;
@@ -242,6 +244,10 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
             $deleteOperation->setOperand($entity);
             $deleteOperation->setOperator(Operator::REMOVE);
             $newAd->setId(null);
+            if ($newAd instanceof TemplateAd) {
+                $newAd->setAdUnionId(new TempAdUnionId());
+                break;
+            }
             $adGroupAd = new AdGroupAd();
             $adGroupAd->setAdGroupId($entity->getAdGroupId());
             $adGroupAd->setStatus(AdGroupAdStatus::ENABLED);
