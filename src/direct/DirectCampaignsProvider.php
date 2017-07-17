@@ -8,8 +8,10 @@ use directapi\services\campaigns\enum\CampaignFieldEnum;
 use directapi\services\campaigns\enum\MobileAppCampaignFieldEnum;
 use directapi\services\campaigns\enum\TextCampaignFieldEnum;
 use directapi\services\campaigns\models\CampaignGetItem;
+use directapi\services\campaigns\models\CampaignUpdateItem;
 use directapi\services\changes\enum\FieldNamesEnum;
 use directapi\services\changes\models\CheckResponse;
+use Google\AdsApi\AdWords\v201702\cm\Campaign;
 use Psr\Log\LoggerInterface;
 use sitkoru\contextcache\common\ICacheProvider;
 use sitkoru\contextcache\common\IEntitiesProvider;
@@ -18,6 +20,7 @@ use sitkoru\contextcache\common\models\UpdateResult;
 class DirectCampaignsProvider extends DirectEntitiesProvider implements IEntitiesProvider
 {
     const CRITERIA_MAX_CAMPAIGN_IDS = 1000;
+    const MAX_CAMPAIGNS_PER_UPDATE = 10;
 
     public function __construct(
         DirectApiService $directApiService,
@@ -85,9 +88,41 @@ class DirectCampaignsProvider extends DirectEntitiesProvider implements IEntitie
         return $campaigns;
     }
 
+    /**
+     * @param Campaign[] $entities
+     * @return UpdateResult
+     */
     public function update(array $entities): UpdateResult
     {
-        return new UpdateResult();
+        $result = new UpdateResult();
+        $this->logger->info('Update campaigns: ' . count($entities));
+        foreach (array_chunk($entities, self::MAX_CAMPAIGNS_PER_UPDATE) as $index => $entitiesChunk) {
+            $this->logger->info('Chunk: ' . $index . '. Upload.');
+            $updEntities = $this->directApiService->getCampaignsService()->toUpdateEntities($entitiesChunk);
+            $chunkResults = $this->directApiService->getCampaignsService()->update($updEntities);
+            $this->logger->info('Chunk: ' . $index . '. Uploaded.');
+            foreach ($chunkResults as $i => $chunkResult) {
+                if (!array_key_exists($i, $updEntities)) {
+
+                    continue;
+                }
+                /**
+                 * @var CampaignUpdateItem $campaign
+                 */
+                $campaign = $updEntities[$i];
+                if ($chunkResult->Errors) {
+                    $result->success = false;
+                    $keywordErrors = [];
+                    foreach ($chunkResult->Errors as $error) {
+                        $keywordErrors[] = $error->Message . ' ' . $error->Details;
+                    }
+                    $result->errors[$campaign->Id] = $keywordErrors;
+                }
+            }
+            $this->logger->info('Chunk: ' . $index . '. Results processed.');
+        }
+        $this->clearCache();
+        return $result;
     }
 
     protected function getChanges(array $ids, string $date): CheckResponse
