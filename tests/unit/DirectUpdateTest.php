@@ -23,6 +23,23 @@ class DirectUpdateTest extends TestCase
         $this->provider = $contextEntitiesProvider->getDirectProvider(DIRECT_UPDATE_ACCESS_TOKEN, DIRECT_UPDATE_LOGIN);
     }
 
+    public function testUpdateCampaign()
+    {
+        $campaign = $this->provider->campaigns->getOne(YDUpdateCampaignId);
+        $this->assertNotNull($campaign);
+        $oldTitle = $campaign->Name;
+        $campaign->Name = 'Updated campaign title';
+        $result = $this->provider->campaigns->update([$campaign]);
+        $this->assertTrue($result->success);
+
+        $updCampaign = $this->provider->campaigns->getOne(YDUpdateCampaignId);
+        $this->assertEquals('Updated campaign title', $updCampaign->Name);
+
+        $campaign->Name = $oldTitle;
+        $result = $this->provider->campaigns->update([$campaign]);
+        $this->assertTrue($result->success);
+    }
+
     public function testUpdateGroup()
     {
         $adGroup = $this->provider->adGroups->getOne(YDUpdateAdGroupId);

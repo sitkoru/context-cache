@@ -112,11 +112,11 @@ class DirectCampaignsProvider extends DirectEntitiesProvider implements IEntitie
                 $campaign = $updEntities[$i];
                 if ($chunkResult->Errors) {
                     $result->success = false;
-                    $keywordErrors = [];
+                    $campaignErrors = [];
                     foreach ($chunkResult->Errors as $error) {
-                        $keywordErrors[] = $error->Message . ' ' . $error->Details;
+                        $campaignErrors[] = $error->Message . ' ' . $error->Details;
                     }
-                    $result->errors[$campaign->Id] = $keywordErrors;
+                    $result->errors[$campaign->Id] = $campaignErrors;
                 }
             }
             $this->logger->info('Chunk: ' . $index . '. Results processed.');

@@ -26,6 +26,23 @@ class AdWordsUpdateTest extends TestCase
             ADWORDS_AUTH_FILE_PATH);
     }
 
+    public function testUpdateCampaign()
+    {
+        $campaign = $this->provider->campaigns->getOne(GAUpdateCampaignId);
+        $this->assertNotNull($campaign);
+        $oldTitle = $campaign->getName();
+        $campaign->setName('Updated campaign title');
+        $result = $this->provider->campaigns->update([$campaign]);
+        $this->assertTrue($result->success);
+
+        $updCampaign = $this->provider->campaigns->getOne(GAUpdateCampaignId);
+        $this->assertEquals('Updated campaign title', $updCampaign->getName());
+
+        $campaign->setName($oldTitle);
+        $result = $this->provider->campaigns->update([$campaign]);
+        $this->assertTrue($result->success);
+    }
+
     public function testUpdateGroup()
     {
         $adGroup = $this->provider->adGroups->getOne(GAUpdateAdGroupId);
