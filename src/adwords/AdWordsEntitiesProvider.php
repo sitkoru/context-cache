@@ -24,7 +24,7 @@ use sitkoru\contextcache\common\models\UpdateResult;
 use SoapFault;
 use UnexpectedValueException;
 
-define('POLL_FREQUENCY_SECONDS', 10);
+define('ADWORDS_POLL_FREQUENCY_SECONDS', 10);
 define('MAX_POLL_ATTEMPTS', 60);
 define('MAX_POLL_FREQUENCY', 60);
 define('MAX_OPERATIONS_SIZE', 2000);
@@ -93,7 +93,7 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
         $pollAttempts = 0;
         $isPending = true;
         do {
-            $sleepSeconds = POLL_FREQUENCY_SECONDS * (2 ** $pollAttempts);
+            $sleepSeconds = ADWORDS_POLL_FREQUENCY_SECONDS * (2 ** $pollAttempts);
             if ($sleepSeconds > MAX_POLL_FREQUENCY) {
                 $sleepSeconds = MAX_POLL_FREQUENCY;
             }
