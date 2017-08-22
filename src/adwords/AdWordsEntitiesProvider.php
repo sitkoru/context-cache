@@ -24,13 +24,13 @@ use sitkoru\contextcache\common\models\UpdateResult;
 use SoapFault;
 use UnexpectedValueException;
 
-define('ADWORDS_POLL_FREQUENCY_SECONDS', 10);
-define('MAX_POLL_ATTEMPTS', 60);
-define('MAX_POLL_FREQUENCY', 60);
-define('MAX_OPERATIONS_SIZE', 2000);
-
 abstract class AdWordsEntitiesProvider extends EntitiesProvider
 {
+    const POLL_FREQUENCY_SECONDS = 10;
+    const MAX_POLL_ATTEMPTS = 60;
+    const MAX_POLL_FREQUENCY = 60;
+    const MAX_OPERATIONS_SIZE = 2000;
+
     /**
      * @var BatchJobService
      */
@@ -93,9 +93,9 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
         $pollAttempts = 0;
         $isPending = true;
         do {
-            $sleepSeconds = ADWORDS_POLL_FREQUENCY_SECONDS * (2 ** $pollAttempts);
-            if ($sleepSeconds > MAX_POLL_FREQUENCY) {
-                $sleepSeconds = MAX_POLL_FREQUENCY;
+            $sleepSeconds = self::POLL_FREQUENCY_SECONDS * (2 ** $pollAttempts);
+            if ($sleepSeconds > self::MAX_POLL_FREQUENCY) {
+                $sleepSeconds = self::MAX_POLL_FREQUENCY;
             }
             $this->logger->debug("Sleeping {$sleepSeconds} seconds...");
             sleep($sleepSeconds);
@@ -118,11 +118,11 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
             ) {
                 $isPending = false;
             }
-        } while ($isPending && $pollAttempts <= MAX_POLL_ATTEMPTS);
+        } while ($isPending && $pollAttempts <= self::MAX_POLL_ATTEMPTS);
         if ($isPending) {
             throw new UnexpectedValueException(
                 sprintf('Job is still pending state after polling %d times.',
-                    MAX_POLL_ATTEMPTS));
+                    self::MAX_POLL_ATTEMPTS));
         }
         if ($batchJob->getProcessingErrors() !== null) {
             $i = 0;
@@ -275,7 +275,7 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
                         break;
                 }
             }
-            $jobResult->errors[$errorIndex][$i] = $text;
+            $jobResult->errors[$errorIndex][0] = $text;
             $this->logger->error($text);
         }
 
