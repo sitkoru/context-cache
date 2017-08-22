@@ -30,6 +30,7 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
     const MAX_POLL_ATTEMPTS = 60;
     const MAX_POLL_FREQUENCY = 60;
     const MAX_OPERATIONS_SIZE = 2000;
+    const MAX_RESPONSE_COUNT = 10000;
 
     /**
      * @var BatchJobService

@@ -4,7 +4,6 @@ namespace sitkoru\contextcache\adwords;
 
 
 use Google\AdsApi\AdWords\AdWordsSession;
-use Google\AdsApi\AdWords\v201702\cm\BiddableAdGroupCriterion;
 use Google\AdsApi\AdWords\v201702\cm\AdGroupCriterion;
 use Google\AdsApi\AdWords\v201702\cm\AdGroupCriterionOperation;
 use Google\AdsApi\AdWords\v201702\cm\AdGroupCriterionService;
@@ -128,16 +127,18 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
             $notFound = array_values(array_diff($ids, $found));
         }
         if ($notFound) {
-            $selector = new Selector();
-            $selector->setFields(self::$fields);
-            $predicates[] = new Predicate('Id', PredicateOperator::IN, $ids);
-            $selector->setPredicates($predicates);
-            $fromService = (array)$this->adGroupCriterionService->get($selector)->getEntries();
-            foreach ($fromService as $criterionItem) {
-                $index = $indexBy($criterionItem);
-                $criterions[$index] = $criterionItem;
+            foreach (array_chunk($ids, self::MAX_RESPONSE_COUNT) as $idsChunk) {
+                $selector = new Selector();
+                $selector->setFields(self::$fields);
+                $predicates[] = new Predicate('Id', PredicateOperator::IN, $idsChunk);
+                $selector->setPredicates($predicates);
+                $fromService = (array)$this->adGroupCriterionService->get($selector)->getEntries();
+                foreach ($fromService as $criterionItem) {
+                    $index = $indexBy($criterionItem);
+                    $criterions[$index] = $criterionItem;
+                }
+                $this->addToCache($fromService);
             }
-            $this->addToCache($fromService);
         }
         return $criterions;
     }
