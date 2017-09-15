@@ -2,6 +2,7 @@
   "name": "sitkoru/context-cache",
   "description": "Context data accessor with cache",
   "type": "library",
+  "license": "MIT",
   "authors": [
     {
       "name": "George Drak",
