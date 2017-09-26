@@ -4,19 +4,19 @@ namespace sitkoru\contextcache\adwords;
 
 use Google\AdsApi\AdWords\AdWordsServices;
 use Google\AdsApi\AdWords\AdWordsSession;
-use Google\AdsApi\AdWords\BatchJobs\v201702\BatchJobs;
-use Google\AdsApi\AdWords\v201702\cm\ApiError;
-use Google\AdsApi\AdWords\v201702\cm\BatchJob;
-use Google\AdsApi\AdWords\v201702\cm\BatchJobOperation;
-use Google\AdsApi\AdWords\v201702\cm\BatchJobService;
-use Google\AdsApi\AdWords\v201702\cm\BatchJobStatus;
-use Google\AdsApi\AdWords\v201702\cm\MutateResult;
-use Google\AdsApi\AdWords\v201702\cm\Operand;
-use Google\AdsApi\AdWords\v201702\cm\Operator;
-use Google\AdsApi\AdWords\v201702\cm\PolicyViolationError;
-use Google\AdsApi\AdWords\v201702\cm\Predicate;
-use Google\AdsApi\AdWords\v201702\cm\PredicateOperator;
-use Google\AdsApi\AdWords\v201702\cm\Selector;
+use Google\AdsApi\AdWords\BatchJobs\v201708\BatchJobs;
+use Google\AdsApi\AdWords\v201708\cm\ApiError;
+use Google\AdsApi\AdWords\v201708\cm\BatchJob;
+use Google\AdsApi\AdWords\v201708\cm\BatchJobOperation;
+use Google\AdsApi\AdWords\v201708\cm\BatchJobService;
+use Google\AdsApi\AdWords\v201708\cm\BatchJobStatus;
+use Google\AdsApi\AdWords\v201708\cm\MutateResult;
+use Google\AdsApi\AdWords\v201708\cm\Operand;
+use Google\AdsApi\AdWords\v201708\cm\Operator;
+use Google\AdsApi\AdWords\v201708\cm\PolicyViolationError;
+use Google\AdsApi\AdWords\v201708\cm\Predicate;
+use Google\AdsApi\AdWords\v201708\cm\PredicateOperator;
+use Google\AdsApi\AdWords\v201708\cm\Selector;
 use Psr\Log\LoggerInterface;
 use sitkoru\contextcache\common\EntitiesProvider;
 use sitkoru\contextcache\common\ICacheProvider;
@@ -59,7 +59,7 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
      * @param $operations
      *
      * @return bool|MutateResult[]
-     * @throws \Google\AdsApi\AdWords\v201702\cm\ApiException
+     * @throws \Google\AdsApi\AdWords\v201708\cm\ApiException
      * @throws \UnexpectedValueException
      */
     public function runMutateJob($operations)
@@ -137,8 +137,7 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
         if ($batchJob->getDownloadUrl() !== null
             && $batchJob->getDownloadUrl()->getUrl() !== null
         ) {
-            $mutateResults = $batchJobs->downloadBatchJobResults(
-                $batchJob->getDownloadUrl()->getUrl());
+            $mutateResults = $batchJobs->downloadBatchJobResults($batchJob->getDownloadUrl()->getUrl());
             $this->logger->info("Downloaded results from {$batchJob->getDownloadUrl()->getUrl()}:");
 
             if (count($mutateResults) === 0) {
@@ -159,7 +158,7 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
      * @return array
      * @throws \ErrorException
      */
-    protected function processErrors($jobResult)
+    protected function processErrors($jobResult): array
     {
         $skipped = [];
         $failed = [];
@@ -220,6 +219,7 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
      * @param UpdateResult   $jobResult
      * @param MutateResult[] $mutateResults
      * @return UpdateResult
+     * @throws \ErrorException
      */
     protected function processJobResult(UpdateResult $jobResult, $mutateResults): UpdateResult
     {
@@ -283,5 +283,5 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
         return $jobResult;
     }
 
-    protected abstract function getOperandEntity(Operand $operand);
+    abstract protected function getOperandEntity(Operand $operand);
 }

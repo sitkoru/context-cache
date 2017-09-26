@@ -3,8 +3,8 @@
 namespace sitkoru\contextcache\tests\unit;
 
 
-use Google\AdsApi\AdWords\v201702\cm\ExpandedTextAd;
-use Google\AdsApi\AdWords\v201702\cm\Keyword;
+use Google\AdsApi\AdWords\v201708\cm\ExpandedTextAd;
+use Google\AdsApi\AdWords\v201708\cm\Keyword;
 use Monolog\Handler\ErrorLogHandler;
 use Monolog\Logger;
 use PHPUnit\Framework\TestCase;

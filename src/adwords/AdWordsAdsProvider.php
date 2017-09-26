@@ -4,17 +4,17 @@ namespace sitkoru\contextcache\adwords;
 
 
 use Google\AdsApi\AdWords\AdWordsSession;
-use Google\AdsApi\AdWords\v201702\cm\AdGroupAd;
-use Google\AdsApi\AdWords\v201702\cm\AdGroupAdOperation;
-use Google\AdsApi\AdWords\v201702\cm\AdGroupAdService;
-use Google\AdsApi\AdWords\v201702\cm\AdGroupAdStatus;
-use Google\AdsApi\AdWords\v201702\cm\Operand;
-use Google\AdsApi\AdWords\v201702\cm\Operator;
-use Google\AdsApi\AdWords\v201702\cm\Predicate;
-use Google\AdsApi\AdWords\v201702\cm\PredicateOperator;
-use Google\AdsApi\AdWords\v201702\cm\Selector;
-use Google\AdsApi\AdWords\v201702\cm\TempAdUnionId;
-use Google\AdsApi\AdWords\v201702\cm\TemplateAd;
+use Google\AdsApi\AdWords\v201708\cm\AdGroupAd;
+use Google\AdsApi\AdWords\v201708\cm\AdGroupAdOperation;
+use Google\AdsApi\AdWords\v201708\cm\AdGroupAdService;
+use Google\AdsApi\AdWords\v201708\cm\AdGroupAdStatus;
+use Google\AdsApi\AdWords\v201708\cm\Operand;
+use Google\AdsApi\AdWords\v201708\cm\Operator;
+use Google\AdsApi\AdWords\v201708\cm\Predicate;
+use Google\AdsApi\AdWords\v201708\cm\PredicateOperator;
+use Google\AdsApi\AdWords\v201708\cm\Selector;
+use Google\AdsApi\AdWords\v201708\cm\TempAdUnionId;
+use Google\AdsApi\AdWords\v201708\cm\TemplateAd;
 use Psr\Log\LoggerInterface;
 use sitkoru\contextcache\common\ICacheProvider;
 use sitkoru\contextcache\common\IEntitiesProvider;
@@ -29,9 +29,6 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
     private $adGroupAdService;
 
     private static $fields = [
-        'AdGroupAdDisapprovalReasons',
-        'AdGroupAdTrademarkDisapproved',
-        'AdGroupCreativeApprovalStatus',
         'AdGroupId',
         'AdType',
         'AdvertisingId',
@@ -100,7 +97,6 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
         'TemplateElementFieldType',
         'TemplateId',
         'TemplateOriginAdId',
-        'Trademarks',
         'UniqueName',
         'Url',
         'UrlData',
@@ -124,6 +120,7 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
     /**
      * @param array $ids
      * @return AdGroupAd[]
+     * @throws \Google\AdsApi\AdWords\v201708\cm\ApiException
      */
     public function getAll(array $ids): array
     {
@@ -188,7 +185,7 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
                  */
                 $adGroupAds[$adGroupAdItem->getAd()->getId()] = $adGroupAdItem;
             }
-            $this->addToCache((array)$fromService);
+            $this->addToCache($fromService);
         }
         return $adGroupAds;
     }
@@ -196,6 +193,7 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
     /**
      * @param array $adGroupIds
      * @return AdGroupAd[]
+     * @throws \Google\AdsApi\AdWords\v201708\cm\ApiException
      */
     public function getByAdGroupIds(array $adGroupIds): array
     {
@@ -221,7 +219,7 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
                  */
                 $adGroupAds[$adGroupAdItem->getAd()->getId()] = $adGroupAdItem;
             }
-            $this->addToCache((array)$fromService);
+            $this->addToCache($fromService);
         }
         return $adGroupAds;
     }
@@ -265,7 +263,7 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
         $this->logger->info('Add operations: ' . count($addOperations));
 
 
-        foreach (array_chunk($addOperations, MAX_OPERATIONS_SIZE) as $i => $addChunk) {
+        foreach (array_chunk($addOperations, self::MAX_OPERATIONS_SIZE) as $i => $addChunk) {
             /**
              * @var AdGroupAdOperation[] $addChunk
              */
@@ -282,7 +280,7 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
         }
 
         $this->logger->info('Delete succeeded ads: ' . count($deleteOperations));
-        foreach (array_chunk($deleteOperations, MAX_OPERATIONS_SIZE) as $i => $deleteChunk) {
+        foreach (array_chunk($deleteOperations, self::MAX_OPERATIONS_SIZE) as $i => $deleteChunk) {
             $this->logger->info('Delete chunk #' . $i . '. Size: ' . count($deleteChunk));
             $jobResults = $this->runMutateJob($deleteChunk);
             $this->processJobResult($result, $jobResults);

@@ -4,20 +4,20 @@ namespace sitkoru\contextcache\adwords;
 
 
 use Google\AdsApi\AdWords\AdWordsSession;
-use Google\AdsApi\AdWords\v201702\cm\AdGroupCriterion;
-use Google\AdsApi\AdWords\v201702\cm\AdGroupCriterionOperation;
-use Google\AdsApi\AdWords\v201702\cm\AdGroupCriterionService;
-use Google\AdsApi\AdWords\v201702\cm\Operand;
-use Google\AdsApi\AdWords\v201702\cm\Operator;
-use Google\AdsApi\AdWords\v201702\cm\Predicate;
-use Google\AdsApi\AdWords\v201702\cm\PredicateOperator;
-use Google\AdsApi\AdWords\v201702\cm\Selector;
-use Google\AdsApi\AdWords\v201702\cm\UserStatus;
+use Google\AdsApi\AdWords\v201708\cm\AdGroupCriterion;
+use Google\AdsApi\AdWords\v201708\cm\AdGroupCriterionOperation;
+use Google\AdsApi\AdWords\v201708\cm\Operand;
+use Google\AdsApi\AdWords\v201708\cm\Operator;
+use Google\AdsApi\AdWords\v201708\cm\Predicate;
+use Google\AdsApi\AdWords\v201708\cm\PredicateOperator;
+use Google\AdsApi\AdWords\v201708\cm\Selector;
+use Google\AdsApi\AdWords\v201708\cm\UserStatus;
 use Psr\Log\LoggerInterface;
 use sitkoru\contextcache\common\ICacheProvider;
 use sitkoru\contextcache\common\IEntitiesProvider;
 use sitkoru\contextcache\common\models\UpdateResult;
 use sitkoru\contextcache\helpers\ArrayHelper;
+use Google\AdsApi\AdWords\v201708\cm\AdGroupCriterionService;
 
 class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implements IEntitiesProvider
 {
@@ -108,6 +108,7 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
     /**
      * @param array $ids
      * @return AdGroupCriterion[]
+     * @throws \Google\AdsApi\AdWords\v201708\cm\ApiException
      */
     public function getAll(array $ids): array
     {
@@ -155,6 +156,7 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
     /**
      * @param array $adGroupIds
      * @return AdGroupCriterion[]
+     * @throws \Google\AdsApi\AdWords\v201708\cm\ApiException
      */
     public function getByAdGroupIds(array $adGroupIds): array
     {
@@ -189,6 +191,7 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
     /**
      * @param array $campaignIds
      * @return AdGroupCriterion[]
+     * @throws \Google\AdsApi\AdWords\v201708\cm\ApiException
      */
     public function getByCampaignIds(array $campaignIds): array
     {
@@ -249,13 +252,13 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
         $this->logger->info('Delete operations: ' . count($deleteOperations));
         $this->logger->info('Update operations: ' . count($addOperations));
 
-        foreach (array_chunk($deleteOperations, MAX_OPERATIONS_SIZE) as $i => $deleteChunk) {
+        foreach (array_chunk($deleteOperations, self::MAX_OPERATIONS_SIZE) as $i => $deleteChunk) {
             $this->logger->info('Delete chunk #' . $i . '. Size: ' . count($deleteChunk));
             $jobResults = $this->runMutateJob($deleteChunk);
             $this->processJobResult($result, $jobResults);
         }
 
-        foreach (array_chunk($addOperations, MAX_OPERATIONS_SIZE) as $i => $addChunk) {
+        foreach (array_chunk($addOperations, self::MAX_OPERATIONS_SIZE) as $i => $addChunk) {
             $this->logger->info('Update chunk #' . $i . '. Size: ' . count($addChunk));
             $jobResults = $this->runMutateJob($addChunk);
             $this->processJobResult($result, $jobResults);
