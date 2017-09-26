@@ -11,7 +11,6 @@ use directapi\services\campaigns\models\CampaignGetItem;
 use directapi\services\campaigns\models\CampaignUpdateItem;
 use directapi\services\changes\enum\FieldNamesEnum;
 use directapi\services\changes\models\CheckResponse;
-use Google\AdsApi\AdWords\v201702\cm\Campaign;
 use Psr\Log\LoggerInterface;
 use sitkoru\contextcache\common\ICacheProvider;
 use sitkoru\contextcache\common\IEntitiesProvider;
@@ -89,7 +88,7 @@ class DirectCampaignsProvider extends DirectEntitiesProvider implements IEntitie
     }
 
     /**
-     * @param Campaign[] $entities
+     * @param CampaignGetItem[] $entities
      * @return UpdateResult
      */
     public function update(array $entities): UpdateResult
