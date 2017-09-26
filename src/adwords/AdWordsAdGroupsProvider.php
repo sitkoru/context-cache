@@ -149,6 +149,10 @@ class AdWordsAdGroupsProvider extends AdWordsEntitiesProvider implements IEntiti
         $this->logger->info('Build operations');
         foreach ($entities as $entity) {
             $addOperation = new AdGroupOperation();
+            if($entity->getBiddingStrategyConfiguration()!==null)
+            {
+                $entity->setBiddingStrategyConfiguration(null);
+            }
             $addOperation->setOperand($entity);
             $addOperation->setOperator(Operator::SET);
             $addOperations[] = $addOperation;

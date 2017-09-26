@@ -6,6 +6,8 @@ namespace sitkoru\contextcache\adwords;
 use Google\AdsApi\AdWords\AdWordsSession;
 use Google\AdsApi\AdWords\v201708\cm\AdGroupCriterion;
 use Google\AdsApi\AdWords\v201708\cm\AdGroupCriterionOperation;
+use Google\AdsApi\AdWords\v201708\cm\AdGroupCriterionService;
+use Google\AdsApi\AdWords\v201708\cm\BiddableAdGroupCriterion;
 use Google\AdsApi\AdWords\v201708\cm\Operand;
 use Google\AdsApi\AdWords\v201708\cm\Operator;
 use Google\AdsApi\AdWords\v201708\cm\Predicate;
@@ -17,7 +19,6 @@ use sitkoru\contextcache\common\ICacheProvider;
 use sitkoru\contextcache\common\IEntitiesProvider;
 use sitkoru\contextcache\common\models\UpdateResult;
 use sitkoru\contextcache\helpers\ArrayHelper;
-use Google\AdsApi\AdWords\v201708\cm\AdGroupCriterionService;
 
 class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implements IEntitiesProvider
 {
@@ -237,6 +238,9 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
         foreach ($entities as $entity) {
             $newCriterion = clone $entity;
             $criterion = clone $entity->getCriterion();
+            if ($newCriterion instanceof BiddableAdGroupCriterion && $newCriterion->getBiddingStrategyConfiguration() !== null) {
+                $newCriterion->setBiddingStrategyConfiguration(null);
+            }
             $entity->setUserStatus(UserStatus::REMOVED);
             $deleteOperation = new AdGroupCriterionOperation();
             $deleteOperation->setOperand($entity);
@@ -246,23 +250,36 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
             $addOperation = new AdGroupCriterionOperation();
             $addOperation->setOperand($newCriterion);
             $addOperation->setOperator(Operator::ADD);
-            $deleteOperations[] = $deleteOperation;
+            $deleteOperations[$entity->getCriterion()->getId()] = $deleteOperation;
             $addOperations[] = $addOperation;
         }
         $this->logger->info('Delete operations: ' . count($deleteOperations));
         $this->logger->info('Update operations: ' . count($addOperations));
 
+
+        foreach (array_chunk($addOperations, self::MAX_OPERATIONS_SIZE) as $i => $addChunk) {
+            /**
+             * @var AdGroupCriterionOperation[] $addChunk
+             */
+            $this->logger->info('Add chunk #' . $i . '. Size: ' . count($addChunk));
+            $jobResults = $this->runMutateJob($addChunk);
+            $this->processJobResult($result, $jobResults);
+            if (!$result->success) {
+                foreach ($result->errors as $criterionOperationId => $errors) {
+                    $criterionOperation = $addChunk[$criterionOperationId];
+                    $criterionId = $criterionOperation->getOperand()->getCriterion()->getId();
+                    unset($deleteOperations[$criterionId]);
+                }
+            }
+        }
+
+        $this->logger->info('Delete succeeded criterions: ' . count($deleteOperations));
         foreach (array_chunk($deleteOperations, self::MAX_OPERATIONS_SIZE) as $i => $deleteChunk) {
             $this->logger->info('Delete chunk #' . $i . '. Size: ' . count($deleteChunk));
             $jobResults = $this->runMutateJob($deleteChunk);
             $this->processJobResult($result, $jobResults);
         }
 
-        foreach (array_chunk($addOperations, self::MAX_OPERATIONS_SIZE) as $i => $addChunk) {
-            $this->logger->info('Update chunk #' . $i . '. Size: ' . count($addChunk));
-            $jobResults = $this->runMutateJob($addChunk);
-            $this->processJobResult($result, $jobResults);
-        }
         $this->logger->info('Done');
         $this->clearCache();
         return $result;
