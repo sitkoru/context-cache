@@ -24,6 +24,30 @@ class ContextEntitiesProvider
         $this->logger = $logger;
     }
 
+    public function clearCache()
+    {
+        $collections = [
+            'yandex' => [
+                'ads',
+                'adGroups',
+                'campaigns',
+                'keywords'
+            ],
+            'google' => [
+                'adGroupCriterions',
+                'adGroups',
+                'adGroupAds',
+                'campaigns'
+            ]
+        ];
+        foreach ($collections as $service => $serviceCollections) {
+            foreach ($serviceCollections as $serviceCollection) {
+                $this->cache->collection($service, $serviceCollection)->clear();
+            }
+        }
+    }
+
+
     public function getDirectProvider(string $accessToken, string $clientLogin): DirectProvider
     {
         return new DirectProvider($accessToken, $clientLogin, $this->cache, $this->logger);
