@@ -72,30 +72,17 @@ class MongoDbCacheCollection implements ICacheCollection
         $this->collection->bulkWrite($operations);
     }
 
-    private function prepareOperationFilter(array $entity): array
+    private function prepareOperationFilter(array $entity, string $keyField): array
     {
-        $filterItems = explode('.', $this->keyField);
+        $filterItems = explode('.', $keyField);
 
         if (count($filterItems) === 1) {
-            return [$this->keyField => $entity[$this->keyField]];
+            $keyValue = $entity[$keyField];
+        } else {
+            $keyValue = $this->getArrayLastValueByArrayKeysNesting($entity, $filterItems);
         }
 
-        $keyValue = $this->getArrayLastValueByArrayKeysNesting($entity, $filterItems);
-
-        return $this->getArrayNestingByKeysArray($filterItems, $keyValue);
-    }
-
-    private function getArrayNestingByKeysArray(array $keysArray, $value = null)
-    {
-        $result = [];
-        foreach (array_reverse($keysArray) as $key) {
-            if (!$result) {
-                $result = [$key => $value];
-            } else {
-                $result = [$key => $result];
-            }
-        }
-        return $result;
+        return [$keyField => $keyValue];
     }
 
     private function getArrayLastValueByArrayKeysNesting(array $array, array $arrayKeysNesting)
