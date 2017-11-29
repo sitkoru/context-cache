@@ -37,8 +37,8 @@ class MongoDbCacheProvider implements ICacheProvider
         );
     }
 
-    public function collection(string $service, string $collection): ICacheCollection
+    public function collection(string $service, string $collection, string $keyField): ICacheCollection
     {
-        return new MongoDbCacheCollection($this->client, $service, $collection);
+        return new MongoDbCacheCollection($this->client, $service, $collection, $keyField);
     }
 }

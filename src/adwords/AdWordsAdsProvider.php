@@ -28,6 +28,8 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
      */
     private $adGroupAdService;
 
+    protected $keyField = 'ad.id';
+
     private static $fields = [
         'AdGroupId',
         'AdType',
@@ -111,7 +113,8 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
         ICacheProvider $cacheProvider,
         AdWordsSession $adWordsSession,
         LoggerInterface $logger
-    ) {
+    )
+    {
         parent::__construct($cacheProvider, $adWordsSession, $logger);
         $this->collection = 'adGroupAds';
         $this->adGroupAdService = $adGroupService;

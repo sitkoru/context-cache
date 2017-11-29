@@ -9,5 +9,5 @@ interface ICacheProvider
 
     public function setTimeStamp(string $service, int $timestamp);
 
-    public function collection(string $service, string $collection): ICacheCollection;
+    public function collection(string $service, string $collection, string $keyField): ICacheCollection;
 }

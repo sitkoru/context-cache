@@ -52,6 +52,8 @@ class AdWordsAdGroupsProvider extends AdWordsEntitiesProvider implements IEntiti
         'UrlCustomParameters'
     ];
 
+    protected $keyField = 'id';
+
     public function __construct(
         AdGroupService $adGroupService,
         ICacheProvider $cacheProvider,

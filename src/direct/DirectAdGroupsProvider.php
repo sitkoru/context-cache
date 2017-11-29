@@ -26,6 +26,8 @@ class DirectAdGroupsProvider extends DirectEntitiesProvider implements IEntities
 
     const CRITERIA_MAX_AD_GROUP_IDS = 10000;
 
+    protected $keyField = 'Id';
+
     public function __construct(
         DirectApiService $directApiService,
         ICacheProvider $cacheProvider,
