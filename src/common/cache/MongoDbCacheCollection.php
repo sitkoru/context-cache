@@ -63,6 +63,7 @@ class MongoDbCacheCollection implements ICacheCollection
      */
     public function set(array $entities)
     {
+        $entities = $this->serializeEntities($entities);
         $operations = [];
         foreach ($entities as $entity) {
             $operations[] = ['updateOne' => [[$this->keyField => $entity[$this->keyField]], ['$set' => $entity], ['upsert' => true]]];
