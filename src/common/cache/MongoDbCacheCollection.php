@@ -66,10 +66,56 @@ class MongoDbCacheCollection implements ICacheCollection
         $entities = $this->serializeEntities($entities);
         $operations = [];
         foreach ($entities as $entity) {
-            $operations[] = ['updateOne' => [[$this->keyField => $entity[$this->keyField]], ['$set' => $entity], ['upsert' => true]]];
+            $operations[] = ['updateOne' => [$this->prepareOperationFilter($entity), ['$set' => $entity], ['upsert' => true]]];
         }
 
         $this->collection->bulkWrite($operations);
+    }
+
+    private function prepareOperationFilter(array $entity): array
+    {
+        $filterItems = explode('.', $this->keyField);
+
+        if (count($filterItems) === 1) {
+            return [$this->keyField => $entity[$this->keyField]];
+        }
+
+        $keyValue = $this->getArrayLastValueByArrayKeysNesting($entity, $filterItems);
+
+        return $this->getArrayNestingByKeysArray($filterItems, $keyValue);
+    }
+
+    private function getArrayNestingByKeysArray(array $keysArray, $value = null)
+    {
+        $result = [];
+        foreach (array_reverse($keysArray) as $key) {
+            if (!$result) {
+                $result = [$key => $value];
+            } else {
+                $result = [$key => $result];
+            }
+        }
+        return $result;
+    }
+
+    private function getArrayLastValueByArrayKeysNesting(array $array, array $arrayKeysNesting)
+    {
+        $i = 0;
+        $lastLevelArray = [];
+        foreach ($arrayKeysNesting as $level) {
+            //last item
+            if (count($arrayKeysNesting) - 1 === $i) {
+                return $lastLevelArray[$level];
+            }
+
+            if (!$lastLevelArray) {
+                $lastLevelArray = $array[$level];
+            } else {
+                $lastLevelArray = $lastLevelArray[$level];
+            }
+            $i++;
+        }
+        return $array;
     }
 
     private function serializeEntities(array $entities): array
