@@ -21,6 +21,8 @@ class DirectCampaignsProvider extends DirectEntitiesProvider implements IEntitie
     const CRITERIA_MAX_CAMPAIGN_IDS = 1000;
     const MAX_CAMPAIGNS_PER_UPDATE = 10;
 
+    protected $keyField = 'Id';
+
     public function __construct(
         DirectApiService $directApiService,
         ICacheProvider $cacheProvider,

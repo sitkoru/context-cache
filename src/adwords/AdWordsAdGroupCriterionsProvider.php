@@ -95,6 +95,8 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
         'VideoName'
     ];
 
+    protected $keyField = 'criterion.id';
+
     public function __construct(
         AdGroupCriterionService $adGroupCriterionService,
         ICacheProvider $cacheProvider,

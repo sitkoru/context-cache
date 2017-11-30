@@ -15,15 +15,18 @@ class MongoDbCacheCollection implements ICacheCollection
      */
     protected $collection;
 
+    protected $keyField;
+
     /**
      * @var Client
      */
     private $client;
 
 
-    public function __construct(Client $client, string $service, string $collection)
+    public function __construct(Client $client, string $service, string $collection, string $keyField)
     {
         $this->client = $client;
+        $this->keyField = $keyField;
         $this->collection = $client->selectCollection($service, $collection);
     }
 
@@ -56,10 +59,50 @@ class MongoDbCacheCollection implements ICacheCollection
      * @param array $entities
      * @throws \MongoDB\Driver\Exception\RuntimeException
      * @throws \MongoDB\Exception\InvalidArgumentException
+     * @throws \MongoDB\Exception\UnsupportedException
      */
     public function set(array $entities)
     {
-        $this->collection->insertMany($this->serializeEntities($entities));
+        $entities = $this->serializeEntities($entities);
+        $operations = [];
+        foreach ($entities as $entity) {
+            $operations[] = ['updateOne' => [$this->prepareOperationFilter($entity), ['$set' => $entity], ['upsert' => true]]];
+        }
+
+        $this->collection->bulkWrite($operations);
+    }
+
+    private function prepareOperationFilter(array $entity): array
+    {
+        $filterItems = explode('.', $this->keyField);
+
+        if (count($filterItems) === 1) {
+            $keyValue = $entity[$this->keyField];
+        } else {
+            $keyValue = $this->getArrayLastValueByArrayKeysNesting($entity, $filterItems);
+        }
+
+        return [$this->keyField => $keyValue];
+    }
+
+    private function getArrayLastValueByArrayKeysNesting(array $array, array $arrayKeysNesting)
+    {
+        $i = 0;
+        $lastLevelArray = [];
+        foreach ($arrayKeysNesting as $level) {
+            //last item
+            if (count($arrayKeysNesting) - 1 === $i) {
+                return $lastLevelArray[$level];
+            }
+
+            if (!$lastLevelArray) {
+                $lastLevelArray = $array[$level];
+            } else {
+                $lastLevelArray = $lastLevelArray[$level];
+            }
+            $i++;
+        }
+        return $array;
     }
 
     private function serializeEntities(array $entities): array

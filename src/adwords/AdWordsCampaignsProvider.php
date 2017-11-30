@@ -77,6 +77,8 @@ class AdWordsCampaignsProvider extends AdWordsEntitiesProvider implements IEntit
         'VanityPharmaText'
     ];
 
+    protected $keyField = 'id';
+
     public function __construct(
         CampaignService $campaignService,
         ICacheProvider $cacheProvider,

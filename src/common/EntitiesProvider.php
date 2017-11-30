@@ -15,6 +15,10 @@ abstract class EntitiesProvider
     protected $serviceKey;
 
     protected $collection;
+
+    private $cacheCollection;
+
+    protected $keyField;
     /**
      * @var LoggerInterface
      */
@@ -24,6 +28,14 @@ abstract class EntitiesProvider
     {
         $this->cacheProvider = $cacheProvider;
         $this->logger = $logger;
+    }
+
+    private function getCacheCollection(): ICacheCollection
+    {
+        if (!$this->cacheCollection){
+            $this->cacheCollection = $this->cacheProvider->collection($this->serviceKey, $this->collection,$this->keyField);
+        }
+        return $this->cacheCollection;
     }
 
     protected function getFromCache(array $ids, string $field, $indexBy = null): array
@@ -37,14 +49,13 @@ abstract class EntitiesProvider
 
     protected function getEntitiesFromCache(array $ids, string $field, $indexBy = null): array
     {
-        $entities = $this->cacheProvider->collection($this->serviceKey, $this->collection)->get($ids, $field, $indexBy);
-        return $entities;
+        return $this->getCacheCollection()->get($ids, $field, $indexBy);
     }
 
     protected function addToCache(array $entities)
     {
         if ($entities) {
-            $this->cacheProvider->collection($this->serviceKey, $this->collection)->set($entities);
+            $this->getCacheCollection()->set($entities);
             $this->cacheProvider->setTimeStamp($this->serviceKey, time());
         }
     }
@@ -52,7 +63,7 @@ abstract class EntitiesProvider
     public function clearCache()
     {
         $this->logger->debug('Clear cache');
-        $this->cacheProvider->collection($this->serviceKey, $this->collection)->clear();
+        $this->getCacheCollection()->clear();
     }
 
     protected function hasChanges($ids): bool

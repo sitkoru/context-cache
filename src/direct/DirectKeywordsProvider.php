@@ -22,6 +22,8 @@ class DirectKeywordsProvider extends DirectEntitiesProvider implements IEntities
     const CRITERIA_MAX_AD_GROUP_IDS = 1000;
     const CRITERIA_MAX_CAMPAIGN_IDS = 10;
 
+    protected $keyField = 'Id';
+
     public function __construct(
         DirectApiService $directApiService,
         ICacheProvider $cacheProvider,
