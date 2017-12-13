@@ -13,7 +13,7 @@
   "require": {
     "sitkoru/yandex-direct-api": "^2017.11.1",
     "googleads/googleads-php-lib": "^30.0.0",
-    "mongodb/mongodb": "^1.1.2",
+    "mongodb/mongodb": "^1.2.0",
     "psr/log": "^1.0"
   },
   "require-dev": {
