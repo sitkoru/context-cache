@@ -6,8 +6,12 @@ use directapi\DirectApiService;
 use directapi\services\ads\criterias\AdsSelectionCriteria;
 use directapi\services\ads\enum\AdFieldEnum;
 use directapi\services\ads\enum\DynamicTextAdFieldEnum;
+use directapi\services\ads\enum\MobileAppAdBuilderAdFieldEnum;
 use directapi\services\ads\enum\MobileAppAdFieldEnum;
+use directapi\services\ads\enum\MobileAppImageAdFieldEnum;
+use directapi\services\ads\enum\TextAdBuilderAdFieldEnum;
 use directapi\services\ads\enum\TextAdFieldEnum;
+use directapi\services\ads\enum\TextImageAdFieldEnum;
 use directapi\services\ads\models\AdGetItem;
 use directapi\services\ads\models\AdUpdateItem;
 use directapi\services\changes\enum\FieldNamesEnum;
@@ -127,8 +131,11 @@ class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvi
                     AdFieldEnum::getValues(),
                     TextAdFieldEnum::getValues(),
                     MobileAppAdFieldEnum::getValues(),
-                    DynamicTextAdFieldEnum::getValues()
-
+                    DynamicTextAdFieldEnum::getValues(),
+                    TextImageAdFieldEnum::getValues(),
+                    MobileAppImageAdFieldEnum::getValues(),
+                    TextAdBuilderAdFieldEnum::getValues(),
+                    MobileAppAdBuilderAdFieldEnum::getValues()
                 );
                 foreach ($fromService as $adGetItem) {
                     $ads[$adGetItem->Id] = $adGetItem;
