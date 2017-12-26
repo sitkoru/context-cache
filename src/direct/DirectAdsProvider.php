@@ -123,9 +123,13 @@ class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvi
             foreach (array_chunk($notFound, self::CRITERIA_MAX_AD_IDS) as $idsChunk) {
                 $criteria = new AdsSelectionCriteria();
                 $criteria->Ids = $idsChunk;
-                $fromService = $this->directApiService->getAdsService()->get($criteria, AdFieldEnum::getValues(),
-                    TextAdFieldEnum::getValues(), MobileAppAdFieldEnum::getValues(),
-                    DynamicTextAdFieldEnum::getValues());
+                $fromService = $this->directApiService->getAdsService()->get($criteria,
+                    AdFieldEnum::getValues(),
+                    TextAdFieldEnum::getValues(),
+                    MobileAppAdFieldEnum::getValues(),
+                    DynamicTextAdFieldEnum::getValues()
+
+                );
                 foreach ($fromService as $adGetItem) {
                     $ads[$adGetItem->Id] = $adGetItem;
                 }
