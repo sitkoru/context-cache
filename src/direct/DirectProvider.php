@@ -32,6 +32,12 @@ class DirectProvider
     public $retargetingLists;
 
     /**
+     * @var DirectAudienceTargetsProvider
+     */
+    public $audienceTargetsProvider;
+
+
+    /**
      * YandexAdGroupsProvider constructor.
      * @param string          $accessToken
      * @param string          $clientLogin
@@ -51,6 +57,7 @@ class DirectProvider
         $this->keywords = new DirectKeywordsProvider($yandexService, $cacheProvider, $logger);
         $this->campaigns = new DirectCampaignsProvider($yandexService, $cacheProvider, $logger);
         $this->retargetingLists = new DirectRetargetingProvider($yandexService, $cacheProvider, $logger);
+        $this->audienceTargetsProvider = new DirectAudienceTargetsProvider($yandexService, $cacheProvider, $logger);
 
 
     }
