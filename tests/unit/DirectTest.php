@@ -8,6 +8,7 @@ use directapi\services\adgroups\models\AdGroupGetItem;
 use directapi\services\ads\models\AdGetItem;
 use directapi\services\campaigns\models\CampaignGetItem;
 use directapi\services\keywords\models\KeywordGetItem;
+use directapi\services\retargetinglists\models\RetargetingListGetItem;
 use Monolog\Handler\ErrorLogHandler;
 use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
@@ -17,6 +18,7 @@ use sitkoru\contextcache\direct\DirectAdGroupsProvider;
 use sitkoru\contextcache\direct\DirectAdsProvider;
 use sitkoru\contextcache\direct\DirectCampaignsProvider;
 use sitkoru\contextcache\direct\DirectKeywordsProvider;
+use sitkoru\contextcache\direct\DirectRetargetingProvider;
 
 class DirectTest extends TestCase
 {
@@ -174,5 +176,22 @@ class DirectTest extends TestCase
             [true],
             [false]
         ];
+    }
+
+    /**
+     * @dataProvider cacheProvider
+     * @param bool $clearCache
+     */
+    public function testLoadRetargetingLists($clearCache): void
+    {
+        $this->assertInstanceOf(DirectRetargetingProvider::class, $this->provider->retargetingLists);
+        if ($clearCache) {
+            $this->provider->keywords->clearCache();
+        }
+        $lists = $this->provider->retargetingLists->getAll([YDRetargetingListId]);
+        $this->assertCount(1, $lists);
+        foreach ($lists as $list) {
+            $this->assertInstanceOf(RetargetingListGetItem::class, $list);
+        }
     }
 }
