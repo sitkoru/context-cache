@@ -3,6 +3,7 @@
 namespace sitkoru\contextcache\direct;
 
 
+use directapi\components\interfaces\IQueryLogger;
 use directapi\DirectApiService;
 use Psr\Log\LoggerInterface;
 use sitkoru\contextcache\common\ICacheProvider;
@@ -39,18 +40,21 @@ class DirectProvider
 
     /**
      * YandexAdGroupsProvider constructor.
-     * @param string          $accessToken
-     * @param string          $clientLogin
-     * @param ICacheProvider  $cacheProvider
-     * @param LoggerInterface $logger
+     * @param string            $accessToken
+     * @param string            $clientLogin
+     * @param ICacheProvider    $cacheProvider
+     * @param LoggerInterface   $logger
+     * @param $
+     * @param null|IQueryLogger $queryLogger
      */
     public function __construct(
         string $accessToken,
         string $clientLogin,
         ICacheProvider $cacheProvider,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        ?IQueryLogger $queryLogger = null
     ) {
-        $yandexService = new DirectApiService($accessToken, $clientLogin);
+        $yandexService = new DirectApiService($accessToken, $clientLogin, $queryLogger);
 
         $this->adGroups = new DirectAdGroupsProvider($yandexService, $cacheProvider, $logger);
         $this->ads = new DirectAdsProvider($yandexService, $cacheProvider, $logger);

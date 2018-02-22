@@ -2,6 +2,7 @@
 
 namespace sitkoru\contextcache;
 
+use directapi\components\interfaces\IQueryLogger;
 use Psr\Log\LoggerInterface;
 use sitkoru\contextcache\adwords\AdWordsProvider;
 use sitkoru\contextcache\common\ICacheProvider;
@@ -48,9 +49,9 @@ class ContextEntitiesProvider
     }
 
 
-    public function getDirectProvider(string $accessToken, string $clientLogin): DirectProvider
+    public function getDirectProvider(string $accessToken, string $clientLogin, IQueryLogger $queryLogger = null): DirectProvider
     {
-        return new DirectProvider($accessToken, $clientLogin, $this->cache, $this->logger);
+        return new DirectProvider($accessToken, $clientLogin, $this->cache, $this->logger, $queryLogger);
     }
 
     public function getAdWordsProvider(
