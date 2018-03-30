@@ -16,6 +16,8 @@ use directapi\services\ads\models\AdGetItem;
 use directapi\services\ads\models\AdUpdateItem;
 use directapi\services\changes\enum\FieldNamesEnum;
 use directapi\services\changes\models\CheckResponse;
+use directapi\services\changes\models\CheckResponseIds;
+use directapi\services\changes\models\CheckResponseModified;
 use Psr\Log\LoggerInterface;
 use sitkoru\contextcache\common\ICacheProvider;
 use sitkoru\contextcache\common\IEntitiesProvider;
@@ -187,5 +189,10 @@ class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvi
     protected function getChanges(array $ids, string $date): CheckResponse
     {
         return $this->directApiService->getChangesService()->check([], [], $ids, [FieldNamesEnum::AD_IDS], $date);
+    }
+
+    protected function getChangesCount(CheckResponseModified $modified, CheckResponseIds $notFound): int
+    {
+        return count($modified->AdIds) + count($notFound->AdIds);
     }
 }

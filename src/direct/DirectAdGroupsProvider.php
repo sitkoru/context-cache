@@ -11,6 +11,8 @@ use directapi\services\adgroups\models\AdGroupGetItem;
 use directapi\services\adgroups\models\AdGroupUpdateItem;
 use directapi\services\changes\enum\FieldNamesEnum;
 use directapi\services\changes\models\CheckResponse;
+use directapi\services\changes\models\CheckResponseIds;
+use directapi\services\changes\models\CheckResponseModified;
 use Psr\Log\LoggerInterface;
 use sitkoru\contextcache\common\ICacheProvider;
 use sitkoru\contextcache\common\IEntitiesProvider;
@@ -32,7 +34,8 @@ class DirectAdGroupsProvider extends DirectEntitiesProvider implements IEntities
         DirectApiService $directApiService,
         ICacheProvider $cacheProvider,
         LoggerInterface $logger
-    ) {
+    )
+    {
         parent::__construct($directApiService, $cacheProvider, $logger);
         $this->collection = 'adGroups';
     }
@@ -151,5 +154,10 @@ class DirectAdGroupsProvider extends DirectEntitiesProvider implements IEntities
     {
         return $this->directApiService->getChangesService()->check([], $ids, [], [FieldNamesEnum::AD_GROUP_IDS],
             $date);
+    }
+
+    protected function getChangesCount(CheckResponseModified $modified, CheckResponseIds $notFound): int
+    {
+        return count($modified->AdGroupIds) + count($notFound->AdGroupIds);
     }
 }

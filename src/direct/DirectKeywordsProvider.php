@@ -5,6 +5,8 @@ namespace sitkoru\contextcache\direct;
 use directapi\DirectApiService;
 use directapi\services\changes\enum\FieldNamesEnum;
 use directapi\services\changes\models\CheckResponse;
+use directapi\services\changes\models\CheckResponseIds;
+use directapi\services\changes\models\CheckResponseModified;
 use directapi\services\keywords\criterias\KeywordsSelectionCriteria;
 use directapi\services\keywords\enum\KeywordFieldEnum;
 use directapi\services\keywords\models\KeywordGetItem;
@@ -170,5 +172,10 @@ class DirectKeywordsProvider extends DirectEntitiesProvider implements IEntities
     protected function getChanges(array $ids, string $date): CheckResponse
     {
         return $this->directApiService->getChangesService()->check([], [], $ids, [FieldNamesEnum::AD_IDS], $date);
+    }
+
+    protected function getChangesCount(CheckResponseModified $modified, CheckResponseIds $notFound): int
+    {
+        return count($modified->AdGroupIds) + count($notFound->AdGroupIds);
     }
 }

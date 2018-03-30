@@ -7,6 +7,8 @@ use directapi\services\audiencetargets\criterias\AudienceTargetSelectionCriteria
 use directapi\services\audiencetargets\enum\AudienceTargetFieldEnum;
 use directapi\services\audiencetargets\models\AudienceTargetGetItem;
 use directapi\services\changes\models\CheckResponse;
+use directapi\services\changes\models\CheckResponseIds;
+use directapi\services\changes\models\CheckResponseModified;
 use Psr\Log\LoggerInterface;
 use sitkoru\contextcache\common\ICacheProvider;
 use sitkoru\contextcache\common\IEntitiesProvider;
@@ -80,5 +82,10 @@ class DirectAudienceTargetsProvider extends DirectEntitiesProvider implements IE
     protected function getChanges(array $ids, string $date): CheckResponse
     {
         return new CheckResponse();
+    }
+
+    protected function getChangesCount(CheckResponseModified $modified, CheckResponseIds $notFound): int
+    {
+        return 0;
     }
 }
