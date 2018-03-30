@@ -193,6 +193,6 @@ class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvi
 
     protected function getChangesCount(CheckResponseModified $modified, CheckResponseIds $notFound): int
     {
-        return count($modified->AdIds) + count($notFound->AdIds);
+        return count((array)$modified->AdIds) + count((array)$notFound->AdIds);
     }
 }
