@@ -3,14 +3,14 @@
 namespace sitkoru\contextcache\adwords;
 
 use Google\AdsApi\AdWords\AdWordsSession;
-use Google\AdsApi\AdWords\v201708\cm\AdGroup;
-use Google\AdsApi\AdWords\v201708\cm\AdGroupOperation;
-use Google\AdsApi\AdWords\v201708\cm\AdGroupService;
-use Google\AdsApi\AdWords\v201708\cm\Operand;
-use Google\AdsApi\AdWords\v201708\cm\Operator;
-use Google\AdsApi\AdWords\v201708\cm\Predicate;
-use Google\AdsApi\AdWords\v201708\cm\PredicateOperator;
-use Google\AdsApi\AdWords\v201708\cm\Selector;
+use Google\AdsApi\AdWords\v201802\cm\AdGroup;
+use Google\AdsApi\AdWords\v201802\cm\AdGroupOperation;
+use Google\AdsApi\AdWords\v201802\cm\AdGroupService;
+use Google\AdsApi\AdWords\v201802\cm\Operand;
+use Google\AdsApi\AdWords\v201802\cm\Operator;
+use Google\AdsApi\AdWords\v201802\cm\Predicate;
+use Google\AdsApi\AdWords\v201802\cm\PredicateOperator;
+use Google\AdsApi\AdWords\v201802\cm\Selector;
 use Psr\Log\LoggerInterface;
 use sitkoru\contextcache\common\ICacheProvider;
 use sitkoru\contextcache\common\IEntitiesProvider;
@@ -38,7 +38,6 @@ class AdWordsAdGroupsProvider extends AdWordsEntitiesProvider implements IEntiti
         'ContentBidCriterionTypeGroup',
         'CpcBid',
         'CpmBid',
-        'EnhancedCpcEnabled',
         'Id',
         'Labels',
         'Name',
@@ -47,7 +46,6 @@ class AdWordsAdGroupsProvider extends AdWordsEntitiesProvider implements IEntiti
         'TargetCpa',
         'TargetCpaBid',
         'TargetCpaBidSource',
-        'TargetSpendEnhancedCpcEnabled',
         'TrackingUrlTemplate',
         'UrlCustomParameters'
     ];
@@ -112,7 +110,7 @@ class AdWordsAdGroupsProvider extends AdWordsEntitiesProvider implements IEntiti
     /**
      * @param array $campaignIds
      * @return AdGroup[]
-     * @throws \Google\AdsApi\AdWords\v201708\cm\ApiException
+     * @throws \Google\AdsApi\AdWords\v201802\cm\ApiException
      */
     public function getByCampaignIds(array $campaignIds): array
     {

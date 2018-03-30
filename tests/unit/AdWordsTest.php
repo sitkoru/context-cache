@@ -4,10 +4,10 @@ declare(strict_types=1);
 namespace sitkoru\contextcache\tests\unit;
 
 
-use Google\AdsApi\AdWords\v201708\cm\AdGroup;
-use Google\AdsApi\AdWords\v201708\cm\AdGroupAd;
-use Google\AdsApi\AdWords\v201708\cm\AdGroupCriterion;
-use Google\AdsApi\AdWords\v201708\cm\Campaign;
+use Google\AdsApi\AdWords\v201802\cm\AdGroup;
+use Google\AdsApi\AdWords\v201802\cm\AdGroupAd;
+use Google\AdsApi\AdWords\v201802\cm\AdGroupCriterion;
+use Google\AdsApi\AdWords\v201802\cm\Campaign;
 use Monolog\Handler\ErrorLogHandler;
 use Monolog\Logger;
 use PHPUnit\Framework\TestCase;

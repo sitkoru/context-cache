@@ -4,17 +4,17 @@ namespace sitkoru\contextcache\adwords;
 
 
 use Google\AdsApi\AdWords\AdWordsSession;
-use Google\AdsApi\AdWords\v201708\cm\AdGroupAd;
-use Google\AdsApi\AdWords\v201708\cm\AdGroupAdOperation;
-use Google\AdsApi\AdWords\v201708\cm\AdGroupAdService;
-use Google\AdsApi\AdWords\v201708\cm\AdGroupAdStatus;
-use Google\AdsApi\AdWords\v201708\cm\Operand;
-use Google\AdsApi\AdWords\v201708\cm\Operator;
-use Google\AdsApi\AdWords\v201708\cm\Predicate;
-use Google\AdsApi\AdWords\v201708\cm\PredicateOperator;
-use Google\AdsApi\AdWords\v201708\cm\Selector;
-use Google\AdsApi\AdWords\v201708\cm\TempAdUnionId;
-use Google\AdsApi\AdWords\v201708\cm\TemplateAd;
+use Google\AdsApi\AdWords\v201802\cm\AdGroupAd;
+use Google\AdsApi\AdWords\v201802\cm\AdGroupAdOperation;
+use Google\AdsApi\AdWords\v201802\cm\AdGroupAdService;
+use Google\AdsApi\AdWords\v201802\cm\AdGroupAdStatus;
+use Google\AdsApi\AdWords\v201802\cm\Operand;
+use Google\AdsApi\AdWords\v201802\cm\Operator;
+use Google\AdsApi\AdWords\v201802\cm\Predicate;
+use Google\AdsApi\AdWords\v201802\cm\PredicateOperator;
+use Google\AdsApi\AdWords\v201802\cm\Selector;
+use Google\AdsApi\AdWords\v201802\cm\TempAdUnionId;
+use Google\AdsApi\AdWords\v201802\cm\TemplateAd;
 use Psr\Log\LoggerInterface;
 use sitkoru\contextcache\common\ICacheProvider;
 use sitkoru\contextcache\common\IEntitiesProvider;
@@ -123,7 +123,7 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
     /**
      * @param array $ids
      * @return AdGroupAd[]
-     * @throws \Google\AdsApi\AdWords\v201708\cm\ApiException
+     * @throws \Google\AdsApi\AdWords\v201802\cm\ApiException
      */
     public function getAll(array $ids): array
     {
@@ -196,7 +196,7 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
     /**
      * @param array $adGroupIds
      * @return AdGroupAd[]
-     * @throws \Google\AdsApi\AdWords\v201708\cm\ApiException
+     * @throws \Google\AdsApi\AdWords\v201802\cm\ApiException
      */
     public function getByAdGroupIds(array $adGroupIds): array
     {

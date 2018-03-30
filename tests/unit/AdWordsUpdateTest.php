@@ -3,8 +3,8 @@
 namespace sitkoru\contextcache\tests\unit;
 
 
-use Google\AdsApi\AdWords\v201708\cm\ExpandedTextAd;
-use Google\AdsApi\AdWords\v201708\cm\Keyword;
+use Google\AdsApi\AdWords\v201802\cm\ExpandedTextAd;
+use Google\AdsApi\AdWords\v201802\cm\Keyword;
 use Monolog\Handler\ErrorLogHandler;
 use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
@@ -33,7 +33,7 @@ class AdWordsUpdateTest extends TestCase
         $oldTitle = $campaign->getName();
         $campaign->setName('Updated campaign title');
         $result = $this->provider->campaigns->update([$campaign]);
-        $this->assertTrue($result->success);
+        $this->assertTrue($result->success, json_encode($result->errors));
 
         $updCampaign = $this->provider->campaigns->getOne(GAUpdateCampaignId);
         $this->assertEquals('Updated campaign title', $updCampaign->getName());

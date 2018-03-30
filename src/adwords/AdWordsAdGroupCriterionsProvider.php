@@ -4,16 +4,16 @@ namespace sitkoru\contextcache\adwords;
 
 
 use Google\AdsApi\AdWords\AdWordsSession;
-use Google\AdsApi\AdWords\v201708\cm\AdGroupCriterion;
-use Google\AdsApi\AdWords\v201708\cm\AdGroupCriterionOperation;
-use Google\AdsApi\AdWords\v201708\cm\AdGroupCriterionService;
-use Google\AdsApi\AdWords\v201708\cm\BiddableAdGroupCriterion;
-use Google\AdsApi\AdWords\v201708\cm\Operand;
-use Google\AdsApi\AdWords\v201708\cm\Operator;
-use Google\AdsApi\AdWords\v201708\cm\Predicate;
-use Google\AdsApi\AdWords\v201708\cm\PredicateOperator;
-use Google\AdsApi\AdWords\v201708\cm\Selector;
-use Google\AdsApi\AdWords\v201708\cm\UserStatus;
+use Google\AdsApi\AdWords\v201802\cm\AdGroupCriterion;
+use Google\AdsApi\AdWords\v201802\cm\AdGroupCriterionOperation;
+use Google\AdsApi\AdWords\v201802\cm\AdGroupCriterionService;
+use Google\AdsApi\AdWords\v201802\cm\BiddableAdGroupCriterion;
+use Google\AdsApi\AdWords\v201802\cm\Operand;
+use Google\AdsApi\AdWords\v201802\cm\Operator;
+use Google\AdsApi\AdWords\v201802\cm\Predicate;
+use Google\AdsApi\AdWords\v201802\cm\PredicateOperator;
+use Google\AdsApi\AdWords\v201802\cm\Selector;
+use Google\AdsApi\AdWords\v201802\cm\UserStatus;
 use Psr\Log\LoggerInterface;
 use sitkoru\contextcache\common\ICacheProvider;
 use sitkoru\contextcache\common\IEntitiesProvider;
@@ -56,7 +56,6 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
         'DestinationUrl',
         'DisapprovalReasons',
         'DisplayName',
-        'EnhancedCpcEnabled',
         'FinalAppUrls',
         'FinalMobileUrls',
         'FinalUrls',
@@ -77,7 +76,6 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
         'QualityScore',
         'Status',
         'SystemServingStatus',
-        'TargetSpendEnhancedCpcEnabled',
         'TopOfPageCpc',
         'TrackingUrlTemplate',
         'UrlCustomParameters',
@@ -111,7 +109,7 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
     /**
      * @param array $ids
      * @return AdGroupCriterion[]
-     * @throws \Google\AdsApi\AdWords\v201708\cm\ApiException
+     * @throws \Google\AdsApi\AdWords\v201802\cm\ApiException
      */
     public function getAll(array $ids): array
     {
@@ -159,7 +157,7 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
     /**
      * @param array $adGroupIds
      * @return AdGroupCriterion[]
-     * @throws \Google\AdsApi\AdWords\v201708\cm\ApiException
+     * @throws \Google\AdsApi\AdWords\v201802\cm\ApiException
      */
     public function getByAdGroupIds(array $adGroupIds): array
     {
@@ -194,7 +192,7 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
     /**
      * @param array $campaignIds
      * @return AdGroupCriterion[]
-     * @throws \Google\AdsApi\AdWords\v201708\cm\ApiException
+     * @throws \Google\AdsApi\AdWords\v201802\cm\ApiException
      */
     public function getByCampaignIds(array $campaignIds): array
     {

@@ -4,14 +4,14 @@ namespace sitkoru\contextcache\adwords;
 
 
 use Google\AdsApi\AdWords\AdWordsSession;
-use Google\AdsApi\AdWords\v201708\cm\Campaign;
-use Google\AdsApi\AdWords\v201708\cm\CampaignOperation;
-use Google\AdsApi\AdWords\v201708\cm\CampaignService;
-use Google\AdsApi\AdWords\v201708\cm\Operand;
-use Google\AdsApi\AdWords\v201708\cm\Operator;
-use Google\AdsApi\AdWords\v201708\cm\Predicate;
-use Google\AdsApi\AdWords\v201708\cm\PredicateOperator;
-use Google\AdsApi\AdWords\v201708\cm\Selector;
+use Google\AdsApi\AdWords\v201802\cm\Campaign;
+use Google\AdsApi\AdWords\v201802\cm\CampaignOperation;
+use Google\AdsApi\AdWords\v201802\cm\CampaignService;
+use Google\AdsApi\AdWords\v201802\cm\Operand;
+use Google\AdsApi\AdWords\v201802\cm\Operator;
+use Google\AdsApi\AdWords\v201802\cm\Predicate;
+use Google\AdsApi\AdWords\v201802\cm\PredicateOperator;
+use Google\AdsApi\AdWords\v201802\cm\Selector;
 use Psr\Log\LoggerInterface;
 use sitkoru\contextcache\common\ICacheProvider;
 use sitkoru\contextcache\common\IEntitiesProvider;
@@ -25,7 +25,6 @@ class AdWordsCampaignsProvider extends AdWordsEntitiesProvider implements IEntit
     private $campaignService;
 
     private static $fields = [
-        'AdServingOptimizationStatus',
         'AdvertisingChannelSubType',
         'AdvertisingChannelType',
         'Amount',
@@ -43,7 +42,6 @@ class AdWordsCampaignsProvider extends AdWordsEntitiesProvider implements IEntit
         'DeliveryMethod',
         'Eligible',
         'EndDate',
-        'EnhancedCpcEnabled',
         'FrequencyCapMaxImpressions',
         'Id',
         'IsBudgetExplicitlyShared',
@@ -68,7 +66,6 @@ class AdWordsCampaignsProvider extends AdWordsEntitiesProvider implements IEntit
         'TargetRoasBidFloor',
         'TargetSearchNetwork',
         'TargetSpendBidCeiling',
-        'TargetSpendEnhancedCpcEnabled',
         'TargetSpendSpendTarget',
         'TimeUnit',
         'TrackingUrlTemplate',
@@ -93,7 +90,7 @@ class AdWordsCampaignsProvider extends AdWordsEntitiesProvider implements IEntit
     /**
      * @param array $ids
      * @return Campaign[]
-     * @throws \Google\AdsApi\AdWords\v201708\cm\ApiException
+     * @throws \Google\AdsApi\AdWords\v201802\cm\ApiException
      */
     public function getAll(array $ids): array
     {
@@ -123,7 +120,7 @@ class AdWordsCampaignsProvider extends AdWordsEntitiesProvider implements IEntit
     /**
      * @param $id
      * @return Campaign
-     * @throws \Google\AdsApi\AdWords\v201708\cm\ApiException
+     * @throws \Google\AdsApi\AdWords\v201802\cm\ApiException
      */
     public function getOne($id): ?Campaign
     {
@@ -136,7 +133,7 @@ class AdWordsCampaignsProvider extends AdWordsEntitiesProvider implements IEntit
 
     /**
      * @return array
-     * @throws \Google\AdsApi\AdWords\v201708\cm\ApiException
+     * @throws \Google\AdsApi\AdWords\v201802\cm\ApiException
      */
     public function getForService(): array
     {
@@ -154,7 +151,7 @@ class AdWordsCampaignsProvider extends AdWordsEntitiesProvider implements IEntit
      * @param Campaign[] $entities
      * @return UpdateResult
      * @throws \ErrorException
-     * @throws \Google\AdsApi\AdWords\v201708\cm\ApiException
+     * @throws \Google\AdsApi\AdWords\v201802\cm\ApiException
      * @throws \UnexpectedValueException
      */
     public function update(array $entities): UpdateResult
