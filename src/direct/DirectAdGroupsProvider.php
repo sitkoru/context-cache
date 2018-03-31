@@ -158,6 +158,13 @@ class DirectAdGroupsProvider extends DirectEntitiesProvider implements IEntities
 
     protected function getChangesCount(?CheckResponseModified $modified, ?CheckResponseIds $notFound): int
     {
-        return count((array)$modified->AdGroupIds) + count((array)$notFound->AdGroupIds);
+        $count = 0;
+        if ($modified && is_array($modified->AdGroupIds)) {
+            $count += \count($modified->AdGroupIds);
+        }
+        if ($notFound && is_array($notFound->AdGroupIds)) {
+            $count += \count($notFound->AdGroupIds);
+        }
+        return $count;
     }
 }

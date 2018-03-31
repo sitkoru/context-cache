@@ -135,6 +135,13 @@ class DirectCampaignsProvider extends DirectEntitiesProvider implements IEntitie
 
     protected function getChangesCount(?CheckResponseModified $modified, ?CheckResponseIds $notFound): int
     {
-        return count((array)$modified->CampaignIds) + count((array)$notFound->CampaignIds);
+        $count = 0;
+        if ($modified && is_array($modified->CampaignIds)) {
+            $count += \count($modified->CampaignIds);
+        }
+        if ($notFound && is_array($notFound->CampaignIds)) {
+            $count += \count($notFound->CampaignIds);
+        }
+        return $count;
     }
 }
