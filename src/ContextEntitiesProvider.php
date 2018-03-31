@@ -43,7 +43,7 @@ class ContextEntitiesProvider
         ];
         foreach ($collections as $service => $serviceCollections) {
             foreach ($serviceCollections as $serviceCollection) {
-                $this->cache->collection($service, $serviceCollection)->clear();
+                $this->cache->collection($service, $serviceCollection, '')->clear();
             }
         }
     }
