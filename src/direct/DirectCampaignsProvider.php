@@ -133,7 +133,7 @@ class DirectCampaignsProvider extends DirectEntitiesProvider implements IEntitie
         return $this->directApiService->getChangesService()->check([], [], $ids, [FieldNamesEnum::CAMPAIGN_IDS], $date);
     }
 
-    protected function getChangesCount(CheckResponseModified $modified, CheckResponseIds $notFound): int
+    protected function getChangesCount(?CheckResponseModified $modified, ?CheckResponseIds $notFound): int
     {
         return count((array)$modified->CampaignIds) + count((array)$notFound->CampaignIds);
     }

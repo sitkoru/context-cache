@@ -174,7 +174,7 @@ class DirectKeywordsProvider extends DirectEntitiesProvider implements IEntities
         return $this->directApiService->getChangesService()->check([], [], $ids, [FieldNamesEnum::AD_IDS], $date);
     }
 
-    protected function getChangesCount(CheckResponseModified $modified, CheckResponseIds $notFound): int
+    protected function getChangesCount(?CheckResponseModified $modified, ?CheckResponseIds $notFound): int
     {
         return count((array)$modified->AdGroupIds) + count((array)$notFound->AdGroupIds);
     }

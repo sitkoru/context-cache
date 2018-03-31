@@ -84,7 +84,7 @@ class DirectAudienceTargetsProvider extends DirectEntitiesProvider implements IE
         return new CheckResponse();
     }
 
-    protected function getChangesCount(CheckResponseModified $modified, CheckResponseIds $notFound): int
+    protected function getChangesCount(?CheckResponseModified $modified, ?CheckResponseIds $notFound): int
     {
         return 0;
     }

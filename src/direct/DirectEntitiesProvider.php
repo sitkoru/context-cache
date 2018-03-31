@@ -50,5 +50,5 @@ abstract class DirectEntitiesProvider extends EntitiesProvider
 
     protected abstract function getChanges(array $ids, string $date): CheckResponse;
 
-    protected abstract function getChangesCount(CheckResponseModified $modified, CheckResponseIds $notFound): int;
+    protected abstract function getChangesCount(?CheckResponseModified $modified, ?CheckResponseIds $notFound): int;
 }
