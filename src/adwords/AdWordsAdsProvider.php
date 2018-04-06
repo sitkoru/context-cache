@@ -285,7 +285,18 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
         $this->logger->info('Delete succeeded ads: ' . count($deleteOperations));
         foreach (array_chunk($deleteOperations, self::MAX_OPERATIONS_SIZE) as $i => $deleteChunk) {
             $this->logger->info('Delete chunk #' . $i . '. Size: ' . count($deleteChunk));
-            $jobResults = $this->runMutateJob($deleteChunk);
+            $try = 0;
+            $maxTry = 5;
+            while (true) {
+                try {
+                    $jobResults = $this->runMutateJob($deleteChunk);
+                } catch (AdWordsBatchJobCancelledException $exception) {
+                    $try++;
+                    if ($try === $maxTry) {
+                        throw $exception;
+                    }
+                }
+            }
             $this->processJobResult($result, $jobResults);
         }
 
