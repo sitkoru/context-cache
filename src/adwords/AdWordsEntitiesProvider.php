@@ -61,6 +61,7 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
      * @return bool|MutateResult[]
      * @throws \Google\AdsApi\AdWords\v201802\cm\ApiException
      * @throws \UnexpectedValueException
+     * @throws AdWordsBatchJobCancelledException
      */
     public function runMutateJob($operations)
     {
@@ -124,6 +125,9 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
             throw new UnexpectedValueException(
                 sprintf('Job is still pending state after polling %d times.',
                     self::MAX_POLL_ATTEMPTS));
+        }
+        if ($batchJob->getStatus() === BatchJobStatus::CANCELED) {
+            throw new AdWordsBatchJobCancelledException('Task was cancelled');
         }
         if ($batchJob->getProcessingErrors() !== null) {
             $i = 0;
