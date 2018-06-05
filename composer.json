@@ -11,7 +11,7 @@
   ],
   "minimum-stability": "stable",
   "require": {
-    "sitkoru/yandex-direct-api": "^2018.5.2",
+    "sitkoru/yandex-direct-api": "^2018.6.1",
     "googleads/googleads-php-lib": "^34.0.0",
     "mongodb/mongodb": "^1.2.0",
     "psr/log": "^1.0",
