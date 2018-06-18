@@ -232,51 +232,23 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
     public function update(array $entities): UpdateResult
     {
         $result = new UpdateResult();
-        $deleteOperations = [];
-        $addOperations = [];
+        $updateOperations = [];
         $this->logger->info('Build operations');
         foreach ($entities as $entity) {
-            $newCriterion = clone $entity;
-            $criterion = clone $entity->getCriterion();
-            if ($newCriterion instanceof BiddableAdGroupCriterion && $newCriterion->getBiddingStrategyConfiguration() !== null) {
-                $newCriterion->setBiddingStrategyConfiguration(null);
-            }
-            $entity->setUserStatus(UserStatus::REMOVED);
-            $deleteOperation = new AdGroupCriterionOperation();
-            $deleteOperation->setOperand($entity);
-            $deleteOperation->setOperator(Operator::REMOVE);
-            $criterion->setId(null);
-            $newCriterion->setCriterion($criterion);
-            $addOperation = new AdGroupCriterionOperation();
-            $addOperation->setOperand($newCriterion);
-            $addOperation->setOperator(Operator::ADD);
-            $deleteOperations[$entity->getCriterion()->getId()] = $deleteOperation;
-            $addOperations[] = $addOperation;
+            $updateOperation = new AdGroupCriterionOperation();
+            $updateOperation->setOperand($entity);
+            $updateOperation->setOperator(Operator::SET);
+            $updateOperations[] = $updateOperation;
         }
-        $this->logger->info('Delete operations: ' . count($deleteOperations));
-        $this->logger->info('Update operations: ' . count($addOperations));
+        $this->logger->info('Update operations: ' . \count($updateOperations));
 
 
-        foreach (array_chunk($addOperations, self::MAX_OPERATIONS_SIZE) as $i => $addChunk) {
+        foreach (array_chunk($updateOperations, self::MAX_OPERATIONS_SIZE) as $i => $updateChunk) {
             /**
-             * @var AdGroupCriterionOperation[] $addChunk
+             * @var AdGroupCriterionOperation[] $updateChunk
              */
-            $this->logger->info('Add chunk #' . $i . '. Size: ' . count($addChunk));
-            $jobResults = $this->runMutateJob($addChunk);
-            $this->processJobResult($result, $jobResults);
-            if (!$result->success) {
-                foreach ($result->errors as $criterionOperationId => $errors) {
-                    $criterionOperation = $addChunk[$criterionOperationId];
-                    $criterionId = $criterionOperation->getOperand()->getCriterion()->getId();
-                    unset($deleteOperations[$criterionId]);
-                }
-            }
-        }
-
-        $this->logger->info('Delete succeeded criterions: ' . count($deleteOperations));
-        foreach (array_chunk($deleteOperations, self::MAX_OPERATIONS_SIZE) as $i => $deleteChunk) {
-            $this->logger->info('Delete chunk #' . $i . '. Size: ' . count($deleteChunk));
-            $jobResults = $this->runMutateJob($deleteChunk);
+            $this->logger->info('Update chunk #' . $i . '. Size: ' . \count($updateChunk));
+            $jobResults = $this->runMutateJob($updateChunk);
             $this->processJobResult($result, $jobResults);
         }
 
