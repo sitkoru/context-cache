@@ -199,7 +199,7 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
         $notFound = $campaignIds;
 
         $indexBy = function (AdGroupCriterion $criterion) {
-            return $criterion->getBaseCampaignId() . $criterion->getCriterion()->getId();
+            return $criterion->getBaseCampaignId() . $criterion->getAdGroupId() . $criterion->getCriterion()->getId();
         };
         /**
          * @var AdGroupCriterion[] $criterions
