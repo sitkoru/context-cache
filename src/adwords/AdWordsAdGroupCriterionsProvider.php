@@ -7,13 +7,12 @@ use Google\AdsApi\AdWords\AdWordsSession;
 use Google\AdsApi\AdWords\v201802\cm\AdGroupCriterion;
 use Google\AdsApi\AdWords\v201802\cm\AdGroupCriterionOperation;
 use Google\AdsApi\AdWords\v201802\cm\AdGroupCriterionService;
-use Google\AdsApi\AdWords\v201802\cm\BiddableAdGroupCriterion;
 use Google\AdsApi\AdWords\v201802\cm\Operand;
 use Google\AdsApi\AdWords\v201802\cm\Operator;
+use Google\AdsApi\AdWords\v201802\cm\Paging;
 use Google\AdsApi\AdWords\v201802\cm\Predicate;
 use Google\AdsApi\AdWords\v201802\cm\PredicateOperator;
 use Google\AdsApi\AdWords\v201802\cm\Selector;
-use Google\AdsApi\AdWords\v201802\cm\UserStatus;
 use Psr\Log\LoggerInterface;
 use sitkoru\contextcache\common\ICacheProvider;
 use sitkoru\contextcache\common\IEntitiesProvider;
@@ -214,11 +213,21 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
             $selector->setFields(self::$fields);
             $predicates[] = new Predicate('CampaignId', PredicateOperator::IN, $notFound);
             $selector->setPredicates($predicates);
-            $fromService = (array)$this->adGroupCriterionService->get($selector)->getEntries();
-            foreach ($fromService as $criterionItem) {
-                $index = $indexBy($criterionItem);
-                $criterions[$index] = $criterionItem;
-            }
+            $perPageSize = 10000;
+            $selector->setPaging(new Paging(0, $perPageSize));
+            $page = 0;
+            do {
+                $page++;
+                $pageResult = $this->adGroupCriterionService->get($selector);
+
+                $fromService = (array)$pageResult->getEntries();
+                foreach ($fromService as $criterionItem) {
+                    $index = $indexBy($criterionItem);
+                    $criterions[$index] = $criterionItem;
+                }
+                $this->logger->info('Getting criterions. Page ' . $page . '. Total: ' . $pageResult->getTotalNumEntries() . ' Already obtained: ' . \count($criterions));
+                $selector->setPaging(new Paging($selector->getPaging()->getStartIndex() + $perPageSize, $perPageSize));
+            } while ($pageResult->getTotalNumEntries() >= $page * $perPageSize);
             $this->addToCache($fromService);
         }
         return $criterions;
