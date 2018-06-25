@@ -18,6 +18,8 @@ abstract class EntitiesProvider
 
     private $cacheCollection;
 
+    private $isCacheEnabled;
+
     protected $keyField;
     /**
      * @var LoggerInterface
@@ -32,19 +34,34 @@ abstract class EntitiesProvider
 
     private function getCacheCollection(): ICacheCollection
     {
-        if (!$this->cacheCollection){
-            $this->cacheCollection = $this->cacheProvider->collection($this->serviceKey, $this->collection,$this->keyField);
+        if (!$this->cacheCollection) {
+            $this->cacheCollection = $this->cacheProvider->collection($this->serviceKey, $this->collection, $this->keyField);
         }
         return $this->cacheCollection;
     }
 
     protected function getFromCache(array $ids, string $field, $indexBy = null): array
     {
+        if (!$this->isCacheEnabled) {
+            return [];
+        }
         if ($this->hasChanges($ids)) {
             $this->clearCache();
             return [];
         }
         return $this->getEntitiesFromCache($ids, $field, $indexBy);
+    }
+
+    public function disableCache()
+    {
+        $this->isCacheEnabled = false;
+        return $this;
+    }
+
+    public function enableCache()
+    {
+        $this->isCacheEnabled = true;
+        return $this;
     }
 
     protected function getEntitiesFromCache(array $ids, string $field, $indexBy = null): array
