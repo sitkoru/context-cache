@@ -57,7 +57,8 @@ class AdWordsAdGroupsProvider extends AdWordsEntitiesProvider implements IEntiti
         ICacheProvider $cacheProvider,
         AdWordsSession $adWordsSession,
         LoggerInterface $logger
-    ) {
+    )
+    {
         parent::__construct($cacheProvider, $adWordsSession, $logger);
         $this->collection = 'adGroups';
         $this->adGroupService = $adGroupService;
@@ -65,10 +66,11 @@ class AdWordsAdGroupsProvider extends AdWordsEntitiesProvider implements IEntiti
 
     /**
      * @param array $ids
+     * @param array $predicates
      * @return AdGroup[]
-     * @throws \Exception
+     * @throws \Google\AdsApi\AdWords\v201802\cm\ApiException
      */
-    public function getAll(array $ids): array
+    public function getAll(array $ids, array $predicates = []): array
     {
         $notFound = $ids;
         /**
@@ -109,10 +111,11 @@ class AdWordsAdGroupsProvider extends AdWordsEntitiesProvider implements IEntiti
 
     /**
      * @param array $campaignIds
+     * @param array $predicates
      * @return AdGroup[]
      * @throws \Google\AdsApi\AdWords\v201802\cm\ApiException
      */
-    public function getByCampaignIds(array $campaignIds): array
+    public function getByCampaignIds(array $campaignIds, array $predicates = []): array
     {
         $notFound = $campaignIds;
         /**
@@ -149,8 +152,7 @@ class AdWordsAdGroupsProvider extends AdWordsEntitiesProvider implements IEntiti
         $this->logger->info('Build operations');
         foreach ($entities as $entity) {
             $addOperation = new AdGroupOperation();
-            if($entity->getBiddingStrategyConfiguration()!==null)
-            {
+            if ($entity->getBiddingStrategyConfiguration() !== null) {
                 $entity->setBiddingStrategyConfiguration(null);
             }
             $addOperation->setOperand($entity);

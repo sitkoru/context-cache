@@ -107,10 +107,11 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
 
     /**
      * @param array $ids
+     * @param array $predicates
      * @return AdGroupCriterion[]
      * @throws \Google\AdsApi\AdWords\v201802\cm\ApiException
      */
-    public function getAll(array $ids): array
+    public function getAll(array $ids, array $predicates = []): array
     {
         $notFound = $ids;
 
@@ -155,10 +156,11 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
 
     /**
      * @param array $adGroupIds
+     * @param array $predicates
      * @return AdGroupCriterion[]
      * @throws \Google\AdsApi\AdWords\v201802\cm\ApiException
      */
-    public function getByAdGroupIds(array $adGroupIds): array
+    public function getByAdGroupIds(array $adGroupIds, array $predicates = []): array
     {
         $notFound = $adGroupIds;
 
@@ -190,10 +192,11 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
 
     /**
      * @param array $campaignIds
+     * @param array $predicates
      * @return AdGroupCriterion[]
      * @throws \Google\AdsApi\AdWords\v201802\cm\ApiException
      */
-    public function getByCampaignIds(array $campaignIds): array
+    public function getByCampaignIds(array $campaignIds, array $predicates = []): array
     {
         $notFound = $campaignIds;
 
