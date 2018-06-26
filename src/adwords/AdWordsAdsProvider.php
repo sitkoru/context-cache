@@ -238,35 +238,68 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
     public function update(array $entities): UpdateResult
     {
         $result = new UpdateResult();
+        $deleteOperations = [];
         /**
-         * @var AdGroupAdOperation[] $updateOperations
+         * @var AdGroupAdOperation[] $addOperations
          */
-        $updateOperations = [];
+        $addOperations = [];
         $this->logger->info('Build operations');
         foreach ($entities as $entity) {
-            $ad = $entity->getAd();
-            if ($ad instanceof TemplateAd) {
-                $ad->setAdUnionId(new TempAdUnionId());
+            $newAd = clone $entity->getAd();
+            $entity->setStatus(AdGroupAdStatus::DISABLED);
+            $deleteOperation = new AdGroupAdOperation();
+            $deleteOperation->setOperand($entity);
+            $deleteOperation->setOperator(Operator::REMOVE);
+            $newAd->setId(null);
+            if ($newAd instanceof TemplateAd) {
+                $newAd->setAdUnionId(new TempAdUnionId());
                 break;
             }
             $adGroupAd = new AdGroupAd();
             $adGroupAd->setAdGroupId($entity->getAdGroupId());
             $adGroupAd->setStatus(AdGroupAdStatus::ENABLED);
-            $adGroupAd->setAd($ad);
-            $updateOperation = new AdGroupAdOperation();
-            $updateOperation->setOperand($adGroupAd);
-            $updateOperation->setOperator(Operator::SET);
-            $updateOperations[] = $updateOperation;
+            $adGroupAd->setAd($newAd);
+            $addOperation = new AdGroupAdOperation();
+            $addOperation->setOperand($adGroupAd);
+            $addOperation->setOperator(Operator::ADD);
+            $deleteOperations[$entity->getAd()->getId()] = $deleteOperation;
+            $addOperations[] = $addOperation;
         }
 
-        $this->logger->info('Update operations: ' . \count($updateOperations));
+        $this->logger->info('Add operations: ' . count($addOperations));
 
-        foreach (array_chunk($updateOperations, self::MAX_OPERATIONS_SIZE) as $i => $updateChunk) {
+
+        foreach (array_chunk($addOperations, self::MAX_OPERATIONS_SIZE) as $i => $addChunk) {
             /**
-             * @var AdGroupAdOperation[] $updateChunk
+             * @var AdGroupAdOperation[] $addChunk
              */
-            $this->logger->info('Update chunk #' . $i . '. Size: ' . \count($updateChunk));
-            $jobResults = $this->runMutateJob($updateChunk);
+            $this->logger->info('Add chunk #' . $i . '. Size: ' . count($addChunk));
+            $jobResults = $this->runMutateJob($addChunk);
+            $this->processJobResult($result, $jobResults);
+            if (!$result->success) {
+                foreach ($result->errors as $adOperationId => $errors) {
+                    $adOperation = $addChunk[$adOperationId];
+                    $adId = $adOperation->getOperand()->getAd()->getId();
+                    unset($deleteOperations[$adId]);
+                }
+            }
+        }
+
+        $this->logger->info('Delete succeeded ads: ' . count($deleteOperations));
+        foreach (array_chunk($deleteOperations, self::MAX_OPERATIONS_SIZE) as $i => $deleteChunk) {
+            $this->logger->info('Delete chunk #' . $i . '. Size: ' . count($deleteChunk));
+            $try = 0;
+            $maxTry = 5;
+            while (true) {
+                try {
+                    $jobResults = $this->runMutateJob($deleteChunk);
+                } catch (AdWordsBatchJobCancelledException $exception) {
+                    $try++;
+                    if ($try === $maxTry) {
+                        throw $exception;
+                    }
+                }
+            }
             $this->processJobResult($result, $jobResults);
         }
 
