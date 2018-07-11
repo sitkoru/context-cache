@@ -4,9 +4,10 @@ namespace sitkoru\contextcache\common\cache;
 
 
 use MongoDB\Client;
-use ReflectionClass;
 use sitkoru\contextcache\common\ICacheCollection;
 use sitkoru\contextcache\helpers\ArrayHelper;
+use Symfony\Component\Serializer\Normalizer\ArrayDenormalizer;
+use Symfony\Component\Serializer\Serializer;
 
 class MongoDbCacheCollection implements ICacheCollection
 {
@@ -28,6 +29,21 @@ class MongoDbCacheCollection implements ICacheCollection
         $this->client = $client;
         $this->keyField = $keyField;
         $this->collection = $client->selectCollection($service, $collection);
+    }
+
+    private static $serializer;
+
+    /**
+     * @return Serializer
+     */
+    private static function getSerializer()
+    {
+
+        if (!self::$serializer) {
+            //self::$serializer = new SkippingEmptyValuesNormalizer(null, null);
+            self::$serializer = new Serializer([new AdWordsNormalizer(), new ArrayDenormalizer()]);
+        }
+        return self::$serializer;
     }
 
     /**
@@ -63,13 +79,14 @@ class MongoDbCacheCollection implements ICacheCollection
      */
     public function set(array $entities)
     {
-        $entities = $this->serializeEntities($entities);
-        $operations = [];
-        foreach ($entities as $entity) {
-            $operations[] = ['updateOne' => [$this->prepareOperationFilter($entity), ['$set' => $entity], ['upsert' => true]]];
+        foreach (array_chunk($entities, 500) as $chunk) {
+            $operations = [];
+            $serializedChunk = $this->serializeEntities($chunk);
+            foreach ($serializedChunk as $entity) {
+                $operations[] = ['updateOne' => [$this->prepareOperationFilter($entity), ['$set' => $entity], ['upsert' => true]]];
+            }
+            $this->collection->bulkWrite($operations);
         }
-
-        $this->collection->bulkWrite($operations);
     }
 
     private function prepareOperationFilter(array $entity): array
@@ -109,8 +126,7 @@ class MongoDbCacheCollection implements ICacheCollection
     {
         $preparedEntities = [];
         foreach ($entities as $entity) {
-            $preparedEntity = $this->extractEntityProperties($entity);
-            $preparedEntity['serialized'] = serialize($entity);
+            $preparedEntity = self::getSerializer()->normalize($entity, 'json');
             $preparedEntities[] = $preparedEntity;
         }
         return $preparedEntities;
@@ -120,8 +136,7 @@ class MongoDbCacheCollection implements ICacheCollection
     {
         $entities = [];
         foreach ($serializedEntities as $entry) {
-            $object = json_decode(json_encode($entry), true);
-            $entity = unserialize($object['serialized']);
+            $entity = self::getSerializer()->denormalize($entry, $entry->_class, 'json');
             $entities[] = $entity;
         }
         return $entities;
@@ -130,42 +145,5 @@ class MongoDbCacheCollection implements ICacheCollection
     public function clear()
     {
         $this->collection->deleteMany([]);
-    }
-
-    private function extractEntityProperties($entity)
-    {
-        $public = [];
-
-        $reflection = new ReflectionClass(get_class($entity));
-
-        foreach ($reflection->getProperties() as $property) {
-            $property->setAccessible(true);
-
-            $value = $property->getValue($entity);
-            $name = $property->getName();
-            if ($value !== null) {
-                if (is_array($value)) {
-                    $public[$name] = [];
-
-                    /** @var array $value */
-                    foreach ($value as $item) {
-                        if (is_object($item)) {
-                            $itemArray = $this->extractEntityProperties($item);
-                            $public[$name][] = $itemArray;
-                        } else {
-                            $public[$name][] = $item;
-                        }
-                    }
-                } else {
-                    if (is_object($value)) {
-                        $public[$name] = $this->extractEntityProperties($value);
-                    } else {
-                        $public[$name] = $value;
-                    }
-                }
-            }
-        }
-
-        return $public;
     }
 }
