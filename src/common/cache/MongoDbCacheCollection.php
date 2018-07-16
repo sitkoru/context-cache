@@ -40,8 +40,7 @@ class MongoDbCacheCollection implements ICacheCollection
     {
 
         if (!self::$serializer) {
-            //self::$serializer = new SkippingEmptyValuesNormalizer(null, null);
-            self::$serializer = new Serializer([new AdWordsNormalizer(), new ArrayDenormalizer()]);
+            self::$serializer = new Serializer([new ContextNormalizer(), new ArrayDenormalizer()]);
         }
         return self::$serializer;
     }
