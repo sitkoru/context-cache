@@ -66,7 +66,8 @@ class AdWordsProvider
         ?string $refreshToken = null,
         ICacheProvider $cacheProvider,
         LoggerInterface $logger
-    ) {
+    )
+    {
 
         $this->customerId = $customerId;
         $this->refreshToken = $refreshToken;
@@ -132,7 +133,11 @@ class AdWordsProvider
             $oauthBuilder->withRefreshToken($this->refreshToken);
         }
 
-        return $oauthBuilder
+        $errLevel = error_reporting();
+        error_reporting(E_ERROR);
+        $loader = $oauthBuilder
             ->build();
+        error_reporting($errLevel);
+        return $loader;
     }
 }
