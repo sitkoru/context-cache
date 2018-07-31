@@ -54,7 +54,7 @@ class DirectProvider
         LoggerInterface $logger,
         ?IQueryLogger $queryLogger = null
     ) {
-        $yandexService = new DirectApiService($accessToken, $clientLogin, $queryLogger);
+        $yandexService = new DirectApiService($accessToken, $clientLogin, $queryLogger, $logger);
 
         $this->adGroups = new DirectAdGroupsProvider($yandexService, $cacheProvider, $logger);
         $this->ads = new DirectAdsProvider($yandexService, $cacheProvider, $logger);
