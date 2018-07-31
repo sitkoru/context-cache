@@ -6,6 +6,8 @@
 
 Реализовано кэширование сущностей в MongoDB.
 
+[![Latest Stable Version](https://poser.pugx.org/sitkoru/context-cache/v/stable)](https://packagist.org/packages/sitkoru/context-cache) [![Total Downloads](https://poser.pugx.org/sitkoru/context-cache/downloads)](https://packagist.org/packages/sitkoru/context-cache) [![License](https://poser.pugx.org/sitkoru/context-cache/license)](https://packagist.org/packages/sitkoru/context-cache)
+
 ## Установка
 
 ```bash
