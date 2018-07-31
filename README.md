@@ -4,7 +4,7 @@
 
 Используются библиотеки [sitkoru/yandex-direct-api](https://github.com/sitkoru/yandex-direct-api) и [googleads/googleads-php-lib](https://github.com/googleads/googleads-php-lib).
 
-Реализование кэширование сущностей в MongoDB.
+Реализовано кэширование сущностей в MongoDB.
 
 ## Установка
 
