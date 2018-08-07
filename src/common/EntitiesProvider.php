@@ -55,7 +55,13 @@ abstract class EntitiesProvider
         return $this->cacheCollection;
     }
 
-    protected function getFromCache(array $ids, string $field, ?string $indexBy = null): array
+    /**
+     * @param array  $ids
+     * @param string $field
+     * @param mixed  $indexBy
+     * @return array
+     */
+    protected function getFromCache(array $ids, string $field, $indexBy = null): array
     {
         if (!$this->isCacheEnabled) {
             return [];
@@ -79,7 +85,13 @@ abstract class EntitiesProvider
         return $this;
     }
 
-    protected function getEntitiesFromCache(array $ids, string $field, ?string $indexBy = null): array
+    /**
+     * @param array  $ids
+     * @param string $field
+     * @param mixed  $indexBy
+     * @return array
+     */
+    protected function getEntitiesFromCache(array $ids, string $field, $indexBy = null): array
     {
         return $this->getCacheCollection()->get($ids, $field, $indexBy);
     }

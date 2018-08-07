@@ -21,7 +21,12 @@ class ArrayHelper
         return $result;
     }
 
-    public static function index(array $array, string $key): array
+    /**
+     * @param array $array
+     * @param mixed $key
+     * @return array
+     */
+    public static function index(array $array, $key): array
     {
         $result = [];
 

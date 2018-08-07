@@ -45,15 +45,15 @@ class MongoDbCacheCollection implements ICacheCollection
     }
 
     /**
-     * @param string      $field
-     * @param array       $ids
-     * @param string|null $indexBy
+     * @param string $field
+     * @param array  $ids
+     * @param mixed  $indexBy
      * @return array
      * @throws \MongoDB\Exception\UnsupportedException
      * @throws \MongoDB\Exception\InvalidArgumentException
      * @throws \MongoDB\Driver\Exception\RuntimeException
      */
-    public function get(array $ids, string $field, ?string $indexBy = null): array
+    public function get(array $ids, string $field, $indexBy = null): array
     {
         $filter = [
             $field => [
