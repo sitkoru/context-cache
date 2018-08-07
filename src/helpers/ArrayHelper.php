@@ -5,7 +5,13 @@ namespace sitkoru\contextcache\helpers;
 
 class ArrayHelper
 {
-    public static function getColumn(array $array, string $name, bool $keepKeys = true): array
+    /**
+     * @param array $array
+     * @param mixed      $name
+     * @param bool  $keepKeys
+     * @return array
+     */
+    public static function getColumn(array $array, $name, bool $keepKeys = true): array
     {
         $result = [];
         if ($keepKeys) {
