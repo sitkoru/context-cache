@@ -3,6 +3,7 @@
 namespace sitkoru\contextcache\common\cache;
 
 
+use directapi\components\Enum;
 use Symfony\Component\Serializer\Normalizer\GetSetMethodNormalizer;
 
 class ContextNormalizer extends GetSetMethodNormalizer
@@ -24,6 +25,12 @@ class ContextNormalizer extends GetSetMethodNormalizer
     {
         $data = parent::normalize($object, $format, $context);
         $data['_class'] = \get_class($object);
+        if (\is_subclass_of($data['_class'], Enum::class)) {
+            /**
+             * @var Enum $object
+             */
+            $data['value'] = $object->__toString();
+        }
         return array_filter($data, function ($value) {
             /*if (\is_array($value) && empty($value)) {
                 return false;
@@ -63,7 +70,9 @@ class ContextNormalizer extends GetSetMethodNormalizer
             $class = $value->_class;
         }
         if ($class) {
-            if ($isArray) {
+            if (\is_subclass_of($class, Enum::class)) {
+                $value = new $class($value['value']);
+            } elseif ($isArray) {
                 $newValue = [];
                 foreach ($value as $val) {
                     $val = $this->denormalize($val, $class, $format, $context);
