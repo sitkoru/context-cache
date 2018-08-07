@@ -11,7 +11,7 @@ use Google\AdsApi\AdWords\v201802\cm\Operator;
 use Google\AdsApi\AdWords\v201802\cm\Predicate;
 use Google\AdsApi\AdWords\v201802\cm\PredicateOperator;
 use Google\AdsApi\AdWords\v201802\cm\Selector;
-use Psr\Log\LoggerInterface;
+use sitkoru\contextcache\common\ContextEntitiesLogger;
 use sitkoru\contextcache\common\ICacheProvider;
 use sitkoru\contextcache\common\IEntitiesProvider;
 use sitkoru\contextcache\common\models\UpdateResult;
@@ -24,6 +24,9 @@ class AdWordsAdGroupsProvider extends AdWordsEntitiesProvider implements IEntiti
      */
     private $adGroupService;
 
+    /**
+     * @var array
+     */
     private static $fields = [
         'AdGroupType',
         'BaseAdGroupId',
@@ -50,18 +53,17 @@ class AdWordsAdGroupsProvider extends AdWordsEntitiesProvider implements IEntiti
         'UrlCustomParameters'
     ];
 
-    protected $keyField = 'id';
 
     public function __construct(
         AdGroupService $adGroupService,
         ICacheProvider $cacheProvider,
         AdWordsSession $adWordsSession,
-        LoggerInterface $logger
-    )
-    {
+        ContextEntitiesLogger $logger
+    ) {
         parent::__construct($cacheProvider, $adWordsSession, $logger);
         $this->collection = 'adGroups';
         $this->adGroupService = $adGroupService;
+        $this->keyField = 'id';
     }
 
     /**
@@ -96,7 +98,7 @@ class AdWordsAdGroupsProvider extends AdWordsEntitiesProvider implements IEntiti
     }
 
     /**
-     * @param $id
+     * @param int $id
      * @return AdGroup|null
      * @throws \Exception
      */
@@ -159,10 +161,10 @@ class AdWordsAdGroupsProvider extends AdWordsEntitiesProvider implements IEntiti
             $addOperation->setOperator(Operator::SET);
             $addOperations[] = $addOperation;
         }
-        $this->logger->info('Update operations: ' . count($addOperations));
+        $this->logger->info('Update operations: ' . \count($addOperations));
 
         foreach (array_chunk($addOperations, self::MAX_OPERATIONS_SIZE) as $i => $addChunk) {
-            $this->logger->info('Update chunk #' . $i . '. Size: ' . count($addChunk));
+            $this->logger->info('Update chunk #' . $i . '. Size: ' . \count($addChunk));
             $jobResults = $this->runMutateJob($addChunk);
             $this->processJobResult($result, $jobResults);
         }
@@ -171,6 +173,10 @@ class AdWordsAdGroupsProvider extends AdWordsEntitiesProvider implements IEntiti
         return $result;
     }
 
+    /**
+     * @param Operand $operand
+     * @return AdGroup|mixed
+     */
     protected function getOperandEntity(Operand $operand)
     {
         return $operand->getAdGroup();

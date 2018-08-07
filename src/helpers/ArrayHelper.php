@@ -5,7 +5,7 @@ namespace sitkoru\contextcache\helpers;
 
 class ArrayHelper
 {
-    public static function getColumn(array $array, $name, $keepKeys = true): array
+    public static function getColumn(array $array, string $name, bool $keepKeys = true): array
     {
         $result = [];
         if ($keepKeys) {
@@ -21,25 +21,19 @@ class ArrayHelper
         return $result;
     }
 
-    public static function index(array $array, $key): array
+    public static function index(array $array, string $key): array
     {
         $result = [];
 
         foreach ($array as $element) {
             $lastArray = &$result;
 
-            if ($key === null) {
-                if (!empty($groups)) {
-                    $lastArray[] = $element;
+            $value = static::getValue($element, $key);
+            if ($value !== null) {
+                if (\is_float($value)) {
+                    $value = (string)$value;
                 }
-            } else {
-                $value = static::getValue($element, $key);
-                if ($value !== null) {
-                    if (is_float($value)) {
-                        $value = (string)$value;
-                    }
-                    $lastArray[$value] = $element;
-                }
+                $lastArray[$value] = $element;
             }
             unset($lastArray);
         }
@@ -47,13 +41,19 @@ class ArrayHelper
         return $result;
     }
 
+    /**
+     * @param array|object $array
+     * @param mixed        $key
+     * @param mixed        $default
+     * @return mixed|null
+     */
     public static function getValue($array, $key, $default = null)
     {
         if ($key instanceof \Closure) {
             return $key($array, $default);
         }
 
-        if (is_array($key)) {
+        if (\is_array($key)) {
             $lastKey = array_pop($key);
             foreach ($key as $keyPart) {
                 $array = static::getValue($array, $keyPart);
@@ -61,7 +61,7 @@ class ArrayHelper
             $key = $lastKey;
         }
 
-        if (is_array($array) && (isset($array[$key]) || array_key_exists($key, $array))) {
+        if (\is_array($array) && (isset($array[$key]) || array_key_exists($key, $array))) {
             return $array[$key];
         }
 
@@ -70,17 +70,19 @@ class ArrayHelper
             $key = substr($key, $pos + 1);
         }
 
-        if (is_object($array)) {
+        if (\is_object($array)) {
             $getter = 'get' . $key;
             if (method_exists($array, $getter)) {
                 return $array->$getter();
-            } else {
-                return $array->$key;
             }
-        } elseif (is_array($array)) {
-            return (isset($array[$key]) || array_key_exists($key, $array)) ? $array[$key] : $default;
-        } else {
-            return $default;
+
+            return $array->$key;
         }
+
+        if (\is_array($array)) {
+            return (isset($array[$key]) || array_key_exists($key, $array)) ? $array[$key] : $default;
+        }
+
+        return $default;
     }
 }

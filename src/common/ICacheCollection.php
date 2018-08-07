@@ -5,9 +5,9 @@ namespace sitkoru\contextcache\common;
 
 interface ICacheCollection
 {
-    public function get(array $ids, string $field, $indexBy = null): array;
+    public function get(array $ids, string $field, ?string $indexBy = null): array;
 
-    public function set(array $entities);
+    public function set(array $entities): void;
 
-    public function clear();
+    public function clear(): void;
 }

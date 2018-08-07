@@ -17,7 +17,7 @@ use Google\AdsApi\AdWords\v201802\cm\PolicyViolationError;
 use Google\AdsApi\AdWords\v201802\cm\Predicate;
 use Google\AdsApi\AdWords\v201802\cm\PredicateOperator;
 use Google\AdsApi\AdWords\v201802\cm\Selector;
-use Psr\Log\LoggerInterface;
+use sitkoru\contextcache\common\ContextEntitiesLogger;
 use sitkoru\contextcache\common\EntitiesProvider;
 use sitkoru\contextcache\common\ICacheProvider;
 use sitkoru\contextcache\common\models\UpdateResult;
@@ -26,11 +26,11 @@ use UnexpectedValueException;
 
 abstract class AdWordsEntitiesProvider extends EntitiesProvider
 {
-    const POLL_FREQUENCY_SECONDS = 10;
-    const MAX_POLL_ATTEMPTS = 60;
-    const MAX_POLL_FREQUENCY = 60;
-    const MAX_OPERATIONS_SIZE = 2000;
-    const MAX_RESPONSE_COUNT = 200;
+    public const POLL_FREQUENCY_SECONDS = 10;
+    public const MAX_POLL_ATTEMPTS = 60;
+    public const MAX_POLL_FREQUENCY = 60;
+    public const MAX_OPERATIONS_SIZE = 2000;
+    public const MAX_RESPONSE_COUNT = 200;
 
     /**
      * @var BatchJobService
@@ -41,7 +41,7 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
      */
     private $adWordsSession;
 
-    public function __construct(ICacheProvider $cacheProvider, AdWordsSession $adWordsSession, LoggerInterface $logger)
+    public function __construct(ICacheProvider $cacheProvider, AdWordsSession $adWordsSession, ContextEntitiesLogger $logger)
     {
         parent::__construct($cacheProvider, $logger);
         $this->serviceKey = 'google';
@@ -49,7 +49,7 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
         $this->batchJobService = (new AdWordsServices())->get($adWordsSession, BatchJobService::class);
     }
 
-    protected function hasChanges($ids): bool
+    protected function hasChanges(array $ids): bool
     {
         $ts = $this->getLastCacheTimestamp();
         return !$ts || $ts < time() - 60 * 30;
@@ -63,7 +63,7 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
      * @throws \UnexpectedValueException
      * @throws AdWordsBatchJobCancelledException
      */
-    public function runMutateJob($operations)
+    public function runMutateJob(array $operations)
     {
         $addOp = new BatchJobOperation();
         $addOp->setOperator(Operator::ADD);
@@ -144,7 +144,7 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
             $mutateResults = $batchJobs->downloadBatchJobResults($batchJob->getDownloadUrl()->getUrl());
             $this->logger->info("Downloaded results from {$batchJob->getDownloadUrl()->getUrl()}:");
 
-            if (count($mutateResults) === 0) {
+            if (\count($mutateResults) === 0) {
                 $this->logger->info('No results available.');
             } else {
                 return $mutateResults;
@@ -168,14 +168,14 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
         $failed = [];
         $errors = [];
         $genericErrors = [];
-        if (!is_array($jobResult)) {
+        if (!\is_array($jobResult)) {
             throw new \ErrorException('Empty result from google');
         }
 
         foreach ($jobResult as $mutateResult) {
             if ($mutateResult->getErrorList()) {
                 foreach ($mutateResult->getErrorList()->getErrors() as $error) {
-                    if (is_array($error)) {
+                    if (\is_array($error)) {
                         $error = $error[0];
                     }
 
@@ -188,7 +188,7 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
                                 $skipped[] = $index;
                                 break;
                             default:
-                                if (!in_array($index, $failed, true)) {
+                                if (!\in_array($index, $failed, true)) {
                                     $failed[] = $index;
                                 }
                                 $errors[$index][] = $error;
@@ -241,22 +241,22 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
                 continue;
             }
             $result = $this->getOperandEntity($entryResult);
-            if ($result) {
+            if ($result !== null) {
                 $succeeded[$i] = $result;
             }
         }
 
         // Display the results of the job.
-        $this->logger->info(sprintf('%d entities were added/updated successfully', count($succeeded)));
+        $this->logger->info(sprintf('%d entities were added/updated successfully', \count($succeeded)));
 
-        $this->logger->info(sprintf("%d entities were skipped and should be retried: %s\n", count($skipped),
+        $this->logger->info(sprintf("%d entities were skipped and should be retried: %s\n", \count($skipped),
                 implode(', ', $skipped)
             )
         );
-        if (count($failed)) {
+        if (\count($failed)) {
             $jobResult->success = false;
         }
-        $this->logger->error(sprintf("%d entities were not added due to errors:\n", count($failed)));
+        $this->logger->error(sprintf("%d entities were not added due to errors:\n", \count($failed)));
         foreach ($failed as $errorIndex) {
             $text = "Entity {$errorIndex} errors:" . PHP_EOL;
             foreach ($errors[$errorIndex] as $i => $error) {
@@ -287,5 +287,9 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
         return $jobResult;
     }
 
+    /**
+     * @param Operand $operand
+     * @return mixed
+     */
     abstract protected function getOperandEntity(Operand $operand);
 }

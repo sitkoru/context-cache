@@ -5,6 +5,7 @@ namespace sitkoru\contextcache;
 use directapi\components\interfaces\IQueryLogger;
 use Psr\Log\LoggerInterface;
 use sitkoru\contextcache\adwords\AdWordsProvider;
+use sitkoru\contextcache\common\ContextEntitiesLogger;
 use sitkoru\contextcache\common\ICacheProvider;
 use sitkoru\contextcache\direct\DirectProvider;
 
@@ -15,17 +16,17 @@ class ContextEntitiesProvider
      */
     private $cache;
     /**
-     * @var LoggerInterface
+     * @var ContextEntitiesLogger
      */
     private $logger;
 
-    public function __construct(ICacheProvider $cacheProvider, LoggerInterface $logger)
+    public function __construct(ICacheProvider $cacheProvider, ?LoggerInterface $logger)
     {
         $this->cache = $cacheProvider;
-        $this->logger = $logger;
+        $this->logger = new ContextEntitiesLogger($logger);
     }
 
-    public function clearCache()
+    public function clearCache(): void
     {
         $collections = [
             'yandex' => [
@@ -49,8 +50,11 @@ class ContextEntitiesProvider
     }
 
 
-    public function getDirectProvider(string $accessToken, string $clientLogin, IQueryLogger $queryLogger = null): DirectProvider
-    {
+    public function getDirectProvider(
+        string $accessToken,
+        string $clientLogin,
+        IQueryLogger $queryLogger = null
+    ): DirectProvider {
         return new DirectProvider($accessToken, $clientLogin, $this->cache, $this->logger, $queryLogger);
     }
 

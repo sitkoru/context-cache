@@ -18,7 +18,7 @@ use directapi\services\changes\enum\FieldNamesEnum;
 use directapi\services\changes\models\CheckResponse;
 use directapi\services\changes\models\CheckResponseIds;
 use directapi\services\changes\models\CheckResponseModified;
-use Psr\Log\LoggerInterface;
+use sitkoru\contextcache\common\ContextEntitiesLogger;
 use sitkoru\contextcache\common\ICacheProvider;
 use sitkoru\contextcache\common\IEntitiesProvider;
 use sitkoru\contextcache\common\models\UpdateResult;
@@ -26,26 +26,32 @@ use sitkoru\contextcache\helpers\ArrayHelper;
 
 class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvider
 {
-    const MAX_ADS_PER_UPDATE = 1000;
-    const CRITERIA_MAX_CAMPAIGN_IDS = 10;
-    const CRITERIA_MAX_AD_GROUP_IDS = 1000;
-    const CRITERIA_MAX_AD_IDS = 10000;
+    public const MAX_ADS_PER_UPDATE = 1000;
+    public const CRITERIA_MAX_CAMPAIGN_IDS = 10;
+    public const CRITERIA_MAX_AD_GROUP_IDS = 1000;
+    public const CRITERIA_MAX_AD_IDS = 10000;
 
-    public $keyField = 'AdGroupId';
 
     public function __construct(
         DirectApiService $directApiService,
         ICacheProvider $cacheProvider,
-        LoggerInterface $logger
+        ContextEntitiesLogger $logger
     ) {
         parent::__construct($directApiService, $cacheProvider, $logger);
         $this->collection = 'ads';
+        $this->keyField = 'AdGroupId';
     }
 
     /**
      * @param array $ids
      * @return AdGetItem[]
-     * @throws \Exception
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \ReflectionException
+     * @throws \directapi\exceptions\DirectAccountNotExistException
+     * @throws \directapi\exceptions\DirectApiException
+     * @throws \directapi\exceptions\DirectApiNotEnoughUnitsException
+     * @throws \directapi\exceptions\RequestValidationException
+     * @throws \directapi\exceptions\UnknownPropertyException
      */
     public function getByAdGroupIds(array $ids): array
     {
@@ -74,7 +80,13 @@ class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvi
     /**
      * @param array $ids
      * @return AdGetItem[]
-     * @throws \Exception
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \ReflectionException
+     * @throws \directapi\exceptions\DirectAccountNotExistException
+     * @throws \directapi\exceptions\DirectApiException
+     * @throws \directapi\exceptions\DirectApiNotEnoughUnitsException
+     * @throws \directapi\exceptions\RequestValidationException
+     * @throws \directapi\exceptions\UnknownPropertyException
      */
     public function getByCampaignIds(array $ids): array
     {
@@ -101,8 +113,15 @@ class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvi
     }
 
     /**
-     * @param $id
+     * @param int $id
      * @return AdGetItem|null
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \ReflectionException
+     * @throws \directapi\exceptions\DirectAccountNotExistException
+     * @throws \directapi\exceptions\DirectApiException
+     * @throws \directapi\exceptions\DirectApiNotEnoughUnitsException
+     * @throws \directapi\exceptions\RequestValidationException
+     * @throws \directapi\exceptions\UnknownPropertyException
      */
     public function getOne($id): ?AdGetItem
     {
@@ -116,6 +135,13 @@ class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvi
     /**
      * @param array $ids
      * @return AdGetItem[]
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \ReflectionException
+     * @throws \directapi\exceptions\DirectAccountNotExistException
+     * @throws \directapi\exceptions\DirectApiException
+     * @throws \directapi\exceptions\DirectApiNotEnoughUnitsException
+     * @throws \directapi\exceptions\RequestValidationException
+     * @throws \directapi\exceptions\UnknownPropertyException
      */
     public function getAll(array $ids): array
     {
@@ -151,12 +177,17 @@ class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvi
     /**
      * @param AdGetItem[] $entities
      * @return UpdateResult
-     * @throws \Exception
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \JsonMapper_Exception
+     * @throws \directapi\exceptions\DirectAccountNotExistException
+     * @throws \directapi\exceptions\DirectApiException
+     * @throws \directapi\exceptions\DirectApiNotEnoughUnitsException
+     * @throws \directapi\exceptions\RequestValidationException
      */
     public function update(array $entities): UpdateResult
     {
         $result = new UpdateResult();
-        $this->logger->info('Update ads: ' . count($entities));
+        $this->logger->info('Update ads: ' . \count($entities));
         foreach (array_chunk($entities, self::MAX_ADS_PER_UPDATE) as $index => $entitiesChunk) {
             $this->logger->info('Chunk: ' . $index . '. Upload.');
             $updEntities = $this->directApiService->getAdsService()->toUpdateEntities($entitiesChunk);
@@ -186,6 +217,17 @@ class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvi
         return $result;
     }
 
+    /**
+     * @param array  $ids
+     * @param string $date
+     * @return CheckResponse
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \JsonMapper_Exception
+     * @throws \directapi\exceptions\DirectAccountNotExistException
+     * @throws \directapi\exceptions\DirectApiException
+     * @throws \directapi\exceptions\DirectApiNotEnoughUnitsException
+     * @throws \directapi\exceptions\RequestValidationException
+     */
     protected function getChanges(array $ids, string $date): CheckResponse
     {
         return $this->directApiService->getChangesService()->check([], [], $ids, [FieldNamesEnum::AD_IDS], $date);
@@ -194,10 +236,10 @@ class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvi
     protected function getChangesCount(?CheckResponseModified $modified, ?CheckResponseIds $notFound): int
     {
         $count = 0;
-        if ($modified && is_array($modified->AdIds)) {
+        if ($modified && \is_array($modified->AdIds)) {
             $count += \count($modified->AdIds);
         }
-        if ($notFound && is_array($notFound->AdIds)) {
+        if ($notFound && \is_array($notFound->AdIds)) {
             $count += \count($notFound->AdIds);
         }
         return $count;

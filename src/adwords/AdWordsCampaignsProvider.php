@@ -12,7 +12,7 @@ use Google\AdsApi\AdWords\v201802\cm\Operator;
 use Google\AdsApi\AdWords\v201802\cm\Predicate;
 use Google\AdsApi\AdWords\v201802\cm\PredicateOperator;
 use Google\AdsApi\AdWords\v201802\cm\Selector;
-use Psr\Log\LoggerInterface;
+use sitkoru\contextcache\common\ContextEntitiesLogger;
 use sitkoru\contextcache\common\ICacheProvider;
 use sitkoru\contextcache\common\IEntitiesProvider;
 use sitkoru\contextcache\common\models\UpdateResult;
@@ -24,6 +24,9 @@ class AdWordsCampaignsProvider extends AdWordsEntitiesProvider implements IEntit
      */
     private $campaignService;
 
+    /**
+     * @var array
+     */
     private static $fields = [
         'AdvertisingChannelSubType',
         'AdvertisingChannelType',
@@ -74,17 +77,17 @@ class AdWordsCampaignsProvider extends AdWordsEntitiesProvider implements IEntit
         'VanityPharmaText'
     ];
 
-    protected $keyField = 'id';
 
     public function __construct(
         CampaignService $campaignService,
         ICacheProvider $cacheProvider,
         AdWordsSession $adWordsSession,
-        LoggerInterface $logger
+        ContextEntitiesLogger $logger
     ) {
         parent::__construct($cacheProvider, $adWordsSession, $logger);
         $this->collection = 'campaigns';
         $this->campaignService = $campaignService;
+        $this->keyField = 'id';
     }
 
     /**
@@ -106,7 +109,7 @@ class AdWordsCampaignsProvider extends AdWordsEntitiesProvider implements IEntit
         if ($notFound) {
             $selector = new Selector();
             $selector->setFields(self::$fields);
-            $predicates[] = new Predicate('Id', PredicateOperator::IN, $ids);
+            $predicates = [new Predicate('Id', PredicateOperator::IN, $ids)];
             $selector->setPredicates($predicates);
             $fromService = (array)$this->campaignService->get($selector)->getEntries();
             foreach ($fromService as $campaignItem) {
@@ -118,7 +121,7 @@ class AdWordsCampaignsProvider extends AdWordsEntitiesProvider implements IEntit
     }
 
     /**
-     * @param $id
+     * @param int $id
      * @return Campaign
      * @throws \Google\AdsApi\AdWords\v201802\cm\ApiException
      */
@@ -153,6 +156,7 @@ class AdWordsCampaignsProvider extends AdWordsEntitiesProvider implements IEntit
      * @throws \ErrorException
      * @throws \Google\AdsApi\AdWords\v201802\cm\ApiException
      * @throws \UnexpectedValueException
+     * @throws AdWordsBatchJobCancelledException
      */
     public function update(array $entities): UpdateResult
     {
@@ -165,10 +169,10 @@ class AdWordsCampaignsProvider extends AdWordsEntitiesProvider implements IEntit
             $addOperation->setOperator(Operator::SET);
             $addOperations[] = $addOperation;
         }
-        $this->logger->info('Update operations: ' . count($addOperations));
+        $this->logger->info('Update operations: ' . \count($addOperations));
 
         foreach (array_chunk($addOperations, self::MAX_OPERATIONS_SIZE) as $i => $addChunk) {
-            $this->logger->info('Update chunk #' . $i . '. Size: ' . count($addChunk));
+            $this->logger->info('Update chunk #' . $i . '. Size: ' . \count($addChunk));
             $jobResults = $this->runMutateJob($addChunk);
             $this->processJobResult($result, $jobResults);
         }
@@ -177,6 +181,10 @@ class AdWordsCampaignsProvider extends AdWordsEntitiesProvider implements IEntit
         return $result;
     }
 
+    /**
+     * @param Operand $operand
+     * @return Campaign|mixed
+     */
     protected function getOperandEntity(Operand $operand)
     {
         return $operand->getCampaign();

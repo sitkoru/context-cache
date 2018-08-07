@@ -15,7 +15,7 @@ use Google\AdsApi\AdWords\v201802\cm\PredicateOperator;
 use Google\AdsApi\AdWords\v201802\cm\Selector;
 use Google\AdsApi\AdWords\v201802\cm\TempAdUnionId;
 use Google\AdsApi\AdWords\v201802\cm\TemplateAd;
-use Psr\Log\LoggerInterface;
+use sitkoru\contextcache\common\ContextEntitiesLogger;
 use sitkoru\contextcache\common\ICacheProvider;
 use sitkoru\contextcache\common\IEntitiesProvider;
 use sitkoru\contextcache\common\models\UpdateResult;
@@ -28,8 +28,10 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
      */
     private $adGroupAdService;
 
-    protected $keyField = 'ad.id';
 
+    /**
+     * @var array
+     */
     private static $fields = [
         'AdGroupId',
         'AdType',
@@ -112,12 +114,12 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
         AdGroupAdService $adGroupService,
         ICacheProvider $cacheProvider,
         AdWordsSession $adWordsSession,
-        LoggerInterface $logger
-    )
-    {
+        ContextEntitiesLogger $logger
+    ) {
         parent::__construct($cacheProvider, $adWordsSession, $logger);
         $this->collection = 'adGroupAds';
         $this->adGroupAdService = $adGroupService;
+        $this->keyField = 'ad.id';
     }
 
     /**
@@ -151,6 +153,11 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
         return $adGroupAds;
     }
 
+    /**
+     * @param int $id
+     * @return AdGroupAd
+     * @throws \Google\AdsApi\AdWords\v201802\cm\ApiException
+     */
     public function getOne($id): AdGroupAd
     {
         $ads = $this->getAll([$id]);
@@ -266,14 +273,14 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
             $addOperations[] = $addOperation;
         }
 
-        $this->logger->info('Add operations: ' . count($addOperations));
+        $this->logger->info('Add operations: ' . \count($addOperations));
 
 
         foreach (array_chunk($addOperations, self::MAX_OPERATIONS_SIZE) as $i => $addChunk) {
             /**
              * @var AdGroupAdOperation[] $addChunk
              */
-            $this->logger->info('Add chunk #' . $i . '. Size: ' . count($addChunk));
+            $this->logger->info('Add chunk #' . $i . '. Size: ' . \count($addChunk));
             $jobResults = $this->runMutateJob($addChunk);
             $this->processJobResult($result, $jobResults);
             if (!$result->success) {
@@ -285,11 +292,12 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
             }
         }
 
-        $this->logger->info('Delete succeeded ads: ' . count($deleteOperations));
+        $this->logger->info('Delete succeeded ads: ' . \count($deleteOperations));
         foreach (array_chunk($deleteOperations, self::MAX_OPERATIONS_SIZE) as $i => $deleteChunk) {
-            $this->logger->info('Delete chunk #' . $i . '. Size: ' . count($deleteChunk));
+            $this->logger->info('Delete chunk #' . $i . '. Size: ' . \count($deleteChunk));
             $try = 0;
             $maxTry = 5;
+            $jobResults = null;
             while (true) {
                 try {
                     $jobResults = $this->runMutateJob($deleteChunk);
@@ -308,6 +316,10 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
         return $result;
     }
 
+    /**
+     * @param Operand $operand
+     * @return AdGroupAd|mixed
+     */
     protected function getOperandEntity(Operand $operand)
     {
         return $operand->getAdGroupAd();

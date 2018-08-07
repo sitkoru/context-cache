@@ -16,27 +16,26 @@ class MongoDbCacheCollection implements ICacheCollection
      */
     protected $collection;
 
-    protected $keyField;
-
     /**
-     * @var Client
+     * @var string
      */
-    private $client;
-
+    protected $keyField;
 
     public function __construct(Client $client, string $service, string $collection, string $keyField)
     {
-        $this->client = $client;
         $this->keyField = $keyField;
         $this->collection = $client->selectCollection($service, $collection);
     }
 
+    /**
+     * @var Serializer
+     */
     private static $serializer;
 
     /**
      * @return Serializer
      */
-    private static function getSerializer()
+    private static function getSerializer(): Serializer
     {
 
         if (!self::$serializer) {
@@ -54,7 +53,7 @@ class MongoDbCacheCollection implements ICacheCollection
      * @throws \MongoDB\Exception\InvalidArgumentException
      * @throws \MongoDB\Driver\Exception\RuntimeException
      */
-    public function get(array $ids, string $field, $indexBy = null): array
+    public function get(array $ids, string $field, ?string $indexBy = null): array
     {
         $filter = [
             $field => [
@@ -76,13 +75,19 @@ class MongoDbCacheCollection implements ICacheCollection
      * @throws \MongoDB\Exception\InvalidArgumentException
      * @throws \MongoDB\Exception\UnsupportedException
      */
-    public function set(array $entities)
+    public function set(array $entities): void
     {
         foreach (array_chunk($entities, 500) as $chunk) {
             $operations = [];
             $serializedChunk = $this->serializeEntities($chunk);
             foreach ($serializedChunk as $entity) {
-                $operations[] = ['updateOne' => [$this->prepareOperationFilter($entity), ['$set' => $entity], ['upsert' => true]]];
+                $operations[] = [
+                    'updateOne' => [
+                        $this->prepareOperationFilter($entity),
+                        ['$set' => $entity],
+                        ['upsert' => true]
+                    ]
+                ];
             }
             $this->collection->bulkWrite($operations);
         }
@@ -92,7 +97,7 @@ class MongoDbCacheCollection implements ICacheCollection
     {
         $filterItems = explode('.', $this->keyField);
 
-        if (count($filterItems) === 1) {
+        if (\count($filterItems) === 1) {
             $keyValue = $entity[$this->keyField];
         } else {
             $keyValue = $this->getArrayLastValueByArrayKeysNesting($entity, $filterItems);
@@ -101,13 +106,18 @@ class MongoDbCacheCollection implements ICacheCollection
         return [$this->keyField => $keyValue];
     }
 
+    /**
+     * @param array $array
+     * @param array $arrayKeysNesting
+     * @return array|mixed
+     */
     private function getArrayLastValueByArrayKeysNesting(array $array, array $arrayKeysNesting)
     {
         $i = 0;
         $lastLevelArray = [];
         foreach ($arrayKeysNesting as $level) {
             //last item
-            if (count($arrayKeysNesting) - 1 === $i) {
+            if (\count($arrayKeysNesting) - 1 === $i) {
                 return $lastLevelArray[$level];
             }
 
@@ -143,7 +153,7 @@ class MongoDbCacheCollection implements ICacheCollection
         return $entities;
     }
 
-    public function clear()
+    public function clear(): void
     {
         $this->collection->deleteMany([]);
     }

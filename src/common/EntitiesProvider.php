@@ -3,8 +3,6 @@
 namespace sitkoru\contextcache\common;
 
 
-use Psr\Log\LoggerInterface;
-
 abstract class EntitiesProvider
 {
     /**
@@ -12,21 +10,37 @@ abstract class EntitiesProvider
      */
     protected $cacheProvider;
 
+    /**
+     * @var string
+     */
     protected $serviceKey;
 
+    /**
+     * @var string
+     */
     protected $collection;
 
+    /**
+     * @var ICacheCollection
+     */
     private $cacheCollection;
 
+    /**
+     * @var bool
+     */
     private $isCacheEnabled = true;
 
-    protected $keyField;
     /**
-     * @var LoggerInterface
+     * @var string
+     */
+    protected $keyField;
+
+    /**
+     * @var ContextEntitiesLogger
      */
     protected $logger;
 
-    public function __construct(ICacheProvider $cacheProvider, LoggerInterface $logger)
+    public function __construct(ICacheProvider $cacheProvider, ContextEntitiesLogger $logger)
     {
         $this->cacheProvider = $cacheProvider;
         $this->logger = $logger;
@@ -35,12 +49,13 @@ abstract class EntitiesProvider
     private function getCacheCollection(): ICacheCollection
     {
         if (!$this->cacheCollection) {
-            $this->cacheCollection = $this->cacheProvider->collection($this->serviceKey, $this->collection, $this->keyField);
+            $this->cacheCollection = $this->cacheProvider->collection($this->serviceKey, $this->collection,
+                $this->keyField);
         }
         return $this->cacheCollection;
     }
 
-    protected function getFromCache(array $ids, string $field, $indexBy = null): array
+    protected function getFromCache(array $ids, string $field, ?string $indexBy = null): array
     {
         if (!$this->isCacheEnabled) {
             return [];
@@ -52,24 +67,24 @@ abstract class EntitiesProvider
         return $this->getEntitiesFromCache($ids, $field, $indexBy);
     }
 
-    public function disableCache()
+    public function disableCache(): self
     {
         $this->isCacheEnabled = false;
         return $this;
     }
 
-    public function enableCache()
+    public function enableCache(): self
     {
         $this->isCacheEnabled = true;
         return $this;
     }
 
-    protected function getEntitiesFromCache(array $ids, string $field, $indexBy = null): array
+    protected function getEntitiesFromCache(array $ids, string $field, ?string $indexBy = null): array
     {
         return $this->getCacheCollection()->get($ids, $field, $indexBy);
     }
 
-    protected function addToCache(array $entities)
+    protected function addToCache(array $entities): void
     {
         if ($this->isCacheEnabled && $entities) {
             $this->getCacheCollection()->set($entities);
@@ -77,13 +92,13 @@ abstract class EntitiesProvider
         }
     }
 
-    public function clearCache()
+    public function clearCache(): void
     {
         $this->logger->debug('Clear cache');
         $this->getCacheCollection()->clear();
     }
 
-    protected function hasChanges($ids): bool
+    protected function hasChanges(array $ids): bool
     {
         return false;
     }
@@ -93,7 +108,7 @@ abstract class EntitiesProvider
         return $this->cacheProvider->getTimeStamp($this->serviceKey);
     }
 
-    protected function setLastCacheTimestamp($timestamp)
+    protected function setLastCacheTimestamp(int $timestamp): void
     {
         $this->cacheProvider->setTimeStamp($this->serviceKey, $timestamp);
     }

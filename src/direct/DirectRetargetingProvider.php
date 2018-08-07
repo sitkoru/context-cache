@@ -3,43 +3,43 @@
 namespace sitkoru\contextcache\direct;
 
 use directapi\DirectApiService;
-use directapi\services\changes\enum\FieldNamesEnum;
 use directapi\services\changes\models\CheckResponse;
 use directapi\services\changes\models\CheckResponseIds;
 use directapi\services\changes\models\CheckResponseModified;
-use directapi\services\keywords\criterias\KeywordsSelectionCriteria;
-use directapi\services\keywords\enum\KeywordFieldEnum;
-use directapi\services\keywords\models\KeywordGetItem;
-use directapi\services\keywords\models\KeywordUpdateItem;
 use directapi\services\retargetinglists\criterias\RetargetingListSelectionCriteria;
 use directapi\services\retargetinglists\enum\RetargetingListFieldEnum;
 use directapi\services\retargetinglists\models\RetargetingListGetItem;
 use directapi\services\retargetinglists\models\RetargetingListUpdateItem;
-use Psr\Log\LoggerInterface;
+use sitkoru\contextcache\common\ContextEntitiesLogger;
 use sitkoru\contextcache\common\ICacheProvider;
 use sitkoru\contextcache\common\IEntitiesProvider;
 use sitkoru\contextcache\common\models\UpdateResult;
-use sitkoru\contextcache\helpers\ArrayHelper;
 
 class DirectRetargetingProvider extends DirectEntitiesProvider implements IEntitiesProvider
 {
-    const MAX_LISTS_PER_UPDATE = 10000;
-    const CRITERIA_MAX_IDS = 10000;
-
-    protected $keyField = 'Id';
+    public const MAX_LISTS_PER_UPDATE = 10000;
+    public const CRITERIA_MAX_IDS = 10000;
 
     public function __construct(
         DirectApiService $directApiService,
         ICacheProvider $cacheProvider,
-        LoggerInterface $logger
+        ContextEntitiesLogger $logger
     ) {
         parent::__construct($directApiService, $cacheProvider, $logger);
         $this->collection = 'retargetinglists';
+        $this->keyField = 'Id';
     }
 
     /**
-     * @param $id
+     * @param int $id
      * @return RetargetingListGetItem|null
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \ReflectionException
+     * @throws \directapi\exceptions\DirectAccountNotExistException
+     * @throws \directapi\exceptions\DirectApiException
+     * @throws \directapi\exceptions\DirectApiNotEnoughUnitsException
+     * @throws \directapi\exceptions\RequestValidationException
+     * @throws \directapi\exceptions\UnknownPropertyException
      */
     public function getOne($id): ?RetargetingListGetItem
     {
@@ -53,6 +53,13 @@ class DirectRetargetingProvider extends DirectEntitiesProvider implements IEntit
     /**
      * @param array $ids
      * @return RetargetingListGetItem[]
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \ReflectionException
+     * @throws \directapi\exceptions\DirectAccountNotExistException
+     * @throws \directapi\exceptions\DirectApiException
+     * @throws \directapi\exceptions\DirectApiNotEnoughUnitsException
+     * @throws \directapi\exceptions\RequestValidationException
+     * @throws \directapi\exceptions\UnknownPropertyException
      */
     public function getAll(array $ids): array
     {
@@ -80,12 +87,17 @@ class DirectRetargetingProvider extends DirectEntitiesProvider implements IEntit
     /**
      * @param RetargetingListGetItem[] $entities
      * @return UpdateResult
-     * @throws \Exception
+     * @throws \ErrorException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \directapi\exceptions\DirectAccountNotExistException
+     * @throws \directapi\exceptions\DirectApiException
+     * @throws \directapi\exceptions\DirectApiNotEnoughUnitsException
+     * @throws \directapi\exceptions\RequestValidationException
      */
     public function update(array $entities): UpdateResult
     {
         $result = new UpdateResult();
-        $this->logger->info('Update retargeting lists: ' . count($entities));
+        $this->logger->info('Update retargeting lists: ' . \count($entities));
         foreach (array_chunk($entities, self::MAX_LISTS_PER_UPDATE) as $index => $entitiesChunk) {
             $this->logger->info('Chunk: ' . $index . '. Upload.');
             $updEntities = $this->directApiService->getRetargetingListsService()->toUpdateEntities($entitiesChunk);
@@ -115,6 +127,12 @@ class DirectRetargetingProvider extends DirectEntitiesProvider implements IEntit
         return $result;
     }
 
+    /**
+     * @param array  $ids
+     * @param string $date
+     * @return CheckResponse
+     * @throws \directapi\exceptions\UnknownPropertyException
+     */
     protected function getChanges(array $ids, string $date): CheckResponse
     {
         return new CheckResponse();

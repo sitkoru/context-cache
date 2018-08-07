@@ -7,7 +7,7 @@ use directapi\DirectApiService;
 use directapi\services\changes\models\CheckResponse;
 use directapi\services\changes\models\CheckResponseIds;
 use directapi\services\changes\models\CheckResponseModified;
-use Psr\Log\LoggerInterface;
+use sitkoru\contextcache\common\ContextEntitiesLogger;
 use sitkoru\contextcache\common\EntitiesProvider;
 use sitkoru\contextcache\common\ICacheProvider;
 
@@ -21,15 +21,14 @@ abstract class DirectEntitiesProvider extends EntitiesProvider
     public function __construct(
         DirectApiService $directApiService,
         ICacheProvider $cacheProvider,
-        LoggerInterface $logger
-    )
-    {
+        ContextEntitiesLogger $logger
+    ) {
         parent::__construct($cacheProvider, $logger);
         $this->directApiService = $directApiService;
         $this->serviceKey = 'yandex';
     }
 
-    protected function hasChanges($ids): bool
+    protected function hasChanges(array $ids): bool
     {
         $ts = $this->getLastCacheTimestamp();
         if (!$ts || $ts < time() - 60) {
@@ -48,7 +47,7 @@ abstract class DirectEntitiesProvider extends EntitiesProvider
         return false;
     }
 
-    protected abstract function getChanges(array $ids, string $date): CheckResponse;
+    abstract protected function getChanges(array $ids, string $date): CheckResponse;
 
-    protected abstract function getChangesCount(?CheckResponseModified $modified, ?CheckResponseIds $notFound): int;
+    abstract protected function getChangesCount(?CheckResponseModified $modified, ?CheckResponseIds $notFound): int;
 }

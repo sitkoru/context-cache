@@ -12,7 +12,7 @@ use Google\AdsApi\AdWords\v201802\cm\AdGroupService;
 use Google\AdsApi\AdWords\v201802\cm\CampaignService;
 use Google\AdsApi\Common\OAuth2TokenBuilder;
 use Google\Auth\CredentialsLoader;
-use Psr\Log\LoggerInterface;
+use sitkoru\contextcache\common\ContextEntitiesLogger;
 use sitkoru\contextcache\common\ICacheProvider;
 
 class AdWordsProvider
@@ -39,35 +39,34 @@ class AdWordsProvider
     public $criterions;
 
     /**
-     * @var
+     * @var string
      */
     private $oAuthFilePath;
 
     /**
-     * @var
+     * @var int
      */
     private $customerId;
     /**
-     * @var
+     * @var string
      */
     private $refreshToken;
 
     /**
      * GoogleProvider constructor.
-     * @param int             $customerId
-     * @param string          $oAuthFilePath
-     * @param null|string     $refreshToken
-     * @param ICacheProvider  $cacheProvider
-     * @param LoggerInterface $logger
+     * @param int                   $customerId
+     * @param string                $oAuthFilePath
+     * @param null|string           $refreshToken
+     * @param ICacheProvider        $cacheProvider
+     * @param ContextEntitiesLogger $logger
      */
     public function __construct(
         int $customerId,
         string $oAuthFilePath,
         ?string $refreshToken = null,
         ICacheProvider $cacheProvider,
-        LoggerInterface $logger
-    )
-    {
+        ContextEntitiesLogger $logger
+    ) {
 
         $this->customerId = $customerId;
         $this->refreshToken = $refreshToken;

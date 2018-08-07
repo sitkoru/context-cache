@@ -13,29 +13,35 @@ use directapi\services\changes\enum\FieldNamesEnum;
 use directapi\services\changes\models\CheckResponse;
 use directapi\services\changes\models\CheckResponseIds;
 use directapi\services\changes\models\CheckResponseModified;
-use Psr\Log\LoggerInterface;
+use sitkoru\contextcache\common\ContextEntitiesLogger;
 use sitkoru\contextcache\common\ICacheProvider;
 use sitkoru\contextcache\common\IEntitiesProvider;
 use sitkoru\contextcache\common\models\UpdateResult;
 
 class DirectCampaignsProvider extends DirectEntitiesProvider implements IEntitiesProvider
 {
-    const CRITERIA_MAX_CAMPAIGN_IDS = 1000;
-    const MAX_CAMPAIGNS_PER_UPDATE = 10;
-
-    protected $keyField = 'Id';
+    public const CRITERIA_MAX_CAMPAIGN_IDS = 1000;
+    public const MAX_CAMPAIGNS_PER_UPDATE = 10;
 
     public function __construct(
         DirectApiService $directApiService,
         ICacheProvider $cacheProvider,
-        LoggerInterface $logger
+        ContextEntitiesLogger $logger
     ) {
         parent::__construct($directApiService, $cacheProvider, $logger);
         $this->collection = 'campaigns';
+        $this->keyField = 'Id';
     }
 
     /**
      * @return CampaignGetItem[]
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \ReflectionException
+     * @throws \directapi\exceptions\DirectAccountNotExistException
+     * @throws \directapi\exceptions\DirectApiException
+     * @throws \directapi\exceptions\DirectApiNotEnoughUnitsException
+     * @throws \directapi\exceptions\RequestValidationException
+     * @throws \directapi\exceptions\UnknownPropertyException
      */
     public function getForService(): array
     {
@@ -51,8 +57,15 @@ class DirectCampaignsProvider extends DirectEntitiesProvider implements IEntitie
     }
 
     /**
-     * @param $id
+     * @param int $id
      * @return CampaignGetItem|null
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \ReflectionException
+     * @throws \directapi\exceptions\DirectAccountNotExistException
+     * @throws \directapi\exceptions\DirectApiException
+     * @throws \directapi\exceptions\DirectApiNotEnoughUnitsException
+     * @throws \directapi\exceptions\RequestValidationException
+     * @throws \directapi\exceptions\UnknownPropertyException
      */
     public function getOne($id): CampaignGetItem
     {
@@ -66,6 +79,13 @@ class DirectCampaignsProvider extends DirectEntitiesProvider implements IEntitie
     /**
      * @param array $ids
      * @return CampaignGetItem[]
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \ReflectionException
+     * @throws \directapi\exceptions\DirectAccountNotExistException
+     * @throws \directapi\exceptions\DirectApiException
+     * @throws \directapi\exceptions\DirectApiNotEnoughUnitsException
+     * @throws \directapi\exceptions\RequestValidationException
+     * @throws \directapi\exceptions\UnknownPropertyException
      */
     public function getAll(array $ids): array
     {
@@ -94,11 +114,17 @@ class DirectCampaignsProvider extends DirectEntitiesProvider implements IEntitie
     /**
      * @param CampaignGetItem[] $entities
      * @return UpdateResult
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \JsonMapper_Exception
+     * @throws \directapi\exceptions\DirectAccountNotExistException
+     * @throws \directapi\exceptions\DirectApiException
+     * @throws \directapi\exceptions\DirectApiNotEnoughUnitsException
+     * @throws \directapi\exceptions\RequestValidationException
      */
     public function update(array $entities): UpdateResult
     {
         $result = new UpdateResult();
-        $this->logger->info('Update campaigns: ' . count($entities));
+        $this->logger->info('Update campaigns: ' . \count($entities));
         foreach (array_chunk($entities, self::MAX_CAMPAIGNS_PER_UPDATE) as $index => $entitiesChunk) {
             $this->logger->info('Chunk: ' . $index . '. Upload.');
             $updEntities = $this->directApiService->getCampaignsService()->toUpdateEntities($entitiesChunk);
@@ -128,6 +154,17 @@ class DirectCampaignsProvider extends DirectEntitiesProvider implements IEntitie
         return $result;
     }
 
+    /**
+     * @param array  $ids
+     * @param string $date
+     * @return CheckResponse
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \JsonMapper_Exception
+     * @throws \directapi\exceptions\DirectAccountNotExistException
+     * @throws \directapi\exceptions\DirectApiException
+     * @throws \directapi\exceptions\DirectApiNotEnoughUnitsException
+     * @throws \directapi\exceptions\RequestValidationException
+     */
     protected function getChanges(array $ids, string $date): CheckResponse
     {
         return $this->directApiService->getChangesService()->check([], [], $ids, [FieldNamesEnum::CAMPAIGN_IDS], $date);
@@ -136,10 +173,10 @@ class DirectCampaignsProvider extends DirectEntitiesProvider implements IEntitie
     protected function getChangesCount(?CheckResponseModified $modified, ?CheckResponseIds $notFound): int
     {
         $count = 0;
-        if ($modified && is_array($modified->CampaignIds)) {
+        if ($modified && \is_array($modified->CampaignIds)) {
             $count += \count($modified->CampaignIds);
         }
-        if ($notFound && is_array($notFound->CampaignIds)) {
+        if ($notFound && \is_array($notFound->CampaignIds)) {
             $count += \count($notFound->CampaignIds);
         }
         return $count;

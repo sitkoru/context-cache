@@ -9,9 +9,12 @@ use sitkoru\contextcache\common\ICacheProvider;
 
 class MongoDbCacheProvider implements ICacheProvider
 {
+    /**
+     * @var Client
+     */
     private $client;
 
-    public function __construct($mongoUrl)
+    public function __construct(string $mongoUrl)
     {
         $this->client = new Client($mongoUrl);
     }
@@ -26,7 +29,7 @@ class MongoDbCacheProvider implements ICacheProvider
         return 0;
     }
 
-    public function setTimeStamp(string $service, int $timestamp)
+    public function setTimeStamp(string $service, int $timestamp): void
     {
         $collection = $this->client->selectCollection($service, 'settings');
         $collection->updateOne([

@@ -13,7 +13,7 @@ use Google\AdsApi\AdWords\v201802\cm\Paging;
 use Google\AdsApi\AdWords\v201802\cm\Predicate;
 use Google\AdsApi\AdWords\v201802\cm\PredicateOperator;
 use Google\AdsApi\AdWords\v201802\cm\Selector;
-use Psr\Log\LoggerInterface;
+use sitkoru\contextcache\common\ContextEntitiesLogger;
 use sitkoru\contextcache\common\ICacheProvider;
 use sitkoru\contextcache\common\IEntitiesProvider;
 use sitkoru\contextcache\common\models\UpdateResult;
@@ -27,6 +27,9 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
      */
     private $adGroupCriterionService;
 
+    /**
+     * @var array
+     */
     private static $fields = [
         'AdGroupId',
         'AgeRangeType',
@@ -92,17 +95,16 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
         'VideoName'
     ];
 
-    protected $keyField = 'criterion.id';
-
     public function __construct(
         AdGroupCriterionService $adGroupCriterionService,
         ICacheProvider $cacheProvider,
         AdWordsSession $adWordsSession,
-        LoggerInterface $logger
+        ContextEntitiesLogger $logger
     ) {
         parent::__construct($cacheProvider, $adWordsSession, $logger);
         $this->collection = 'adGroupCriterions';
         $this->adGroupCriterionService = $adGroupCriterionService;
+        $this->keyField = 'criterion.id';
     }
 
     /**
@@ -145,6 +147,11 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
         return $criterions;
     }
 
+    /**
+     * @param int $id
+     * @return AdGroupCriterion
+     * @throws \Google\AdsApi\AdWords\v201802\cm\ApiException
+     */
     public function getOne($id): AdGroupCriterion
     {
         $criterions = $this->getAll([$id]);
@@ -269,6 +276,10 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
         return $result;
     }
 
+    /**
+     * @param Operand $operand
+     * @return AdGroupCriterion|mixed
+     */
     protected function getOperandEntity(Operand $operand)
     {
         return $operand->getAdGroupCriterion();

@@ -9,6 +9,10 @@ interface IEntitiesProvider
 {
     public function getAll(array $ids): array;
 
+    /**
+     * @param mixed $id
+     * @return mixed
+     */
     public function getOne($id);
 
     public function update(array $entities): UpdateResult;

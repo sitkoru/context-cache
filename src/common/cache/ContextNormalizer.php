@@ -8,19 +8,33 @@ use Symfony\Component\Serializer\Normalizer\GetSetMethodNormalizer;
 
 class ContextNormalizer extends GetSetMethodNormalizer
 {
-    public function supportsNormalization($data, $format = null)
+    /**
+     * @param mixed $data
+     * @param null  $format
+     * @return bool
+     */
+    public function supportsNormalization($data, $format = null): bool
     {
-        return is_object($data);
+        return \is_object($data);
     }
 
     /**
-     * {@inheritdoc}
+     * @param mixed $data
+     * @param mixed $type
+     * @param null  $format
+     * @return bool
      */
-    public function supportsDenormalization($data, $type, $format = null)
+    public function supportsDenormalization($data, $type, $format = null): bool
     {
         return array_key_exists('_class', $data);
     }
 
+    /**
+     * @param object $object
+     * @param null   $format
+     * @param array  $context
+     * @return array|bool|float|int|string
+     */
     public function normalize($object, $format = null, array $context = [])
     {
         $data = parent::normalize($object, $format, $context);
@@ -32,16 +46,20 @@ class ContextNormalizer extends GetSetMethodNormalizer
             $data['type'] = $object->__toString();
         }
         return array_filter($data, function ($value) {
-            /*if (\is_array($value) && empty($value)) {
-                return false;
-            }*/
-            return !\is_null($value);
+            return $value !== null;
         });
     }
 
+    /**
+     * @param array|object $data
+     * @param string       $class
+     * @param null         $format
+     * @param array        $context
+     * @return object
+     */
     public function denormalize($data, $class, $format = null, array $context = [])
     {
-        if (is_object($data)) {
+        if (\is_object($data)) {
             $data = json_decode(json_encode($data), true);
         }
         if (\is_array($data) && isset($data['_class'])) {
@@ -50,10 +68,24 @@ class ContextNormalizer extends GetSetMethodNormalizer
         return parent::denormalize($data, $class, $format, $context);
     }
 
-    protected function setAttributeValue($object, $attribute, $value, $format = null, array $context = [])
+    /**
+     * @param object      $object
+     * @param  string     $attribute
+     * @param mixed       $value
+     * @param null|string $format
+     * @param array       $context
+     * @throws \ReflectionException
+     *
+     * @return void
+     */
+    protected function setAttributeValue($object, $attribute, $value, $format = null, array $context = []): void
     {
-        if ($attribute === '_class') return;
-        if ($attribute === '_id') return;
+        if ($attribute === '_class') {
+            return;
+        }
+        if ($attribute === '_id') {
+            return;
+        }
         $class = null;
         $isArray = false;
         if (\is_array($value)) {
@@ -86,7 +118,8 @@ class ContextNormalizer extends GetSetMethodNormalizer
 
         $reflClass = new \ReflectionClass($object);
         foreach ($reflClass->getProperties(\ReflectionProperty::IS_PUBLIC) as $reflProperty) {
-            if ($reflProperty->name !== $attribute || !$reflProperty->isPublic() || $reflProperty->isStatic() || !$this->isAllowedAttribute($object, $reflProperty->name, $format, $context)) {
+            if ($reflProperty->name !== $attribute || !$reflProperty->isPublic() || $reflProperty->isStatic() || !$this->isAllowedAttribute($object,
+                    $reflProperty->name, $format, $context)) {
                 continue;
             }
 
@@ -97,21 +130,42 @@ class ContextNormalizer extends GetSetMethodNormalizer
         parent::setAttributeValue($object, $attribute, $value, $format, $context);
     }
 
-    protected function getConstructor(array &$data, $class, array &$context, \ReflectionClass $reflectionClass, $allowedAttributes)
-    {
+    /**
+     * @param array            $data
+     * @param string           $class
+     * @param array            $context
+     * @param \ReflectionClass $reflectionClass
+     * @param array|bool       $allowedAttributes
+     * @return null|\ReflectionMethod
+     */
+    protected function getConstructor(
+        array &$data,
+        $class,
+        array &$context,
+        \ReflectionClass $reflectionClass,
+        $allowedAttributes
+    ): ?\ReflectionMethod {
         if (\is_subclass_of($class, Enum::class)) {
             return parent::getConstructor($data, $class, $context, $reflectionClass, $allowedAttributes);
         }
         return null;
     }
 
-    protected function extractAttributes($object, $format = null, array $context = [])
+    /**
+     * @param object $object
+     * @param null   $format
+     * @param array  $context
+     * @return array|string[]
+     * @throws \ReflectionException
+     */
+    protected function extractAttributes($object, $format = null, array $context = []): array
     {
         $attributes = parent::extractAttributes($object, $format, $context);
 
         $reflClass = new \ReflectionClass($object);
         foreach ($reflClass->getProperties(\ReflectionProperty::IS_PUBLIC) as $reflProperty) {
-            if ($reflProperty->isStatic() || !$this->isAllowedAttribute($object, $reflProperty->name, $format, $context)) {
+            if ($reflProperty->isStatic() || !$this->isAllowedAttribute($object, $reflProperty->name, $format,
+                    $context)) {
                 continue;
             }
 
@@ -121,13 +175,22 @@ class ContextNormalizer extends GetSetMethodNormalizer
         return $attributes;
     }
 
+    /**
+     * @param object $object
+     * @param string $attribute
+     * @param null   $format
+     * @param array  $context
+     * @return mixed
+     * @throws \ReflectionException
+     */
     protected function getAttributeValue($object, $attribute, $format = null, array $context = [])
     {
         $value = parent::getAttributeValue($object, $attribute, $format, $context);
 
         $reflClass = new \ReflectionClass($object);
         foreach ($reflClass->getProperties(\ReflectionProperty::IS_PUBLIC) as $reflProperty) {
-            if ($reflProperty->name !== $attribute || !$reflProperty->isPublic() || $reflProperty->isStatic() || !$this->isAllowedAttribute($object, $reflProperty->name, $format, $context)) {
+            if ($reflProperty->name !== $attribute || !$reflProperty->isPublic() || $reflProperty->isStatic() || !$this->isAllowedAttribute($object,
+                    $reflProperty->name, $format, $context)) {
                 continue;
             }
             $value = $object->$attribute;
