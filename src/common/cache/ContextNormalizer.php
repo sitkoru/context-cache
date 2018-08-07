@@ -29,7 +29,7 @@ class ContextNormalizer extends GetSetMethodNormalizer
             /**
              * @var Enum $object
              */
-            $data['value'] = $object->__toString();
+            $data['type'] = $object->__toString();
         }
         return array_filter($data, function ($value) {
             /*if (\is_array($value) && empty($value)) {
@@ -70,8 +70,8 @@ class ContextNormalizer extends GetSetMethodNormalizer
             $class = $value->_class;
         }
         if ($class) {
-            if (isset($value['value']) && \is_subclass_of($class, Enum::class)) {
-                $value = new $class($value['value']);
+            if (isset($value['type']) && \is_subclass_of($class, Enum::class)) {
+                $value = new $class($value['type']);
             } elseif ($isArray) {
                 $newValue = [];
                 foreach ($value as $val) {
@@ -99,6 +99,9 @@ class ContextNormalizer extends GetSetMethodNormalizer
 
     protected function getConstructor(array &$data, $class, array &$context, \ReflectionClass $reflectionClass, $allowedAttributes)
     {
+        if (\is_subclass_of($class, Enum::class)) {
+            return parent::getConstructor($data, $class, $context, $reflectionClass, $allowedAttributes);
+        }
         return null;
     }
 
