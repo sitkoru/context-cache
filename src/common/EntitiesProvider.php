@@ -18,7 +18,7 @@ abstract class EntitiesProvider
 
     private $cacheCollection;
 
-    private $isCacheEnabled;
+    private $isCacheEnabled = true;
 
     protected $keyField;
     /**
@@ -71,7 +71,7 @@ abstract class EntitiesProvider
 
     protected function addToCache(array $entities)
     {
-        if ($entities) {
+        if ($this->isCacheEnabled && $entities) {
             $this->getCacheCollection()->set($entities);
             $this->cacheProvider->setTimeStamp($this->serviceKey, time());
         }
