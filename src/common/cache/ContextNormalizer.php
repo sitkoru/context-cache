@@ -70,7 +70,7 @@ class ContextNormalizer extends GetSetMethodNormalizer
             $class = $value->_class;
         }
         if ($class) {
-            if (\is_subclass_of($class, Enum::class)) {
+            if (isset($value['value']) && \is_subclass_of($class, Enum::class)) {
                 $value = new $class($value['value']);
             } elseif ($isArray) {
                 $newValue = [];
