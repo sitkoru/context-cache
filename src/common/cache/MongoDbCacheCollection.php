@@ -135,8 +135,10 @@ class MongoDbCacheCollection implements ICacheCollection
     {
         $entities = [];
         foreach ($serializedEntities as $entry) {
-            $entity = self::getSerializer()->denormalize($entry, $entry->_class, 'json');
-            $entities[] = $entity;
+            if ($entry->_class !== null) {
+                $entity = self::getSerializer()->denormalize($entry, $entry->_class, 'json');
+                $entities[] = $entity;
+            }
         }
         return $entities;
     }
