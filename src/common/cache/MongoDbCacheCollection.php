@@ -62,7 +62,7 @@ class MongoDbCacheCollection implements ICacheCollection
         ];
         $entities = $this->collection->find($filter)->toArray();
         $entities = $this->deserializeEntities($entities);
-        if (!$indexBy) {
+        if ($indexBy === null) {
             $indexBy = $field;
         }
         $entities = ArrayHelper::index($entities, $indexBy);
@@ -121,7 +121,7 @@ class MongoDbCacheCollection implements ICacheCollection
                 return $lastLevelArray[$level];
             }
 
-            if (!$lastLevelArray) {
+            if ($lastLevelArray === []) {
                 $lastLevelArray = $array[$level];
             } else {
                 $lastLevelArray = $lastLevelArray[$level];
