@@ -6,6 +6,7 @@ use Google\AdsApi\AdWords\AdWordsServices;
 use Google\AdsApi\AdWords\AdWordsSession;
 use Google\AdsApi\AdWords\BatchJobs\v201802\BatchJobs;
 use Google\AdsApi\AdWords\v201802\cm\ApiError;
+use Google\AdsApi\AdWords\v201802\cm\ApiException;
 use Google\AdsApi\AdWords\v201802\cm\BatchJob;
 use Google\AdsApi\AdWords\v201802\cm\BatchJobOperation;
 use Google\AdsApi\AdWords\v201802\cm\BatchJobService;
@@ -41,8 +42,11 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
      */
     private $adWordsSession;
 
-    public function __construct(ICacheProvider $cacheProvider, AdWordsSession $adWordsSession, ContextEntitiesLogger $logger)
-    {
+    public function __construct(
+        ICacheProvider $cacheProvider,
+        AdWordsSession $adWordsSession,
+        ContextEntitiesLogger $logger
+    ) {
         parent::__construct($cacheProvider, $logger);
         $this->serviceKey = 'google';
         $this->adWordsSession = $adWordsSession;
@@ -285,6 +289,31 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
         }
 
         return $jobResult;
+    }
+
+    /**
+     * @param callable $request
+     * @param int      $try
+     * @param int      $maxTry
+     * @return mixed
+     * @throws ApiException
+     */
+    protected function doRequest(callable $request, int $try = 0, int $maxTry = 10)
+    {
+        $try++;
+        try {
+            return $request();
+        } catch (ApiException $ex) {
+            if (stripos($ex->getMessage(), 'UNEXPECTED_INTERNAL_API_ERROR ') !== false) {
+                if ($try <= $maxTry) {
+                    $this->logger->warning('Internal google error. Wait 30 seconds and retry');
+                    sleep(30);
+                    return $this->doRequest($request);
+                }
+                $this->logger->warning('Internal google error after ' . $maxTry . ' retries');
+            }
+            throw $ex;
+        }
     }
 
     /**

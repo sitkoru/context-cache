@@ -136,7 +136,9 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
                 $selector->setFields(self::$fields);
                 $predicates[] = new Predicate('Id', PredicateOperator::IN, $idsChunk);
                 $selector->setPredicates($predicates);
-                $fromService = (array)$this->adGroupCriterionService->get($selector)->getEntries();
+                $fromService = (array)$this->doRequest(function () use ($selector) {
+                    return $this->adGroupCriterionService->get($selector)->getEntries();
+                });
                 foreach ($fromService as $criterionItem) {
                     $index = $indexBy($criterionItem);
                     $criterions[$index] = $criterionItem;
@@ -187,7 +189,9 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
             $selector->setFields(self::$fields);
             $predicates[] = new Predicate('AdGroupId', PredicateOperator::IN, $notFound);
             $selector->setPredicates($predicates);
-            $fromService = (array)$this->adGroupCriterionService->get($selector)->getEntries();
+            $fromService = (array)$this->doRequest(function () use ($selector) {
+                return $this->adGroupCriterionService->get($selector)->getEntries();
+            });
             foreach ($fromService as $criterionItem) {
                 $index = $indexBy($criterionItem);
                 $criterions[$index] = $criterionItem;
@@ -228,7 +232,9 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
             $page = 0;
             do {
                 $page++;
-                $pageResult = $this->adGroupCriterionService->get($selector);
+                $pageResult = $this->doRequest(function () use ($selector) {
+                    return $this->adGroupCriterionService->get($selector);
+                });
 
                 $fromService = (array)$pageResult->getEntries();
                 foreach ($fromService as $criterionItem) {

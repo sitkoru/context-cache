@@ -144,7 +144,9 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
             $selector->setFields(self::$fields);
             $predicates[] = new Predicate('Id', PredicateOperator::IN, $ids);
             $selector->setPredicates($predicates);
-            $fromService = (array)$this->adGroupAdService->get($selector)->getEntries();
+            $fromService = (array)$this->doRequest(function () use ($selector) {
+                return $this->adGroupAdService->get($selector)->getEntries();
+            });
             foreach ($fromService as $adGroupAdItem) {
                 $adGroupAds[$adGroupAdItem->getAd()->getId()] = $adGroupAdItem;
             }
@@ -190,7 +192,9 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
             $selector->setFields(self::$fields);
             $predicates[] = new Predicate('CampaignId', PredicateOperator::IN, $notFound);
             $selector->setPredicates($predicates);
-            $fromService = (array)$this->adGroupAdService->get($selector)->getEntries();
+            $fromService = (array)$this->doRequest(function () use ($selector) {
+                return $this->adGroupAdService->get($selector)->getEntries();
+            });
             foreach ($fromService as $adGroupAdItem) {
                 /**
                  * @var AdGroupAd $adGroupAdItem
@@ -225,7 +229,9 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
             $selector->setFields(self::$fields);
             $predicates[] = new Predicate('AdGroupId', PredicateOperator::IN, $notFound);
             $selector->setPredicates($predicates);
-            $fromService = (array)$this->adGroupAdService->get($selector)->getEntries();
+            $fromService = (array)$this->doRequest(function () use ($selector) {
+                return $this->adGroupAdService->get($selector)->getEntries();
+            });
             foreach ($fromService as $adGroupAdItem) {
                 /**
                  * @var AdGroupAd $adGroupAdItem
