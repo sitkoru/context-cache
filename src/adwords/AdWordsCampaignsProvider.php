@@ -4,14 +4,14 @@ namespace sitkoru\contextcache\adwords;
 
 
 use Google\AdsApi\AdWords\AdWordsSession;
-use Google\AdsApi\AdWords\v201802\cm\Campaign;
-use Google\AdsApi\AdWords\v201802\cm\CampaignOperation;
-use Google\AdsApi\AdWords\v201802\cm\CampaignService;
-use Google\AdsApi\AdWords\v201802\cm\Operand;
-use Google\AdsApi\AdWords\v201802\cm\Operator;
-use Google\AdsApi\AdWords\v201802\cm\Predicate;
-use Google\AdsApi\AdWords\v201802\cm\PredicateOperator;
-use Google\AdsApi\AdWords\v201802\cm\Selector;
+use Google\AdsApi\AdWords\v201809\cm\Campaign;
+use Google\AdsApi\AdWords\v201809\cm\CampaignOperation;
+use Google\AdsApi\AdWords\v201809\cm\CampaignService;
+use Google\AdsApi\AdWords\v201809\cm\Operand;
+use Google\AdsApi\AdWords\v201809\cm\Operator;
+use Google\AdsApi\AdWords\v201809\cm\Predicate;
+use Google\AdsApi\AdWords\v201809\cm\PredicateOperator;
+use Google\AdsApi\AdWords\v201809\cm\Selector;
 use sitkoru\contextcache\common\ContextEntitiesLogger;
 use sitkoru\contextcache\common\ICacheProvider;
 use sitkoru\contextcache\common\IEntitiesProvider;
@@ -93,7 +93,7 @@ class AdWordsCampaignsProvider extends AdWordsEntitiesProvider implements IEntit
     /**
      * @param array $ids
      * @return Campaign[]
-     * @throws \Google\AdsApi\AdWords\v201802\cm\ApiException
+     * @throws \Google\AdsApi\AdWords\v201809\cm\ApiException
      */
     public function getAll(array $ids): array
     {
@@ -125,7 +125,7 @@ class AdWordsCampaignsProvider extends AdWordsEntitiesProvider implements IEntit
     /**
      * @param int $id
      * @return Campaign
-     * @throws \Google\AdsApi\AdWords\v201802\cm\ApiException
+     * @throws \Google\AdsApi\AdWords\v201809\cm\ApiException
      */
     public function getOne($id): ?Campaign
     {
@@ -138,7 +138,7 @@ class AdWordsCampaignsProvider extends AdWordsEntitiesProvider implements IEntit
 
     /**
      * @return array
-     * @throws \Google\AdsApi\AdWords\v201802\cm\ApiException
+     * @throws \Google\AdsApi\AdWords\v201809\cm\ApiException
      */
     public function getForService(): array
     {
@@ -158,7 +158,7 @@ class AdWordsCampaignsProvider extends AdWordsEntitiesProvider implements IEntit
      * @param Campaign[] $entities
      * @return UpdateResult
      * @throws \ErrorException
-     * @throws \Google\AdsApi\AdWords\v201802\cm\ApiException
+     * @throws \Google\AdsApi\AdWords\v201809\cm\ApiException
      * @throws \UnexpectedValueException
      * @throws AdWordsBatchJobCancelledException
      */

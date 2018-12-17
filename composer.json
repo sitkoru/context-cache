@@ -12,12 +12,13 @@
   "minimum-stability": "stable",
   "require": {
     "sitkoru/yandex-direct-api": "^2018.10.1",
-    "googleads/googleads-php-lib": "^37.1.0",
+    "googleads/googleads-php-lib": "^38.0.0",
     "mongodb/mongodb": "^1.4.1",
     "psr/log": "^1.0",
     "guzzlehttp/guzzle": "^6.3.3",
     "php": "^7.2",
     "ext-json": "*",
+    "ext-soap": "*",
     "ext-mongodb": "*",
     "symfony/property-info": "^4.1.6"
   },

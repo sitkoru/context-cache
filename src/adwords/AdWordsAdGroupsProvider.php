@@ -3,14 +3,14 @@
 namespace sitkoru\contextcache\adwords;
 
 use Google\AdsApi\AdWords\AdWordsSession;
-use Google\AdsApi\AdWords\v201802\cm\AdGroup;
-use Google\AdsApi\AdWords\v201802\cm\AdGroupOperation;
-use Google\AdsApi\AdWords\v201802\cm\AdGroupService;
-use Google\AdsApi\AdWords\v201802\cm\Operand;
-use Google\AdsApi\AdWords\v201802\cm\Operator;
-use Google\AdsApi\AdWords\v201802\cm\Predicate;
-use Google\AdsApi\AdWords\v201802\cm\PredicateOperator;
-use Google\AdsApi\AdWords\v201802\cm\Selector;
+use Google\AdsApi\AdWords\v201809\cm\AdGroup;
+use Google\AdsApi\AdWords\v201809\cm\AdGroupOperation;
+use Google\AdsApi\AdWords\v201809\cm\AdGroupService;
+use Google\AdsApi\AdWords\v201809\cm\Operand;
+use Google\AdsApi\AdWords\v201809\cm\Operator;
+use Google\AdsApi\AdWords\v201809\cm\Predicate;
+use Google\AdsApi\AdWords\v201809\cm\PredicateOperator;
+use Google\AdsApi\AdWords\v201809\cm\Selector;
 use sitkoru\contextcache\common\ContextEntitiesLogger;
 use sitkoru\contextcache\common\ICacheProvider;
 use sitkoru\contextcache\common\IEntitiesProvider;
@@ -70,7 +70,7 @@ class AdWordsAdGroupsProvider extends AdWordsEntitiesProvider implements IEntiti
      * @param array $ids
      * @param array $predicates
      * @return AdGroup[]
-     * @throws \Google\AdsApi\AdWords\v201802\cm\ApiException
+     * @throws \Google\AdsApi\AdWords\v201809\cm\ApiException
      */
     public function getAll(array $ids, array $predicates = []): array
     {
@@ -117,7 +117,7 @@ class AdWordsAdGroupsProvider extends AdWordsEntitiesProvider implements IEntiti
      * @param array $campaignIds
      * @param array $predicates
      * @return AdGroup[]
-     * @throws \Google\AdsApi\AdWords\v201802\cm\ApiException
+     * @throws \Google\AdsApi\AdWords\v201809\cm\ApiException
      */
     public function getByCampaignIds(array $campaignIds, array $predicates = []): array
     {

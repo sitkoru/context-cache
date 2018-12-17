@@ -4,17 +4,17 @@ namespace sitkoru\contextcache\adwords;
 
 
 use Google\AdsApi\AdWords\AdWordsSession;
-use Google\AdsApi\AdWords\v201802\cm\AdGroupAd;
-use Google\AdsApi\AdWords\v201802\cm\AdGroupAdOperation;
-use Google\AdsApi\AdWords\v201802\cm\AdGroupAdService;
-use Google\AdsApi\AdWords\v201802\cm\AdGroupAdStatus;
-use Google\AdsApi\AdWords\v201802\cm\Operand;
-use Google\AdsApi\AdWords\v201802\cm\Operator;
-use Google\AdsApi\AdWords\v201802\cm\Predicate;
-use Google\AdsApi\AdWords\v201802\cm\PredicateOperator;
-use Google\AdsApi\AdWords\v201802\cm\Selector;
-use Google\AdsApi\AdWords\v201802\cm\TempAdUnionId;
-use Google\AdsApi\AdWords\v201802\cm\TemplateAd;
+use Google\AdsApi\AdWords\v201809\cm\AdGroupAd;
+use Google\AdsApi\AdWords\v201809\cm\AdGroupAdOperation;
+use Google\AdsApi\AdWords\v201809\cm\AdGroupAdService;
+use Google\AdsApi\AdWords\v201809\cm\AdGroupAdStatus;
+use Google\AdsApi\AdWords\v201809\cm\Operand;
+use Google\AdsApi\AdWords\v201809\cm\Operator;
+use Google\AdsApi\AdWords\v201809\cm\Predicate;
+use Google\AdsApi\AdWords\v201809\cm\PredicateOperator;
+use Google\AdsApi\AdWords\v201809\cm\Selector;
+use Google\AdsApi\AdWords\v201809\cm\TempAdUnionId;
+use Google\AdsApi\AdWords\v201809\cm\TemplateAd;
 use sitkoru\contextcache\common\ContextEntitiesLogger;
 use sitkoru\contextcache\common\ICacheProvider;
 use sitkoru\contextcache\common\IEntitiesProvider;
@@ -126,7 +126,7 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
      * @param array $ids
      * @param array $predicates
      * @return AdGroupAd[]
-     * @throws \Google\AdsApi\AdWords\v201802\cm\ApiException
+     * @throws \Google\AdsApi\AdWords\v201809\cm\ApiException
      */
     public function getAll(array $ids, array $predicates = []): array
     {
@@ -158,7 +158,7 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
     /**
      * @param int $id
      * @return AdGroupAd
-     * @throws \Google\AdsApi\AdWords\v201802\cm\ApiException
+     * @throws \Google\AdsApi\AdWords\v201809\cm\ApiException
      */
     public function getOne($id): AdGroupAd
     {
@@ -173,7 +173,7 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
      * @param int[] $campaignIds
      * @param array $predicates
      * @return AdGroupAd[]
-     * @throws \Google\AdsApi\AdWords\v201802\cm\ApiException
+     * @throws \Google\AdsApi\AdWords\v201809\cm\ApiException
      */
     public function getByCampaignIds(array $campaignIds, array $predicates = []): array
     {
@@ -210,7 +210,7 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
      * @param array $adGroupIds
      * @param array $predicates
      * @return AdGroupAd[]
-     * @throws \Google\AdsApi\AdWords\v201802\cm\ApiException
+     * @throws \Google\AdsApi\AdWords\v201809\cm\ApiException
      */
     public function getByAdGroupIds(array $adGroupIds, array $predicates = []): array
     {

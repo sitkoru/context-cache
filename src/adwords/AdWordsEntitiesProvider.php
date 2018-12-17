@@ -4,20 +4,20 @@ namespace sitkoru\contextcache\adwords;
 
 use Google\AdsApi\AdWords\AdWordsServices;
 use Google\AdsApi\AdWords\AdWordsSession;
-use Google\AdsApi\AdWords\BatchJobs\v201802\BatchJobs;
-use Google\AdsApi\AdWords\v201802\cm\ApiError;
-use Google\AdsApi\AdWords\v201802\cm\ApiException;
-use Google\AdsApi\AdWords\v201802\cm\BatchJob;
-use Google\AdsApi\AdWords\v201802\cm\BatchJobOperation;
-use Google\AdsApi\AdWords\v201802\cm\BatchJobService;
-use Google\AdsApi\AdWords\v201802\cm\BatchJobStatus;
-use Google\AdsApi\AdWords\v201802\cm\MutateResult;
-use Google\AdsApi\AdWords\v201802\cm\Operand;
-use Google\AdsApi\AdWords\v201802\cm\Operator;
-use Google\AdsApi\AdWords\v201802\cm\PolicyViolationError;
-use Google\AdsApi\AdWords\v201802\cm\Predicate;
-use Google\AdsApi\AdWords\v201802\cm\PredicateOperator;
-use Google\AdsApi\AdWords\v201802\cm\Selector;
+use Google\AdsApi\AdWords\BatchJobs\v201809\BatchJobs;
+use Google\AdsApi\AdWords\v201809\cm\ApiError;
+use Google\AdsApi\AdWords\v201809\cm\ApiException;
+use Google\AdsApi\AdWords\v201809\cm\BatchJob;
+use Google\AdsApi\AdWords\v201809\cm\BatchJobOperation;
+use Google\AdsApi\AdWords\v201809\cm\BatchJobService;
+use Google\AdsApi\AdWords\v201809\cm\BatchJobStatus;
+use Google\AdsApi\AdWords\v201809\cm\MutateResult;
+use Google\AdsApi\AdWords\v201809\cm\Operand;
+use Google\AdsApi\AdWords\v201809\cm\Operator;
+use Google\AdsApi\AdWords\v201809\cm\PolicyViolationError;
+use Google\AdsApi\AdWords\v201809\cm\Predicate;
+use Google\AdsApi\AdWords\v201809\cm\PredicateOperator;
+use Google\AdsApi\AdWords\v201809\cm\Selector;
 use sitkoru\contextcache\common\ContextEntitiesLogger;
 use sitkoru\contextcache\common\EntitiesProvider;
 use sitkoru\contextcache\common\ICacheProvider;
@@ -63,7 +63,7 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
      * @param $operations
      *
      * @return bool|MutateResult[]
-     * @throws \Google\AdsApi\AdWords\v201802\cm\ApiException
+     * @throws \Google\AdsApi\AdWords\v201809\cm\ApiException
      * @throws \UnexpectedValueException
      * @throws AdWordsBatchJobCancelledException
      */
@@ -115,6 +115,7 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
             ]);
             $selector->setPredicates([new Predicate('Id', PredicateOperator::EQUALS, [$job->getId()])]);
             $batchJob = $this->batchJobService->get($selector)->getEntries()[0];
+            $this->logger->info('Batch job ID ' . $batchJob->getId() . " has status '{$batchJob->getStatus()}'. Last sleep {$sleepSeconds}");
             $this->logger->debug('Batch job ID ' . $batchJob->getId() . " has status '{$batchJob->getStatus()}'");
             $pollAttempts++;
             $status = $batchJob->getStatus();
