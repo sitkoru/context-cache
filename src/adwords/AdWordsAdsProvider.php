@@ -248,6 +248,7 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
      * @param AdGroupAd[] $entities
      * @return UpdateResult
      * @throws \Exception
+     * @throws \Throwable
      */
     public function update(array $entities): UpdateResult
     {
