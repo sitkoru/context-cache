@@ -55,7 +55,6 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
         'CriteriaSamples',
         'CriteriaType',
         'CriterionUse',
-        'DestinationUrl',
         'DisapprovalReasons',
         'DisplayName',
         'FinalAppUrls',
