@@ -4,7 +4,7 @@ namespace sitkoru\contextcache\adwords;
 
 use Google\AdsApi\AdWords\AdWordsServices;
 use Google\AdsApi\AdWords\AdWordsSession;
-use Google\AdsApi\AdWords\BatchJobs\v201802\BatchJobs;
+use Google\AdsApi\AdWords\BatchJobs\v201809\BatchJobs;
 use Google\AdsApi\AdWords\v201809\cm\ApiError;
 use Google\AdsApi\AdWords\v201809\cm\ApiException;
 use Google\AdsApi\AdWords\v201809\cm\BatchJob;
@@ -63,7 +63,7 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
      * @param $operations
      *
      * @return bool|MutateResult[]
-     * @throws \Google\AdsApi\AdWords\v201802\cm\ApiException
+     * @throws \Google\AdsApi\AdWords\v201809\cm\ApiException
      * @throws \UnexpectedValueException
      * @throws AdWordsBatchJobCancelledException
      */
