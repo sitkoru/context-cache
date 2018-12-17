@@ -267,13 +267,18 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
         $this->logger->info('Update operations: ' . \count($updateOperations));
 
 
-        foreach (array_chunk($updateOperations, self::MAX_OPERATIONS_SIZE) as $i => $updateChunk) {
-            /**
-             * @var AdGroupCriterionOperation[] $updateChunk
-             */
-            $this->logger->info('Update chunk #' . $i . '. Size: ' . \count($updateChunk));
-            $jobResults = $this->runMutateJob($updateChunk);
-            $this->processJobResult($result, $jobResults);
+        if (count($updateOperations) > 1000) {
+            foreach (array_chunk($updateOperations, self::MAX_OPERATIONS_SIZE) as $i => $updateChunk) {
+                /**
+                 * @var AdGroupCriterionOperation[] $updateChunk
+                 */
+                $this->logger->info('Update chunk #' . $i . '. Size: ' . \count($updateChunk));
+                $jobResults = $this->runMutateJob($updateChunk);
+                $this->processJobResult($result, $jobResults);
+            }
+        } else {
+            $mutateResult = $this->adGroupCriterionService->mutate($updateOperations);
+            $this->processMutateResult($result, $updateOperations, $mutateResult->getValue(), $mutateResult->getPartialFailureErrors());
         }
 
         $this->logger->info('Done');

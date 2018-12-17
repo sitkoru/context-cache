@@ -175,10 +175,15 @@ class AdWordsCampaignsProvider extends AdWordsEntitiesProvider implements IEntit
         }
         $this->logger->info('Update operations: ' . \count($addOperations));
 
-        foreach (array_chunk($addOperations, self::MAX_OPERATIONS_SIZE) as $i => $addChunk) {
-            $this->logger->info('Update chunk #' . $i . '. Size: ' . \count($addChunk));
-            $jobResults = $this->runMutateJob($addChunk);
-            $this->processJobResult($result, $jobResults);
+        if (count($addOperations) > 1000) {
+            foreach (array_chunk($addOperations, self::MAX_OPERATIONS_SIZE) as $i => $addChunk) {
+                $this->logger->info('Update chunk #' . $i . '. Size: ' . \count($addChunk));
+                $jobResults = $this->runMutateJob($addChunk);
+                $this->processJobResult($result, $jobResults);
+            }
+        } else {
+            $mutateResult = $this->campaignService->mutate($addOperations);
+            $this->processMutateResult($result, $addOperations, $mutateResult->getValue(), $mutateResult->getPartialFailureErrors());
         }
         $this->logger->info('Done');
         $this->clearCache();
