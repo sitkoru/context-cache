@@ -115,7 +115,8 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
         ICacheProvider $cacheProvider,
         AdWordsSession $adWordsSession,
         ContextEntitiesLogger $logger
-    ) {
+    )
+    {
         parent::__construct($cacheProvider, $adWordsSession, $logger);
         $this->collection = 'adGroupAds';
         $this->adGroupAdService = $adGroupService;
@@ -281,41 +282,73 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
 
         $this->logger->info('Add operations: ' . \count($addOperations));
 
+        if (count($addOperations) > 1000) {
+            foreach (array_chunk($addOperations, self::MAX_OPERATIONS_SIZE) as $i => $addChunk) {
+                /**
+                 * @var AdGroupAdOperation[] $addChunk
+                 */
+                $this->logger->info('Add chunk #' . $i . '. Size: ' . \count($addChunk));
+                $jobResults = $this->runMutateJob($addChunk);
+                $this->processJobResult($result, $jobResults);
+                if (!$result->success) {
+                    foreach ($result->errors as $adOperationId => $errors) {
+                        $adOperation = $addChunk[$adOperationId];
+                        $adId = $adOperation->getOperand()->getAd()->getId();
+                        unset($deleteOperations[$adId]);
+                    }
+                }
+            }
 
-        foreach (array_chunk($addOperations, self::MAX_OPERATIONS_SIZE) as $i => $addChunk) {
-            /**
-             * @var AdGroupAdOperation[] $addChunk
-             */
-            $this->logger->info('Add chunk #' . $i . '. Size: ' . \count($addChunk));
-            $jobResults = $this->runMutateJob($addChunk);
-            $this->processJobResult($result, $jobResults);
+            $this->logger->info('Delete succeeded ads: ' . \count($deleteOperations));
+            foreach (array_chunk($deleteOperations, self::MAX_OPERATIONS_SIZE) as $i => $deleteChunk) {
+                $this->logger->info('Delete chunk #' . $i . '. Size: ' . \count($deleteChunk));
+                $try = 0;
+                $maxTry = 5;
+                $jobResults = null;
+                while (true) {
+                    try {
+                        $jobResults = $this->runMutateJob($deleteChunk);
+                        break;
+                    } catch (AdWordsBatchJobCancelledException $exception) {
+                        $try++;
+                        if ($try === $maxTry) {
+                            throw $exception;
+                        }
+                    }
+                }
+                $this->processJobResult($result, $jobResults);
+            }
+        } else {
+            $mutateResult = $this->adGroupAdService->mutate($addOperations);
+            $this->processMutateResult($result, $addOperations, $mutateResult->getValue(), $mutateResult->getPartialFailureErrors());
             if (!$result->success) {
                 foreach ($result->errors as $adOperationId => $errors) {
-                    $adOperation = $addChunk[$adOperationId];
+                    $adOperation = $addOperations[$adOperationId];
                     $adId = $adOperation->getOperand()->getAd()->getId();
                     unset($deleteOperations[$adId]);
                 }
             }
-        }
 
-        $this->logger->info('Delete succeeded ads: ' . \count($deleteOperations));
-        foreach (array_chunk($deleteOperations, self::MAX_OPERATIONS_SIZE) as $i => $deleteChunk) {
-            $this->logger->info('Delete chunk #' . $i . '. Size: ' . \count($deleteChunk));
-            $try = 0;
-            $maxTry = 5;
-            $jobResults = null;
-            while (true) {
-                try {
-                    $jobResults = $this->runMutateJob($deleteChunk);
-                } catch (AdWordsBatchJobCancelledException $exception) {
-                    $try++;
-                    if ($try === $maxTry) {
-                        throw $exception;
+            if ($deleteOperations) {
+                $this->logger->info('Delete succeeded ads: ' . \count($deleteOperations));
+                $try = 0;
+                $maxTry = 5;
+                $jobResults = null;
+                while (true) {
+                    try {
+                        $jobResults = $this->adGroupAdService->mutate(array_values($deleteOperations));
+                        break;
+                    } catch (\Throwable $exception) {
+                        $try++;
+                        if ($try === $maxTry) {
+                            throw $exception;
+                        }
                     }
                 }
+                $this->processMutateResult($result, array_values($deleteOperations), $jobResults->getValue(), $jobResults->getPartialFailureErrors());
             }
-            $this->processJobResult($result, $jobResults);
         }
+
 
         $this->logger->info('Done');
         $this->clearCache();
@@ -330,4 +363,6 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
     {
         return $operand->getAdGroupAd();
     }
+
+
 }
