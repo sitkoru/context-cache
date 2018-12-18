@@ -3,8 +3,11 @@
 namespace sitkoru\contextcache\tests\unit;
 
 
+use Google\AdsApi\AdWords\v201809\cm\Ad;
 use Google\AdsApi\AdWords\v201809\cm\ExpandedTextAd;
 use Google\AdsApi\AdWords\v201809\cm\Keyword;
+use Google\AdsApi\AdWords\v201809\cm\Operator;
+use Google\AdsApi\AdWords\v201809\cm\TextAd;
 use Monolog\Handler\ErrorLogHandler;
 use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
@@ -90,6 +93,46 @@ class AdWordsUpdateTest extends TestCase
         $textAd->setHeadlinePart1($oldTitle);
         $updGroupAd->setAd($textAd);
         $result = $this->provider->ads->update([$updGroupAd]);
+        $this->assertTrue($result->success);
+    }
+
+    public function testMutateAd()
+    {
+        $groupAds = $this->provider->ads->getByAdGroupIds([GAUpdateAdGroupId]);
+        $this->assertNotEmpty($groupAds);
+        $groupAd = reset($groupAds);
+        /**
+         * @var ExpandedTextAd $textAd
+         */
+        $textAd = $groupAd->getAd();
+        $finalUrls = $textAd->getFinalUrls();
+        $oldUrl = reset($finalUrls);
+        $newUrl = $oldUrl . '?updated=yes';
+        $newAd = new ExpandedTextAd();
+        $newAd->setHeadlinePart1($textAd->getHeadlinePart1());
+        $newAd->setHeadlinePart2($textAd->getHeadlinePart2());
+        $newAd->setDescription($textAd->getDescription());
+        $newAd->setId($textAd->getId());
+        $newAd->setType($textAd->getType());
+        $newAd->setFinalUrls([$newUrl]);
+        $result = $this->provider->ads->mutate([$newAd],Operator::SET);
+        $this->assertTrue($result->success);
+
+        $newGroupAds = $this->provider->ads->getByAdGroupIds([GAUpdateAdGroupId]);
+        $updGroupAd = null;
+        foreach ($newGroupAds as $newGroupAd) {
+            $textAd = $newGroupAd->getAd();
+            $finalUrls = $textAd->getFinalUrls();
+            $url = reset($finalUrls);
+            if ($url === $newUrl) {
+                $updGroupAd = $newGroupAd;
+                break;
+            }
+        }
+        $this->assertNotNull($updGroupAd);
+
+        $newAd->setFinalUrls([$oldUrl]);
+        $result = $this->provider->ads->mutate([$newAd],Operator::SET);
         $this->assertTrue($result->success);
     }
 
