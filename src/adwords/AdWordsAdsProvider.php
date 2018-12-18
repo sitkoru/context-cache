@@ -4,10 +4,13 @@ namespace sitkoru\contextcache\adwords;
 
 
 use Google\AdsApi\AdWords\AdWordsSession;
+use Google\AdsApi\AdWords\v201809\cm\Ad;
 use Google\AdsApi\AdWords\v201809\cm\AdGroupAd;
 use Google\AdsApi\AdWords\v201809\cm\AdGroupAdOperation;
 use Google\AdsApi\AdWords\v201809\cm\AdGroupAdService;
 use Google\AdsApi\AdWords\v201809\cm\AdGroupAdStatus;
+use Google\AdsApi\AdWords\v201809\cm\AdOperation;
+use Google\AdsApi\AdWords\v201809\cm\AdService;
 use Google\AdsApi\AdWords\v201809\cm\Operand;
 use Google\AdsApi\AdWords\v201809\cm\Operator;
 use Google\AdsApi\AdWords\v201809\cm\Predicate;
@@ -167,9 +170,14 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
         'Width',
         'YouTubeVideoIdString'
     ];
+    /**
+     * @var AdService
+     */
+    private $adService;
 
     public function __construct(
         AdGroupAdService $adGroupService,
+        AdService $adService,
         ICacheProvider $cacheProvider,
         AdWordsSession $adWordsSession,
         ContextEntitiesLogger $logger
@@ -179,6 +187,7 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
         $this->collection = 'adGroupAds';
         $this->adGroupAdService = $adGroupService;
         $this->keyField = 'ad.id';
+        $this->adService = $adService;
     }
 
     /**
@@ -415,6 +424,35 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
     }
 
     /**
+     * @param array $ads
+     * @param string $operator
+     * @return UpdateResult
+     * @throws \ErrorException
+     * @throws \Google\AdsApi\AdWords\v201809\cm\ApiException
+     */
+    public function mutate(array $ads, string $operator): UpdateResult
+    {
+        $operations = [];
+        foreach ($ads as $ad) {
+            if (!($ad instanceof Ad)) {
+                throw new \ErrorException("Ad must be instance od Ad");
+            }
+
+            $operation = new AdOperation();
+            $operation->setOperand($ad);
+            $operation->setOperator($operator);
+            $operations[] = $operation;
+        }
+
+        $mutateResult = $this->adService->mutate($operations);
+        $result = new UpdateResult();
+        $this->processMutateResult($result, $operations, $mutateResult->getValue(), $mutateResult->getPartialFailureErrors());
+        $this->logger->info('Done');
+        $this->clearCache();
+        return $result;
+    }
+
+    /**
      * @param Operand $operand
      * @return AdGroupAd|mixed
      */
@@ -422,6 +460,4 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
     {
         return $operand->getAdGroupAd();
     }
-
-
 }

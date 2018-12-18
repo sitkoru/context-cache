@@ -9,6 +9,7 @@ use Google\AdsApi\AdWords\AdWordsSessionBuilder;
 use Google\AdsApi\AdWords\v201809\cm\AdGroupAdService;
 use Google\AdsApi\AdWords\v201809\cm\AdGroupCriterionService;
 use Google\AdsApi\AdWords\v201809\cm\AdGroupService;
+use Google\AdsApi\AdWords\v201809\cm\AdService;
 use Google\AdsApi\AdWords\v201809\cm\CampaignService;
 use Google\AdsApi\Common\OAuth2TokenBuilder;
 use Google\Auth\CredentialsLoader;
@@ -91,7 +92,11 @@ class AdWordsProvider
          * @var AdGroupAdService $adGroupAdService
          */
         $adGroupAdService = $services->get($session, AdGroupAdService::class);
-        $this->ads = new AdWordsAdsProvider($adGroupAdService, $cacheProvider, $session, $logger);
+        /**
+         * @var AdService $adService
+         */
+        $adService = $services->get($session, AdService::class);
+        $this->ads = new AdWordsAdsProvider($adGroupAdService, $adService, $cacheProvider, $session, $logger);
 
         /**
          * @var AdGroupCriterionService $adGroupCriterionService
