@@ -53,9 +53,10 @@ class ContextEntitiesProvider
     public function getDirectProvider(
         string $accessToken,
         string $clientLogin,
-        IQueryLogger $queryLogger = null
+        IQueryLogger $queryLogger = null,
+        $useSandbox = false
     ): DirectProvider {
-        return new DirectProvider($accessToken, $clientLogin, $this->cache, $this->logger, $queryLogger);
+        return new DirectProvider($accessToken, $clientLogin, $this->cache, $this->logger, $queryLogger, $useSandbox);
     }
 
     public function getAdWordsProvider(

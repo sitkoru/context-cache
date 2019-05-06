@@ -45,15 +45,17 @@ class DirectProvider
      * @param ICacheProvider        $cacheProvider
      * @param ContextEntitiesLogger $logger
      * @param null|IQueryLogger     $queryLogger
+     * @param bool                  $useSandbox
      */
     public function __construct(
         string $accessToken,
         string $clientLogin,
         ICacheProvider $cacheProvider,
         ContextEntitiesLogger $logger,
-        ?IQueryLogger $queryLogger = null
+        ?IQueryLogger $queryLogger = null,
+        $useSandbox = false
     ) {
-        $yandexService = new DirectApiService($accessToken, $clientLogin, $queryLogger, $logger->getLogger());
+        $yandexService = new DirectApiService($accessToken, $clientLogin, $queryLogger, $logger->getLogger(), $useSandbox);
 
         $this->adGroups = new DirectAdGroupsProvider($yandexService, $cacheProvider, $logger);
         $this->ads = new DirectAdsProvider($yandexService, $cacheProvider, $logger);
