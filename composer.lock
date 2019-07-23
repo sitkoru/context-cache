@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3fa24bed42b3f7e5cee494494c6f2042",
+    "content-hash": "bf90917c61cb9fb0963ca22aeb1c078b",
     "packages": [
         {
             "name": "doctrine/annotations",
@@ -1064,16 +1064,16 @@
         },
         {
             "name": "sitkoru/yandex-direct-api",
-            "version": "v2019.7.1",
+            "version": "v2019.7.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sitkoru/yandex-direct-api.git",
-                "reference": "0d31e3958a19b23314a169ecd735a7fbc7033712"
+                "reference": "54cf573f8ec8ca80afc20c2403331fbf2ee3c12f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sitkoru/yandex-direct-api/zipball/0d31e3958a19b23314a169ecd735a7fbc7033712",
-                "reference": "0d31e3958a19b23314a169ecd735a7fbc7033712",
+                "url": "https://api.github.com/repos/sitkoru/yandex-direct-api/zipball/54cf573f8ec8ca80afc20c2403331fbf2ee3c12f",
+                "reference": "54cf573f8ec8ca80afc20c2403331fbf2ee3c12f",
                 "shasum": ""
             },
             "require": {
@@ -1110,7 +1110,7 @@
                 }
             ],
             "description": "Client for Yandex.Direct API v5",
-            "time": "2019-07-23T05:57:49+00:00"
+            "time": "2019-07-23T06:49:30+00:00"
         },
         {
             "name": "symfony/inflector",
