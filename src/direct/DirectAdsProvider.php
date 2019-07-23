@@ -115,9 +115,19 @@ class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvi
             foreach (array_chunk($notFound, self::CRITERIA_MAX_CAMPAIGN_IDS) as $idsChunk) {
                 $criteria = new AdsSelectionCriteria();
                 $criteria->CampaignIds = $idsChunk;
-                $fromService = $this->directApiService->getAdsService()->get($criteria, AdFieldEnum::getValues(),
-                    TextAdFieldEnum::getValues(), MobileAppAdFieldEnum::getValues(),
-                    DynamicTextAdFieldEnum::getValues());
+                $fromService = $this->directApiService->getAdsService()->get($criteria,
+                    AdFieldEnum::getValues(),
+                    TextAdFieldEnum::getValues(),
+                    TextAdPriceExtensionFieldEnum::getValues(),
+                    MobileAppAdFieldEnum::getValues(),
+                    DynamicTextAdFieldEnum::getValues(),
+                    TextImageAdFieldEnum::getValues(),
+                    MobileAppImageAdFieldEnum::getValues(),
+                    TextAdBuilderAdFieldEnum::getValues(),
+                    MobileAppAdBuilderAdFieldEnum::getValues(),
+                    CpcVideoAdBuilderAdFieldEnum::getValues(),
+                    CpmBannerAdBuilderAdFieldEnum::getValues(),
+                    CpmVideoAdBuilderAdFieldEnum::getValues());
                 foreach ($fromService as $adGetItem) {
                     $ads[$adGetItem->Id] = $adGetItem;
                 }
@@ -173,12 +183,16 @@ class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvi
                 $fromService = $this->directApiService->getAdsService()->get($criteria,
                     AdFieldEnum::getValues(),
                     TextAdFieldEnum::getValues(),
+                    TextAdPriceExtensionFieldEnum::getValues(),
                     MobileAppAdFieldEnum::getValues(),
                     DynamicTextAdFieldEnum::getValues(),
                     TextImageAdFieldEnum::getValues(),
                     MobileAppImageAdFieldEnum::getValues(),
                     TextAdBuilderAdFieldEnum::getValues(),
-                    MobileAppAdBuilderAdFieldEnum::getValues()
+                    MobileAppAdBuilderAdFieldEnum::getValues(),
+                    CpcVideoAdBuilderAdFieldEnum::getValues(),
+                    CpmBannerAdBuilderAdFieldEnum::getValues(),
+                    CpmVideoAdBuilderAdFieldEnum::getValues()
                 );
                 foreach ($fromService as $adGetItem) {
                     $ads[$adGetItem->Id] = $adGetItem;
