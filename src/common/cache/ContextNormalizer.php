@@ -43,7 +43,7 @@ class ContextNormalizer extends GetSetMethodNormalizer
             /**
              * @var Enum $object
              */
-            $data['type'] = $object->__toString();
+            $data['type'] = $object ? $object->__toString() : null;
         }
         return array_filter($data, function ($value) {
             return $value !== null;
