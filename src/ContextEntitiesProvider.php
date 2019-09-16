@@ -54,7 +54,7 @@ class ContextEntitiesProvider
         string $accessToken,
         string $clientLogin,
         IQueryLogger $queryLogger = null,
-        $useSandbox = false
+        bool $useSandbox = false
     ): DirectProvider {
         return new DirectProvider($accessToken, $clientLogin, $this->cache, $this->logger, $queryLogger, $useSandbox);
     }

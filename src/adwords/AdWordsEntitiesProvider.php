@@ -225,17 +225,17 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
         return null;
     }
 
-    protected function processMutateResult(UpdateResult $result, array $operations, array $entities = [], ?array $mutateErrors = [])
+    protected function processMutateResult(UpdateResult $result, array $operations, array $entities = [], ?array $mutateErrors = []): UpdateResult
     {
         /**
-         * @var int[] $failed
-         * @var int[] $skipped
+         * @var int[]   $failed
+         * @var int[]   $skipped
          * @var array[] $errors
          */
         [$skipped, $failed, $errors] = $this->processMutateErrors($mutateErrors);
         $succeeded = [];
         foreach ($operations as $k => $operation) {
-            if (in_array($k, $failed) || in_array($k, $skipped)) {
+            if (in_array($k, $failed, true) || in_array($k, $skipped, true)) {
                 continue;
             }
 
@@ -246,43 +246,7 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
             $succeeded[$k] = $entry;
         }
 
-        // Display the results of the job.
-        $this->logger->info(sprintf('%d entities were added/updated successfully', \count($succeeded)));
-
-        $this->logger->info(sprintf("%d entities were skipped and should be retried: %s\n", \count($skipped),
-                implode(', ', $skipped)
-            )
-        );
-        if (\count($failed)) {
-            $result->success = false;
-        }
-        $this->logger->error(sprintf("%d entities were not added due to errors:\n", \count($failed)));
-        foreach ($failed as $errorIndex) {
-            $text = "Entity {$errorIndex} errors:" . PHP_EOL;
-            foreach ($errors[$errorIndex] as $i => $error) {
-                /**
-                 * @var ApiError $error
-                 */
-                $path = substr($error->getFieldPath(), strrpos($error->getFieldPath(), '.') + 1);
-                switch (true) {
-                    case $error instanceof PolicyViolationError:
-                        /**
-                         * @var PolicyViolationError $error
-                         */
-                        $text .= '<strong>' . $error->getExternalPolicyName() . '</strong> in <strong>'
-                            . $path . '</strong>:<br />' . $error->getExternalPolicyDescription() . '<br/>';
-                        break;
-                    case $error instanceof ApiError:
-                        $text .= $error->getErrorString();
-                        break;
-                    default:
-                        $text .= json_encode($error);
-                        break;
-                }
-            }
-            $result->errors[$errorIndex][0] = $text;
-            $this->logger->error($text);
-        }
+        $this->logJobResult($result, $succeeded, $skipped, $failed, $errors);
 
         return $result;
     }
@@ -324,7 +288,7 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
     }
 
     /**
-     * @param UpdateResult $jobResult
+     * @param UpdateResult   $jobResult
      * @param MutateResult[] $mutateResults
      * @return UpdateResult
      * @throws \ErrorException
@@ -332,8 +296,8 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
     protected function processJobResult(UpdateResult $jobResult, $mutateResults): UpdateResult
     {
         /**
-         * @var int[] $failed
-         * @var int[] $skipped
+         * @var int[]   $failed
+         * @var int[]   $skipped
          * @var array[] $errors
          */
         [$skipped, $failed, $errors] = $this->processErrors($mutateResults);
@@ -350,51 +314,15 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
             }
         }
 
-        // Display the results of the job.
-        $this->logger->info(sprintf('%d entities were added/updated successfully', \count($succeeded)));
-
-        $this->logger->info(sprintf("%d entities were skipped and should be retried: %s\n", \count($skipped),
-                implode(', ', $skipped)
-            )
-        );
-        if (\count($failed)) {
-            $jobResult->success = false;
-        }
-        $this->logger->error(sprintf("%d entities were not added due to errors:\n", \count($failed)));
-        foreach ($failed as $errorIndex) {
-            $text = "Entity {$errorIndex} errors:" . PHP_EOL;
-            foreach ($errors[$errorIndex] as $i => $error) {
-                /**
-                 * @var ApiError $error
-                 */
-                $path = substr($error->getFieldPath(), strrpos($error->getFieldPath(), '.') + 1);
-                switch (true) {
-                    case $error instanceof PolicyViolationError:
-                        /**
-                         * @var PolicyViolationError $error
-                         */
-                        $text .= '<strong>' . $error->getExternalPolicyName() . '</strong> in <strong>'
-                            . $path . '</strong>:<br />' . $error->getExternalPolicyDescription() . '<br/>';
-                        break;
-                    case $error instanceof ApiError:
-                        $text .= $error->getErrorString();
-                        break;
-                    default:
-                        $text .= json_encode($error);
-                        break;
-                }
-            }
-            $jobResult->errors[$errorIndex][0] = $text;
-            $this->logger->error($text);
-        }
+        $this->logJobResult($jobResult, $succeeded, $skipped, $failed, $errors);
 
         return $jobResult;
     }
 
     /**
      * @param callable $request
-     * @param int $try
-     * @param int $maxTry
+     * @param int      $try
+     * @param int      $maxTry
      * @return mixed
      * @throws ApiException
      */
@@ -421,4 +349,52 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
      * @return mixed
      */
     abstract protected function getOperandEntity(Operand $operand);
+
+    /**
+     * @param UpdateResult $result
+     * @param array        $succeeded
+     * @param array        $skipped
+     * @param array        $failed
+     * @param array        $errors
+     */
+    protected function logJobResult(UpdateResult $result, array $succeeded, array $skipped, array $failed, array $errors): void
+    {
+// Display the results of the job.
+        $this->logger->info(sprintf('%d entities were added/updated successfully', \count($succeeded)));
+
+        $this->logger->info(sprintf("%d entities were skipped and should be retried: %s\n", \count($skipped),
+                implode(', ', $skipped)
+            )
+        );
+        if (\count($failed)) {
+            $result->success = false;
+        }
+        $this->logger->error(sprintf("%d entities were not added due to errors:\n", \count($failed)));
+        foreach ($failed as $errorIndex) {
+            $text = "Entity {$errorIndex} errors:" . PHP_EOL;
+            foreach ($errors[$errorIndex] as $i => $error) {
+                /**
+                 * @var ApiError $error
+                 */
+                $path = substr($error->getFieldPath(), strrpos($error->getFieldPath(), '.') + 1);
+                switch (true) {
+                    case $error instanceof PolicyViolationError:
+                        /**
+                         * @var PolicyViolationError $error
+                         */
+                        $text .= '<strong>' . $error->getExternalPolicyName() . '</strong> in <strong>'
+                            . $path . '</strong>:<br />' . $error->getExternalPolicyDescription() . '<br/>';
+                        break;
+                    case $error instanceof ApiError:
+                        $text .= $error->getErrorString();
+                        break;
+                    default:
+                        $text .= json_encode($error);
+                        break;
+                }
+            }
+            $result->errors[$errorIndex][0] = $text;
+            $this->logger->error($text);
+        }
+    }
 }
