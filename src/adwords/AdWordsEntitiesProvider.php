@@ -2,6 +2,7 @@
 
 namespace sitkoru\contextcache\adwords;
 
+use ErrorException;
 use Google\AdsApi\AdWords\AdWordsServices;
 use Google\AdsApi\AdWords\AdWordsSession;
 use Google\AdsApi\AdWords\BatchJobs\v201809\BatchJobs;
@@ -23,7 +24,11 @@ use sitkoru\contextcache\common\EntitiesProvider;
 use sitkoru\contextcache\common\ICacheProvider;
 use sitkoru\contextcache\common\models\UpdateResult;
 use SoapFault;
+use Throwable;
 use UnexpectedValueException;
+use function count;
+use function in_array;
+use function is_array;
 
 abstract class AdWordsEntitiesProvider extends EntitiesProvider
 {
@@ -64,8 +69,8 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
      * @param $operations
      *
      * @return bool|MutateResult[]
-     * @throws \Google\AdsApi\AdWords\v201809\cm\ApiException
-     * @throws \UnexpectedValueException
+     * @throws ApiException
+     * @throws UnexpectedValueException
      * @throws AdWordsBatchJobCancelledException
      */
     public function runMutateJob(array $operations)
@@ -90,7 +95,7 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
         $batchJobs = new BatchJobs($this->adWordsSession);
         try {
             $batchJobs->uploadBatchJobOperations($operations, $uploadUrl);
-        } catch (\Throwable $ex) {
+        } catch (Throwable $ex) {
             $this->logger->error('Произошла ошибка при загрузке данных в Google AdWords. Попробуйте ещё раз немного позже');
 
             return false;
@@ -150,7 +155,7 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
             $mutateResults = $batchJobs->downloadBatchJobResults($batchJob->getDownloadUrl()->getUrl());
             $this->logger->info("Downloaded results from {$batchJob->getDownloadUrl()->getUrl()}:");
 
-            if (\count($mutateResults) === 0) {
+            if (count($mutateResults) === 0) {
                 $this->logger->info('No results available.');
             } else {
                 return $mutateResults;
@@ -166,7 +171,7 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
      * @param MutateResult[] $jobResult
      *
      * @return array
-     * @throws \ErrorException
+     * @throws ErrorException
      */
     protected function processErrors($jobResult): array
     {
@@ -174,34 +179,18 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
         $failed = [];
         $errors = [];
         $genericErrors = [];
-        if (!\is_array($jobResult)) {
-            throw new \ErrorException('Empty result from google');
+        if (!is_array($jobResult)) {
+            throw new ErrorException('Empty result from google');
         }
 
         foreach ($jobResult as $mutateResult) {
             if ($mutateResult->getErrorList()) {
                 foreach ($mutateResult->getErrorList()->getErrors() as $error) {
-                    if (\is_array($error)) {
+                    if (is_array($error)) {
                         $error = $error[0];
                     }
 
-                    $index = self::getSourceOperationIndex($error);
-                    if ($index !== null) {
-                        $type = explode('.', $error->getErrorString())[1];
-                        switch ($type) {
-                            case 'UNPROCESSED_RESULT':
-                            case 'BATCH_FAILURE':
-                                $skipped[] = $index;
-                                break;
-                            default:
-                                if (!\in_array($index, $failed, true)) {
-                                    $failed[] = $index;
-                                }
-                                $errors[$index][] = $error;
-                        }
-                    } else {
-                        $genericErrors[] = $error;
-                    }
+                    list($skipped, $failed, $errors, $genericErrors) = $this->fillErrors($error, $skipped, $failed, $errors, $genericErrors);
                 }
             }
         }
@@ -217,7 +206,7 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
     {
         $matches = [];
         // Get the index of operations that has a problem.
-        if (preg_match('/^operations\[(\d+)\]/', $error->getFieldPath(),
+        if (preg_match('/^operations\[(\d+)]/', $error->getFieldPath(),
             $matches)) {
             return $matches[1];
         }
@@ -264,23 +253,7 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
 
         if ($mutateErrors) {
             foreach ($mutateErrors as $mutateError) {
-                $index = self::getSourceOperationIndex($mutateError);
-                if ($index !== null) {
-                    $type = explode('.', $mutateError->getErrorString())[1];
-                    switch ($type) {
-                        case 'UNPROCESSED_RESULT':
-                        case 'BATCH_FAILURE':
-                            $skipped[] = $index;
-                            break;
-                        default:
-                            if (!\in_array($index, $failed, true)) {
-                                $failed[] = $index;
-                            }
-                            $errors[$index][] = $mutateError;
-                    }
-                } else {
-                    $genericErrors[] = $mutateError;
-                }
+                list($skipped, $failed, $errors, $genericErrors) = $this->fillErrors($mutateError, $skipped, $failed, $errors, $genericErrors);
             }
         }
 
@@ -291,7 +264,7 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
      * @param UpdateResult   $jobResult
      * @param MutateResult[] $mutateResults
      * @return UpdateResult
-     * @throws \ErrorException
+     * @throws ErrorException
      */
     protected function processJobResult(UpdateResult $jobResult, $mutateResults): UpdateResult
     {
@@ -359,17 +332,17 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
      */
     protected function logJobResult(UpdateResult $result, array $succeeded, array $skipped, array $failed, array $errors): void
     {
-// Display the results of the job.
-        $this->logger->info(sprintf('%d entities were added/updated successfully', \count($succeeded)));
+        // Display the results of the job.
+        $this->logger->info(sprintf('%d entities were added/updated successfully', count($succeeded)));
 
-        $this->logger->info(sprintf("%d entities were skipped and should be retried: %s\n", \count($skipped),
+        $this->logger->info(sprintf("%d entities were skipped and should be retried: %s\n", count($skipped),
                 implode(', ', $skipped)
             )
         );
-        if (\count($failed)) {
+        if (count($failed)) {
             $result->success = false;
         }
-        $this->logger->error(sprintf("%d entities were not added due to errors:\n", \count($failed)));
+        $this->logger->error(sprintf("%d entities were not added due to errors:\n", count($failed)));
         foreach ($failed as $errorIndex) {
             $text = "Entity {$errorIndex} errors:" . PHP_EOL;
             foreach ($errors[$errorIndex] as $i => $error) {
@@ -396,5 +369,35 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
             $result->errors[$errorIndex][0] = $text;
             $this->logger->error($text);
         }
+    }
+
+    /**
+     * @param ApiError $error
+     * @param array    $skipped
+     * @param array    $failed
+     * @param array    $errors
+     * @param array    $genericErrors
+     * @return array
+     */
+    protected function fillErrors(ApiError $error, array $skipped, array $failed, array $errors, array $genericErrors): array
+    {
+        $index = self::getSourceOperationIndex($error);
+        if ($index !== null) {
+            $type = explode('.', $error->getErrorString())[1];
+            switch ($type) {
+                case 'UNPROCESSED_RESULT':
+                case 'BATCH_FAILURE':
+                    $skipped[] = $index;
+                    break;
+                default:
+                    if (!in_array($index, $failed, true)) {
+                        $failed[] = $index;
+                    }
+                    $errors[$index][] = $error;
+            }
+        } else {
+            $genericErrors[] = $error;
+        }
+        return array($skipped, $failed, $errors, $genericErrors);
     }
 }
