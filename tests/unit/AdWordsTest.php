@@ -25,9 +25,10 @@ class AdWordsTest extends TestCase
     public function __construct($name = null, array $data = [], $dataName = '')
     {
         parent::__construct($name, $data, $dataName);
-        $cacheProvider = new MongoDbCacheProvider('mongodb://mongodb');
+
         $logger = new Logger('adWordsLogger');
         $logger->pushHandler(new ErrorLogHandler());
+        $cacheProvider = new MongoDbCacheProvider('mongodb://mongodb', $logger);
         $contextEntitiesProvider = new ContextEntitiesProvider($cacheProvider, $logger);
         $this->provider = $contextEntitiesProvider->getAdWordsProvider(ADWORDS_CUSTOMER_ID, ADWORDS_AUTH_FILE_PATH);
     }

@@ -16,9 +16,9 @@ class DirectUpdateTest extends TestCase
     public function __construct($name = null, array $data = [], $dataName = '')
     {
         parent::__construct($name, $data, $dataName);
-        $cacheProvider = new MongoDbCacheProvider('mongodb://mongodb');
         $logger = new Logger('directUpdateLogger');
         $logger->pushHandler(new ErrorLogHandler());
+        $cacheProvider = new MongoDbCacheProvider('mongodb://mongodb', $logger);
         $contextEntitiesProvider = new ContextEntitiesProvider($cacheProvider, $logger);
         $this->provider = $contextEntitiesProvider->getDirectProvider(DIRECT_UPDATE_ACCESS_TOKEN, DIRECT_UPDATE_LOGIN);
     }

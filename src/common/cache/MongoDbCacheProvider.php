@@ -4,6 +4,7 @@ namespace sitkoru\contextcache\common\cache;
 
 
 use MongoDB\Client;
+use Psr\Log\LoggerInterface;
 use sitkoru\contextcache\common\ICacheCollection;
 use sitkoru\contextcache\common\ICacheProvider;
 
@@ -13,10 +14,15 @@ class MongoDbCacheProvider implements ICacheProvider
      * @var Client
      */
     private $client;
+    /**
+     * @var LoggerInterface|null
+     */
+    private $logger;
 
-    public function __construct(string $mongoUrl)
+    public function __construct(string $mongoUrl, ?LoggerInterface $logger)
     {
         $this->client = new Client($mongoUrl);
+        $this->logger = $logger;
     }
 
     public function getTimeStamp(string $service): int
@@ -42,6 +48,6 @@ class MongoDbCacheProvider implements ICacheProvider
 
     public function collection(string $service, string $collection, string $keyField): ICacheCollection
     {
-        return new MongoDbCacheCollection($this->client, $service, $collection, $keyField);
+        return new MongoDbCacheCollection($this->client, $service, $collection, $keyField, $this->logger);
     }
 }

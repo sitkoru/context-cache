@@ -4,15 +4,22 @@ namespace sitkoru\contextcache\common\cache;
 
 
 use MongoDB\Client;
+use MongoDB\Collection;
+use MongoDB\Driver\Exception\RuntimeException;
+use MongoDB\Exception\InvalidArgumentException;
+use MongoDB\Exception\UnsupportedException;
+use Psr\Log\LoggerInterface;
 use sitkoru\contextcache\common\ICacheCollection;
 use sitkoru\contextcache\helpers\ArrayHelper;
+use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\Normalizer\ArrayDenormalizer;
 use Symfony\Component\Serializer\Serializer;
+use function count;
 
 class MongoDbCacheCollection implements ICacheCollection
 {
     /**
-     * @var \MongoDB\Collection
+     * @var Collection
      */
     protected $collection;
 
@@ -20,11 +27,16 @@ class MongoDbCacheCollection implements ICacheCollection
      * @var string
      */
     protected $keyField;
+    /**
+     * @var LoggerInterface|null
+     */
+    private $logger;
 
-    public function __construct(Client $client, string $service, string $collection, string $keyField)
+    public function __construct(Client $client, string $service, string $collection, string $keyField, ?LoggerInterface $logger)
     {
         $this->keyField = $keyField;
         $this->collection = $client->selectCollection($service, $collection);
+        $this->logger = $logger;
     }
 
     /**
@@ -49,9 +61,9 @@ class MongoDbCacheCollection implements ICacheCollection
      * @param array  $ids
      * @param mixed  $indexBy
      * @return array
-     * @throws \MongoDB\Exception\UnsupportedException
-     * @throws \MongoDB\Exception\InvalidArgumentException
-     * @throws \MongoDB\Driver\Exception\RuntimeException
+     * @throws UnsupportedException
+     * @throws InvalidArgumentException
+     * @throws RuntimeException
      */
     public function get(array $ids, string $field, $indexBy = null): array
     {
@@ -71,9 +83,9 @@ class MongoDbCacheCollection implements ICacheCollection
 
     /**
      * @param array $entities
-     * @throws \MongoDB\Driver\Exception\RuntimeException
-     * @throws \MongoDB\Exception\InvalidArgumentException
-     * @throws \MongoDB\Exception\UnsupportedException
+     * @throws RuntimeException
+     * @throws InvalidArgumentException
+     * @throws UnsupportedException
      */
     public function set(array $entities): void
     {
@@ -97,7 +109,7 @@ class MongoDbCacheCollection implements ICacheCollection
     {
         $filterItems = explode('.', $this->keyField);
 
-        if (\count($filterItems) === 1) {
+        if (count($filterItems) === 1) {
             $keyValue = $entity[$this->keyField];
         } else {
             $keyValue = $this->getArrayLastValueByArrayKeysNesting($entity, $filterItems);
@@ -117,7 +129,7 @@ class MongoDbCacheCollection implements ICacheCollection
         $lastLevelArray = [];
         foreach ($arrayKeysNesting as $level) {
             //last item
-            if (\count($arrayKeysNesting) - 1 === $i) {
+            if (count($arrayKeysNesting) - 1 === $i) {
                 return $lastLevelArray[$level];
             }
 
@@ -135,8 +147,19 @@ class MongoDbCacheCollection implements ICacheCollection
     {
         $preparedEntities = [];
         foreach ($entities as $entity) {
-            $preparedEntity = self::getSerializer()->normalize($entity, 'json');
-            $preparedEntities[] = $preparedEntity;
+            try {
+                $preparedEntity = self::getSerializer()->normalize($entity, 'json');
+                $preparedEntities[] = $preparedEntity;
+            } catch (ExceptionInterface $e) {
+                if ($this->logger) {
+                    $keyField = $this->keyField;
+                    $this->logger->error("Can't serialize entry "
+                        . $entity->$keyField
+                        . " (" . get_class($entity) . ") to collection "
+                        . $this->collection->getCollectionName() . ": " . $e->getMessage());
+                }
+            }
+
         }
         return $preparedEntities;
     }
@@ -146,8 +169,19 @@ class MongoDbCacheCollection implements ICacheCollection
         $entities = [];
         foreach ($serializedEntities as $entry) {
             if ($entry->_class !== null) {
-                $entity = self::getSerializer()->denormalize($entry, $entry->_class, 'json');
-                $entities[] = $entity;
+                try {
+                    $entity = self::getSerializer()->denormalize($entry, $entry->_class, 'json');
+                    $entities[] = $entity;
+                } catch (ExceptionInterface $e) {
+                    if ($this->logger) {
+                        $keyField = $this->keyField;
+                        $this->logger->error("Can't deserialize entry "
+                            . $entry->$keyField
+                            . " (" . $entry->_class . ") from collection "
+                            . $this->collection->getCollectionName() . ": " . $e->getMessage());
+                    }
+                }
+
             }
         }
         return $entities;

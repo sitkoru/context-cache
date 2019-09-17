@@ -36,9 +36,9 @@ AnnotationRegistry::registerLoader([$loader, 'loadClass']);
 Для примера, получим список кампаний аккаунта в Яндекс.Директ
 
 ```php
-$cacheProvider = new MongoDbCacheProvider('mongodb://mongodb');
 $logger = new Logger('directLogger');
 $logger->pushHandler(new ErrorLogHandler());
+$cacheProvider = new MongoDbCacheProvider('mongodb://mongodb', $logger);
 $contextEntitiesProvider = new ContextEntitiesProvider($cacheProvider, $logger);
 $provider = $contextEntitiesProvider->getDirectProvider("ваш токен", "ваш логин");
 $campaigns = $provider->campaigns->getAll([]);
@@ -47,9 +47,9 @@ $campaigns = $provider->campaigns->getAll([]);
 Тоже самое для Google AdWords
 
 ```php
-$cacheProvider = new MongoDbCacheProvider('mongodb://mongodb');
 $logger = new Logger('adWordsLogger');
 $logger->pushHandler(new ErrorLogHandler());
+$cacheProvider = new MongoDbCacheProvider('mongodb://mongodb', $logger);
 $contextEntitiesProvider = new ContextEntitiesProvider($cacheProvider, $logger);
 $provider = $contextEntitiesProvider->getAdWordsProvider("айди клиента", "путь к файлу auth.ini");
 $campaigns = $provider->campaigns->getAll([]);

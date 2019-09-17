@@ -6,4 +6,4 @@ ini_set("display_errors","on");
 $loader = require __DIR__ . '/../vendor/autoload.php';
 AnnotationRegistry::registerLoader([$loader, 'loadClass']);
 
-require_once __DIR__ . '/constants.php';
+include_once __DIR__ . '/constants.php';
