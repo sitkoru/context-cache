@@ -33,7 +33,9 @@ class ContextEntitiesProvider
                 'ads',
                 'adGroups',
                 'campaigns',
-                'keywords'
+                'keywords',
+                'audiencetargets',
+                'retargetinglists'
             ],
             'google' => [
                 'adGroupCriterions',
