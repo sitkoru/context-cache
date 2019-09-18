@@ -6,11 +6,10 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-    
+    container:
+      image: sitkoru/php7-ci
     steps:
     - uses: actions/checkout@v1
-    - name: install mongo-ext 1.6
-      run: pecl install mongodb
     - name: Install packages
       run: composer install
     - name: phpstan
