@@ -9,6 +9,8 @@ jobs:
     
     steps:
     - uses: actions/checkout@v1
+    - name: install mongo-ext 1.6
+      run: pecl install mongodb
     - name: Install packages
       run: composer install
     - name: phpstan
