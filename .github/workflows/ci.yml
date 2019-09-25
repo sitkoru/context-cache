@@ -7,7 +7,7 @@ jobs:
 
     runs-on: ubuntu-latest
     container:
-      image: sitkoru/php7-ci
+      image: docker.pkg.github.com/sitkoru/php7-ci/php7-ci
     steps:
     - uses: actions/checkout@v1
     - name: Install packages
