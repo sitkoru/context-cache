@@ -11,7 +11,7 @@
   ],
   "minimum-stability": "stable",
   "require": {
-    "sitkoru/yandex-direct-api": "^2019.9.1",
+    "sitkoru/yandex-direct-api": "2019.10.2",
     "googleads/googleads-php-lib": "^43.0.0",
     "mongodb/mongodb": "^1.5.0",
     "psr/log": "^1.0",
@@ -20,7 +20,7 @@
     "ext-json": "*",
     "ext-soap": "*",
     "ext-mongodb": "*",
-    "symfony/property-info": "^4.3.4"
+    "symfony/property-info": "^4.3.5"
   },
   "require-dev": {
     "phpunit/phpunit": "^7.3.5",
