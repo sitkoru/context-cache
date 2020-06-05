@@ -19,7 +19,7 @@
     "php": "^7.2",
     "ext-json": "*",
     "ext-soap": "*",
-    "ext-mongodb": "*",
+    "ext-mongodb": "^1.7",
     "symfony/property-info": "^4.3.5"
   },
   "require-dev": {
