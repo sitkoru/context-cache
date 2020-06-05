@@ -11,11 +11,11 @@
   ],
   "minimum-stability": "stable",
   "require": {
-    "sitkoru/yandex-direct-api": "2019.10.2",
-    "googleads/googleads-php-lib": "^43.0.0",
-    "mongodb/mongodb": "^1.5.0",
+    "sitkoru/yandex-direct-api": "2020.05.02",
+    "googleads/googleads-php-lib": "^47.0.0",
+    "mongodb/mongodb": "^1.6.0",
     "psr/log": "^1.0",
-    "guzzlehttp/guzzle": "^6.3.3",
+    "guzzlehttp/guzzle": "^6.5.4",
     "php": "^7.2",
     "ext-json": "*",
     "ext-soap": "*",
@@ -26,9 +26,9 @@
     "phpunit/phpunit": "^7.3.5",
     "monolog/monolog": "^1.22.0",
     "roave/security-advisories": "dev-master",
-    "phpstan/phpstan": "^0.11.15",
-    "phpstan/phpstan-strict-rules": "^0.11.1",
-    "thecodingmachine/phpstan-strict-rules": "^0.11.2"
+    "phpstan/phpstan": "^0.12.25",
+    "phpstan/phpstan-strict-rules": "^0.12.2",
+    "thecodingmachine/phpstan-strict-rules": "^0.12.0"
   },
   "autoload": {
     "psr-4": {
