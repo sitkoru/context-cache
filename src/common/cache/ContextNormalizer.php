@@ -45,7 +45,7 @@ class ContextNormalizer extends GetSetMethodNormalizer
              */
             $data['type'] = $object ? $object->__toString() : null;
         }
-        return array_filter($data, function ($value) {
+        return array_filter($data, function ($value): bool {
             return $value !== null;
         });
     }
@@ -70,13 +70,13 @@ class ContextNormalizer extends GetSetMethodNormalizer
 
     /**
      * @param object      $object
-     * @param  string     $attribute
+     * @param string      $attribute
      * @param mixed       $value
      * @param null|string $format
      * @param array       $context
+     * @return void
      * @throws \ReflectionException
      *
-     * @return void
      */
     protected function setAttributeValue($object, $attribute, $value, $format = null, array $context = []): void
     {

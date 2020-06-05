@@ -181,8 +181,7 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
         ICacheProvider $cacheProvider,
         AdWordsSession $adWordsSession,
         ContextEntitiesLogger $logger
-    )
-    {
+    ) {
         parent::__construct($cacheProvider, $adWordsSession, $logger);
         $this->collection = 'adGroupAds';
         $this->adGroupAdService = $adGroupService;
@@ -212,7 +211,7 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
             $selector->setFields(self::$fields);
             $predicates[] = new Predicate('Id', PredicateOperator::IN, $ids);
             $selector->setPredicates($predicates);
-            $fromService = (array)$this->doRequest(function () use ($selector) {
+            $fromService = (array)$this->doRequest(function () use ($selector): array {
                 return $this->adGroupAdService->get($selector)->getEntries();
             });
             foreach ($fromService as $adGroupAdItem) {
@@ -260,7 +259,7 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
             $selector->setFields(self::$fields);
             $predicates[] = new Predicate('CampaignId', PredicateOperator::IN, $notFound);
             $selector->setPredicates($predicates);
-            $fromService = (array)$this->doRequest(function () use ($selector) {
+            $fromService = (array)$this->doRequest(function () use ($selector): array {
                 return $this->adGroupAdService->get($selector)->getEntries();
             });
             foreach ($fromService as $adGroupAdItem) {
@@ -297,7 +296,7 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
             $selector->setFields(self::$fields);
             $predicates[] = new Predicate('AdGroupId', PredicateOperator::IN, $notFound);
             $selector->setPredicates($predicates);
-            $fromService = (array)$this->doRequest(function () use ($selector) {
+            $fromService = (array)$this->doRequest(function () use ($selector): array {
                 return $this->adGroupAdService->get($selector)->getEntries();
             });
             foreach ($fromService as $adGroupAdItem) {
@@ -388,7 +387,8 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
             }
         } else {
             $mutateResult = $this->adGroupAdService->mutate($addOperations);
-            $this->processMutateResult($result, $addOperations, $mutateResult->getValue(), $mutateResult->getPartialFailureErrors());
+            $this->processMutateResult($result, $addOperations, $mutateResult->getValue(),
+                $mutateResult->getPartialFailureErrors());
             if (!$result->success) {
                 foreach ($result->errors as $adOperationId => $errors) {
                     $adOperation = $addOperations[$adOperationId];
@@ -413,7 +413,8 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
                         }
                     }
                 }
-                $this->processMutateResult($result, array_values($deleteOperations), $jobResults->getValue(), $jobResults->getPartialFailureErrors());
+                $this->processMutateResult($result, array_values($deleteOperations), $jobResults->getValue(),
+                    $jobResults->getPartialFailureErrors());
             }
         }
 
@@ -424,7 +425,7 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
     }
 
     /**
-     * @param array $ads
+     * @param array  $ads
      * @param string $operator
      * @return UpdateResult
      * @throws \ErrorException
@@ -446,7 +447,8 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
 
         $mutateResult = $this->adService->mutate($operations);
         $result = new UpdateResult();
-        $this->processMutateResult($result, $operations, $mutateResult->getValue(), $mutateResult->getPartialFailureErrors());
+        $this->processMutateResult($result, $operations, $mutateResult->getValue(),
+            $mutateResult->getPartialFailureErrors());
         $this->logger->info('Done');
         $this->clearCache();
         return $result;

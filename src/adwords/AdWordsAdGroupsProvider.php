@@ -88,7 +88,7 @@ class AdWordsAdGroupsProvider extends AdWordsEntitiesProvider implements IEntiti
             $selector->setFields(self::$fields);
             $predicates[] = new Predicate('Id', PredicateOperator::IN, $ids);
             $selector->setPredicates($predicates);
-            $fromService = (array)$this->doRequest(function () use ($selector) {
+            $fromService = (array)$this->doRequest(function () use ($selector): array {
                 return $this->adGroupService->get($selector)->getEntries();
             });
             foreach ($fromService as $adGroupItem) {
@@ -135,7 +135,7 @@ class AdWordsAdGroupsProvider extends AdWordsEntitiesProvider implements IEntiti
             $selector->setFields(self::$fields);
             $predicates[] = new Predicate('CampaignId', PredicateOperator::IN, $notFound);
             $selector->setPredicates($predicates);
-            $fromService = (array)$this->doRequest(function () use ($selector) {
+            $fromService = (array)$this->doRequest(function () use ($selector): array {
                 return $this->adGroupService->get($selector)->getEntries();
             });
             foreach ($fromService as $adGroupItem) {
@@ -175,7 +175,8 @@ class AdWordsAdGroupsProvider extends AdWordsEntitiesProvider implements IEntiti
             }
         } else {
             $mutateResult = $this->adGroupService->mutate($addOperations);
-            $this->processMutateResult($result, $addOperations, $mutateResult->getValue(), $mutateResult->getPartialFailureErrors());
+            $this->processMutateResult($result, $addOperations, $mutateResult->getValue(),
+                $mutateResult->getPartialFailureErrors());
         }
         $this->logger->info('Done');
         $this->clearCache();

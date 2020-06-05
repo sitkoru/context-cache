@@ -6,6 +6,7 @@ namespace sitkoru\contextcache\adwords;
 use Google\AdsApi\AdWords\AdWordsSession;
 use Google\AdsApi\AdWords\v201809\cm\AdGroupCriterion;
 use Google\AdsApi\AdWords\v201809\cm\AdGroupCriterionOperation;
+use Google\AdsApi\AdWords\v201809\cm\AdGroupCriterionPage;
 use Google\AdsApi\AdWords\v201809\cm\AdGroupCriterionService;
 use Google\AdsApi\AdWords\v201809\cm\Operand;
 use Google\AdsApi\AdWords\v201809\cm\Operator;
@@ -116,7 +117,7 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
     {
         $notFound = $ids;
 
-        $indexBy = function (AdGroupCriterion $criterion) {
+        $indexBy = function (AdGroupCriterion $criterion): string {
             return $criterion->getAdGroupId() . $criterion->getCriterion()->getId();
         };
         /**
@@ -124,7 +125,7 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
          */
         $criterions = $this->getFromCache($ids, 'criterion.id', $indexBy);
         if ($criterions) {
-            $found = array_unique(ArrayHelper::getColumn($criterions, function (AdGroupCriterion $criterion) {
+            $found = array_unique(ArrayHelper::getColumn($criterions, function (AdGroupCriterion $criterion): int {
                 return $criterion->getCriterion()->getId();
             }));
             $notFound = array_values(array_diff($ids, $found));
@@ -135,7 +136,7 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
                 $selector->setFields(self::$fields);
                 $predicates[] = new Predicate('Id', PredicateOperator::IN, $idsChunk);
                 $selector->setPredicates($predicates);
-                $fromService = (array)$this->doRequest(function () use ($selector) {
+                $fromService = (array)$this->doRequest(function () use ($selector): array {
                     return $this->adGroupCriterionService->get($selector)->getEntries();
                 });
                 foreach ($fromService as $criterionItem) {
@@ -172,7 +173,7 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
     {
         $notFound = $adGroupIds;
 
-        $indexBy = function (AdGroupCriterion $criterion) {
+        $indexBy = function (AdGroupCriterion $criterion): int {
             return $criterion->getAdGroupId() . $criterion->getCriterion()->getId();
         };
         /**
@@ -188,7 +189,7 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
             $selector->setFields(self::$fields);
             $predicates[] = new Predicate('AdGroupId', PredicateOperator::IN, $notFound);
             $selector->setPredicates($predicates);
-            $fromService = (array)$this->doRequest(function () use ($selector) {
+            $fromService = (array)$this->doRequest(function () use ($selector): array {
                 return $this->adGroupCriterionService->get($selector)->getEntries();
             });
             foreach ($fromService as $criterionItem) {
@@ -210,7 +211,7 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
     {
         $notFound = $campaignIds;
 
-        $indexBy = function (AdGroupCriterion $criterion) {
+        $indexBy = function (AdGroupCriterion $criterion): string {
             return $criterion->getBaseCampaignId() . $criterion->getAdGroupId() . $criterion->getCriterion()->getId();
         };
         /**
@@ -231,7 +232,7 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
             $page = 0;
             do {
                 $page++;
-                $pageResult = $this->doRequest(function () use ($selector) {
+                $pageResult = $this->doRequest(function () use ($selector): AdGroupCriterionPage {
                     return $this->adGroupCriterionService->get($selector);
                 });
 
@@ -278,7 +279,8 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
             }
         } else {
             $mutateResult = $this->adGroupCriterionService->mutate($updateOperations);
-            $this->processMutateResult($result, $updateOperations, $mutateResult->getValue(), $mutateResult->getPartialFailureErrors());
+            $this->processMutateResult($result, $updateOperations, $mutateResult->getValue(),
+                $mutateResult->getPartialFailureErrors());
         }
 
         $this->logger->info('Done');

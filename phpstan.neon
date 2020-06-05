@@ -3,6 +3,7 @@ parameters:
     ignoreErrors:
           - '#Variable property access on .*#'
           - '#Variable method call on .*#'
+          - '#Instantiated class directapi\\components\\Enum is abstract#'
 services:
   -
     class: TheCodingMachine\PHPStan\Rules\Exceptions\EmptyExceptionRule
