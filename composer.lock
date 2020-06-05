@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2a4a53cd3857dbd0d7f9242d447ff537",
+    "content-hash": "287466403a568cde9fcb9ac9246cdc12",
     "packages": [
         {
             "name": "doctrine/annotations",
@@ -748,16 +748,16 @@
         },
         {
             "name": "netresearch/jsonmapper",
-            "version": "v1.6.0",
+            "version": "v2.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/cweiske/jsonmapper.git",
-                "reference": "0d4d1b48d682a93b6bfedf60b88c7750e9cb0b06"
+                "reference": "e0f1e33a71587aca81be5cffbb9746510e1fe04e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/cweiske/jsonmapper/zipball/0d4d1b48d682a93b6bfedf60b88c7750e9cb0b06",
-                "reference": "0d4d1b48d682a93b6bfedf60b88c7750e9cb0b06",
+                "url": "https://api.github.com/repos/cweiske/jsonmapper/zipball/e0f1e33a71587aca81be5cffbb9746510e1fe04e",
+                "reference": "e0f1e33a71587aca81be5cffbb9746510e1fe04e",
                 "shasum": ""
             },
             "require": {
@@ -768,8 +768,8 @@
                 "php": ">=5.6"
             },
             "require-dev": {
-                "phpunit/phpunit": "~4.8.35 || ~5.7 || ~6.4",
-                "squizlabs/php_codesniffer": "~1.5"
+                "phpunit/phpunit": "~4.8.35 || ~5.7 || ~6.4 || ~7.0",
+                "squizlabs/php_codesniffer": "~3.5"
             },
             "type": "library",
             "autoload": {
@@ -784,13 +784,13 @@
             "authors": [
                 {
                     "name": "Christian Weiske",
-                    "role": "Developer",
                     "email": "cweiske@cweiske.de",
-                    "homepage": "http://github.com/cweiske/jsonmapper/"
+                    "homepage": "http://github.com/cweiske/jsonmapper/",
+                    "role": "Developer"
                 }
             ],
             "description": "Map nested JSON structures onto PHP classes",
-            "time": "2019-08-15T19:41:25+00:00"
+            "time": "2020-04-16T18:48:43+00:00"
         },
         {
             "name": "phpdocumentor/reflection-common",
@@ -1125,16 +1125,16 @@
         },
         {
             "name": "sitkoru/yandex-direct-api",
-            "version": "2020.05.02",
+            "version": "2020.06.01",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sitkoru/yandex-direct-api.git",
-                "reference": "c6f071cec0c8cd7d6a601dcb11008d14cd232511"
+                "reference": "1464d2b86595c86c983a2c4b3bac20b46bfc9763"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sitkoru/yandex-direct-api/zipball/c6f071cec0c8cd7d6a601dcb11008d14cd232511",
-                "reference": "c6f071cec0c8cd7d6a601dcb11008d14cd232511",
+                "url": "https://api.github.com/repos/sitkoru/yandex-direct-api/zipball/1464d2b86595c86c983a2c4b3bac20b46bfc9763",
+                "reference": "1464d2b86595c86c983a2c4b3bac20b46bfc9763",
                 "shasum": ""
             },
             "require": {
@@ -1142,17 +1142,17 @@
                 "doctrine/cache": "^1.8",
                 "ext-json": "*",
                 "guzzlehttp/guzzle": "^6.3.2",
-                "netresearch/jsonmapper": "~1.6.0",
+                "netresearch/jsonmapper": "^2.1.0",
                 "php": ">=7.1.0",
                 "psr/log": "^1.1.0",
                 "symfony/validator": "^4.3 || ^5.0"
             },
             "require-dev": {
-                "phpstan/phpstan": "^0.11.15",
-                "phpstan/phpstan-strict-rules": "^0.11.1",
-                "phpunit/phpunit": "^7.3",
+                "phpstan/phpstan": "^0.12.25",
+                "phpstan/phpstan-strict-rules": "^0.12.2",
+                "phpunit/phpunit": "^8.5",
                 "roave/security-advisories": "dev-master",
-                "thecodingmachine/phpstan-strict-rules": "^0.11.2"
+                "thecodingmachine/phpstan-strict-rules": "^0.12.0"
             },
             "type": "library",
             "autoload": {
@@ -1171,7 +1171,7 @@
                 }
             ],
             "description": "Client for Yandex.Direct API v5",
-            "time": "2020-05-29T09:56:37+00:00"
+            "time": "2020-06-05T13:30:27+00:00"
         },
         {
             "name": "symfony/deprecation-contracts",
@@ -4003,7 +4003,7 @@
         "php": "^7.2",
         "ext-json": "*",
         "ext-soap": "*",
-        "ext-mongodb": "*"
+        "ext-mongodb": "^1.7"
     },
     "platform-dev": [],
     "plugin-api-version": "1.1.0"
