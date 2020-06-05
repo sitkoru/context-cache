@@ -2,10 +2,12 @@
 
 namespace sitkoru\contextcache\adwords;
 
+use Exception;
 use Google\AdsApi\AdWords\AdWordsSession;
 use Google\AdsApi\AdWords\v201809\cm\AdGroup;
 use Google\AdsApi\AdWords\v201809\cm\AdGroupOperation;
 use Google\AdsApi\AdWords\v201809\cm\AdGroupService;
+use Google\AdsApi\AdWords\v201809\cm\ApiException;
 use Google\AdsApi\AdWords\v201809\cm\Operand;
 use Google\AdsApi\AdWords\v201809\cm\Operator;
 use Google\AdsApi\AdWords\v201809\cm\Predicate;
@@ -16,6 +18,7 @@ use sitkoru\contextcache\common\ICacheProvider;
 use sitkoru\contextcache\common\IEntitiesProvider;
 use sitkoru\contextcache\common\models\UpdateResult;
 use sitkoru\contextcache\helpers\ArrayHelper;
+use function count;
 
 class AdWordsAdGroupsProvider extends AdWordsEntitiesProvider implements IEntitiesProvider
 {
@@ -70,7 +73,7 @@ class AdWordsAdGroupsProvider extends AdWordsEntitiesProvider implements IEntiti
      * @param array $ids
      * @param array $predicates
      * @return AdGroup[]
-     * @throws \Google\AdsApi\AdWords\v201809\cm\ApiException
+     * @throws ApiException
      */
     public function getAll(array $ids, array $predicates = []): array
     {
@@ -88,8 +91,9 @@ class AdWordsAdGroupsProvider extends AdWordsEntitiesProvider implements IEntiti
             $selector->setFields(self::$fields);
             $predicates[] = new Predicate('Id', PredicateOperator::IN, $ids);
             $selector->setPredicates($predicates);
-            $fromService = (array)$this->doRequest(function () use ($selector): array {
-                return $this->adGroupService->get($selector)->getEntries();
+            $fromService = $this->doRequest(function () use ($selector): array {
+                $entries = $this->adGroupService->get($selector)->getEntries();
+                return $entries !== null ? $entries : [];
             });
             foreach ($fromService as $adGroupItem) {
                 $adGroups[$adGroupItem->getId()] = $adGroupItem;
@@ -102,9 +106,9 @@ class AdWordsAdGroupsProvider extends AdWordsEntitiesProvider implements IEntiti
     /**
      * @param int $id
      * @return AdGroup|null
-     * @throws \Exception
+     * @throws Exception
      */
-    public function getOne($id): AdGroup
+    public function getOne($id): ?AdGroup
     {
         $adGroups = $this->getAll([$id]);
         if ($adGroups) {
@@ -117,7 +121,7 @@ class AdWordsAdGroupsProvider extends AdWordsEntitiesProvider implements IEntiti
      * @param array $campaignIds
      * @param array $predicates
      * @return AdGroup[]
-     * @throws \Google\AdsApi\AdWords\v201809\cm\ApiException
+     * @throws ApiException
      */
     public function getByCampaignIds(array $campaignIds, array $predicates = []): array
     {
@@ -135,8 +139,9 @@ class AdWordsAdGroupsProvider extends AdWordsEntitiesProvider implements IEntiti
             $selector->setFields(self::$fields);
             $predicates[] = new Predicate('CampaignId', PredicateOperator::IN, $notFound);
             $selector->setPredicates($predicates);
-            $fromService = (array)$this->doRequest(function () use ($selector): array {
-                return $this->adGroupService->get($selector)->getEntries();
+            $fromService = $this->doRequest(function () use ($selector): array {
+                $entries = $this->adGroupService->get($selector)->getEntries();
+                return $entries !== null ? $entries : [];
             });
             foreach ($fromService as $adGroupItem) {
                 $adGroups[$adGroupItem->getId()] = $adGroupItem;
@@ -149,7 +154,7 @@ class AdWordsAdGroupsProvider extends AdWordsEntitiesProvider implements IEntiti
     /**
      * @param AdGroup[] $entities
      * @return UpdateResult
-     * @throws \Exception
+     * @throws Exception
      */
     public function update(array $entities): UpdateResult
     {
@@ -165,11 +170,11 @@ class AdWordsAdGroupsProvider extends AdWordsEntitiesProvider implements IEntiti
             $addOperation->setOperator(Operator::SET);
             $addOperations[] = $addOperation;
         }
-        $this->logger->info('Update operations: ' . \count($addOperations));
+        $this->logger->info('Update operations: ' . count($addOperations));
 
         if (count($addOperations) > 1000) {
             foreach (array_chunk($addOperations, self::MAX_OPERATIONS_SIZE) as $i => $addChunk) {
-                $this->logger->info('Update chunk #' . $i . '. Size: ' . \count($addChunk));
+                $this->logger->info('Update chunk #' . $i . '. Size: ' . count($addChunk));
                 $jobResults = $this->runMutateJob($addChunk);
                 $this->processJobResult($result, $jobResults);
             }

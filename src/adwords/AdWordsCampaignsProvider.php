@@ -3,7 +3,9 @@
 namespace sitkoru\contextcache\adwords;
 
 
+use ErrorException;
 use Google\AdsApi\AdWords\AdWordsSession;
+use Google\AdsApi\AdWords\v201809\cm\ApiException;
 use Google\AdsApi\AdWords\v201809\cm\Campaign;
 use Google\AdsApi\AdWords\v201809\cm\CampaignOperation;
 use Google\AdsApi\AdWords\v201809\cm\CampaignService;
@@ -16,6 +18,8 @@ use sitkoru\contextcache\common\ContextEntitiesLogger;
 use sitkoru\contextcache\common\ICacheProvider;
 use sitkoru\contextcache\common\IEntitiesProvider;
 use sitkoru\contextcache\common\models\UpdateResult;
+use UnexpectedValueException;
+use function count;
 
 class AdWordsCampaignsProvider extends AdWordsEntitiesProvider implements IEntitiesProvider
 {
@@ -93,7 +97,7 @@ class AdWordsCampaignsProvider extends AdWordsEntitiesProvider implements IEntit
     /**
      * @param array $ids
      * @return Campaign[]
-     * @throws \Google\AdsApi\AdWords\v201809\cm\ApiException
+     * @throws ApiException
      */
     public function getAll(array $ids): array
     {
@@ -111,8 +115,9 @@ class AdWordsCampaignsProvider extends AdWordsEntitiesProvider implements IEntit
             $selector->setFields(self::$fields);
             $predicates = [new Predicate('Id', PredicateOperator::IN, $ids)];
             $selector->setPredicates($predicates);
-            $fromService = (array)$this->doRequest(function () use ($selector): array {
-                return $this->campaignService->get($selector)->getEntries();
+            $fromService = $this->doRequest(function () use ($selector): array {
+                $entries = $this->campaignService->get($selector)->getEntries();
+                return $entries !== null ? $entries : [];
             });
             foreach ($fromService as $campaignItem) {
                 $campaigns[$campaignItem->getId()] = $campaignItem;
@@ -125,7 +130,7 @@ class AdWordsCampaignsProvider extends AdWordsEntitiesProvider implements IEntit
     /**
      * @param int $id
      * @return Campaign
-     * @throws \Google\AdsApi\AdWords\v201809\cm\ApiException
+     * @throws ApiException
      */
     public function getOne($id): ?Campaign
     {
@@ -138,15 +143,16 @@ class AdWordsCampaignsProvider extends AdWordsEntitiesProvider implements IEntit
 
     /**
      * @return array
-     * @throws \Google\AdsApi\AdWords\v201809\cm\ApiException
+     * @throws ApiException
      */
     public function getForService(): array
     {
         $campaigns = [];
         $selector = new Selector();
         $selector->setFields(self::$fields);
-        $fromService = (array)$this->doRequest(function () use ($selector): array {
-            return $this->campaignService->get($selector)->getEntries();
+        $fromService = $this->doRequest(function () use ($selector): array {
+            $entries = $this->campaignService->get($selector)->getEntries();
+            return $entries !== null ? $entries : [];
         });
         foreach ($fromService as $campaignItem) {
             $campaigns[$campaignItem->getId()] = $campaignItem;
@@ -157,9 +163,9 @@ class AdWordsCampaignsProvider extends AdWordsEntitiesProvider implements IEntit
     /**
      * @param Campaign[] $entities
      * @return UpdateResult
-     * @throws \ErrorException
-     * @throws \Google\AdsApi\AdWords\v201809\cm\ApiException
-     * @throws \UnexpectedValueException
+     * @throws ErrorException
+     * @throws ApiException
+     * @throws UnexpectedValueException
      * @throws AdWordsBatchJobCancelledException
      */
     public function update(array $entities): UpdateResult
@@ -173,11 +179,11 @@ class AdWordsCampaignsProvider extends AdWordsEntitiesProvider implements IEntit
             $addOperation->setOperator(Operator::SET);
             $addOperations[] = $addOperation;
         }
-        $this->logger->info('Update operations: ' . \count($addOperations));
+        $this->logger->info('Update operations: ' . count($addOperations));
 
         if (count($addOperations) > 1000) {
             foreach (array_chunk($addOperations, self::MAX_OPERATIONS_SIZE) as $i => $addChunk) {
-                $this->logger->info('Update chunk #' . $i . '. Size: ' . \count($addChunk));
+                $this->logger->info('Update chunk #' . $i . '. Size: ' . count($addChunk));
                 $jobResults = $this->runMutateJob($addChunk);
                 $this->processJobResult($result, $jobResults);
             }

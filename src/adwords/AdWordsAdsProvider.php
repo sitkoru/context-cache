@@ -3,6 +3,8 @@
 namespace sitkoru\contextcache\adwords;
 
 
+use ErrorException;
+use Exception;
 use Google\AdsApi\AdWords\AdWordsSession;
 use Google\AdsApi\AdWords\v201809\cm\Ad;
 use Google\AdsApi\AdWords\v201809\cm\AdGroupAd;
@@ -11,6 +13,7 @@ use Google\AdsApi\AdWords\v201809\cm\AdGroupAdService;
 use Google\AdsApi\AdWords\v201809\cm\AdGroupAdStatus;
 use Google\AdsApi\AdWords\v201809\cm\AdOperation;
 use Google\AdsApi\AdWords\v201809\cm\AdService;
+use Google\AdsApi\AdWords\v201809\cm\ApiException;
 use Google\AdsApi\AdWords\v201809\cm\Operand;
 use Google\AdsApi\AdWords\v201809\cm\Operator;
 use Google\AdsApi\AdWords\v201809\cm\Predicate;
@@ -23,6 +26,8 @@ use sitkoru\contextcache\common\ICacheProvider;
 use sitkoru\contextcache\common\IEntitiesProvider;
 use sitkoru\contextcache\common\models\UpdateResult;
 use sitkoru\contextcache\helpers\ArrayHelper;
+use Throwable;
+use function count;
 
 class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesProvider
 {
@@ -193,7 +198,7 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
      * @param array $ids
      * @param array $predicates
      * @return AdGroupAd[]
-     * @throws \Google\AdsApi\AdWords\v201809\cm\ApiException
+     * @throws ApiException
      */
     public function getAll(array $ids, array $predicates = []): array
     {
@@ -211,8 +216,9 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
             $selector->setFields(self::$fields);
             $predicates[] = new Predicate('Id', PredicateOperator::IN, $ids);
             $selector->setPredicates($predicates);
-            $fromService = (array)$this->doRequest(function () use ($selector): array {
-                return $this->adGroupAdService->get($selector)->getEntries();
+            $fromService = $this->doRequest(function () use ($selector): array {
+                $entries = $this->adGroupAdService->get($selector)->getEntries();
+                return $entries !== null ? $entries : [];
             });
             foreach ($fromService as $adGroupAdItem) {
                 $adGroupAds[$adGroupAdItem->getAd()->getId()] = $adGroupAdItem;
@@ -225,9 +231,9 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
     /**
      * @param int $id
      * @return AdGroupAd
-     * @throws \Google\AdsApi\AdWords\v201809\cm\ApiException
+     * @throws ApiException
      */
-    public function getOne($id): AdGroupAd
+    public function getOne($id): ?AdGroupAd
     {
         $ads = $this->getAll([$id]);
         if ($ads) {
@@ -240,7 +246,7 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
      * @param int[] $campaignIds
      * @param array $predicates
      * @return AdGroupAd[]
-     * @throws \Google\AdsApi\AdWords\v201809\cm\ApiException
+     * @throws ApiException
      */
     public function getByCampaignIds(array $campaignIds, array $predicates = []): array
     {
@@ -259,8 +265,9 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
             $selector->setFields(self::$fields);
             $predicates[] = new Predicate('CampaignId', PredicateOperator::IN, $notFound);
             $selector->setPredicates($predicates);
-            $fromService = (array)$this->doRequest(function () use ($selector): array {
-                return $this->adGroupAdService->get($selector)->getEntries();
+            $fromService = $this->doRequest(function () use ($selector): array {
+                $entries = $this->adGroupAdService->get($selector)->getEntries();
+                return $entries !== null ? $entries : [];
             });
             foreach ($fromService as $adGroupAdItem) {
                 /**
@@ -277,7 +284,7 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
      * @param array $adGroupIds
      * @param array $predicates
      * @return AdGroupAd[]
-     * @throws \Google\AdsApi\AdWords\v201809\cm\ApiException
+     * @throws ApiException
      */
     public function getByAdGroupIds(array $adGroupIds, array $predicates = []): array
     {
@@ -296,8 +303,9 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
             $selector->setFields(self::$fields);
             $predicates[] = new Predicate('AdGroupId', PredicateOperator::IN, $notFound);
             $selector->setPredicates($predicates);
-            $fromService = (array)$this->doRequest(function () use ($selector): array {
-                return $this->adGroupAdService->get($selector)->getEntries();
+            $fromService = $this->doRequest(function () use ($selector): array {
+                $entries = $this->adGroupAdService->get($selector)->getEntries();
+                return $entries !== null ? $entries : [];
             });
             foreach ($fromService as $adGroupAdItem) {
                 /**
@@ -313,8 +321,8 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
     /**
      * @param AdGroupAd[] $entities
      * @return UpdateResult
-     * @throws \Exception
-     * @throws \Throwable
+     * @throws Exception
+     * @throws Throwable
      */
     public function update(array $entities): UpdateResult
     {
@@ -347,14 +355,14 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
             $addOperations[] = $addOperation;
         }
 
-        $this->logger->info('Add operations: ' . \count($addOperations));
+        $this->logger->info('Add operations: ' . count($addOperations));
 
         if (count($addOperations) > 1000) {
             foreach (array_chunk($addOperations, self::MAX_OPERATIONS_SIZE) as $i => $addChunk) {
                 /**
                  * @var AdGroupAdOperation[] $addChunk
                  */
-                $this->logger->info('Add chunk #' . $i . '. Size: ' . \count($addChunk));
+                $this->logger->info('Add chunk #' . $i . '. Size: ' . count($addChunk));
                 $jobResults = $this->runMutateJob($addChunk);
                 $this->processJobResult($result, $jobResults);
                 if (!$result->success) {
@@ -366,9 +374,9 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
                 }
             }
 
-            $this->logger->info('Delete succeeded ads: ' . \count($deleteOperations));
+            $this->logger->info('Delete succeeded ads: ' . count($deleteOperations));
             foreach (array_chunk($deleteOperations, self::MAX_OPERATIONS_SIZE) as $i => $deleteChunk) {
-                $this->logger->info('Delete chunk #' . $i . '. Size: ' . \count($deleteChunk));
+                $this->logger->info('Delete chunk #' . $i . '. Size: ' . count($deleteChunk));
                 $try = 0;
                 $maxTry = 5;
                 $jobResults = null;
@@ -398,7 +406,7 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
             }
 
             if ($deleteOperations) {
-                $this->logger->info('Delete succeeded ads: ' . \count($deleteOperations));
+                $this->logger->info('Delete succeeded ads: ' . count($deleteOperations));
                 $try = 0;
                 $maxTry = 5;
                 $jobResults = null;
@@ -406,7 +414,7 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
                     try {
                         $jobResults = $this->adGroupAdService->mutate(array_values($deleteOperations));
                         break;
-                    } catch (\Throwable $exception) {
+                    } catch (Throwable $exception) {
                         $try++;
                         if ($try === $maxTry) {
                             throw $exception;
@@ -428,15 +436,15 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
      * @param array  $ads
      * @param string $operator
      * @return UpdateResult
-     * @throws \ErrorException
-     * @throws \Google\AdsApi\AdWords\v201809\cm\ApiException
+     * @throws ErrorException
+     * @throws ApiException
      */
     public function mutate(array $ads, string $operator): UpdateResult
     {
         $operations = [];
         foreach ($ads as $ad) {
             if (!($ad instanceof Ad)) {
-                throw new \ErrorException("Ad must be instance od Ad");
+                throw new ErrorException("Ad must be instance od Ad");
             }
 
             $operation = new AdOperation();
