@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a7d91c21e83378043a067c9342665d6c",
+    "content-hash": "a8dc9b525c4fe86534f33acd2773a3b4",
     "packages": [
         {
             "name": "doctrine/annotations",
@@ -1125,16 +1125,16 @@
         },
         {
             "name": "sitkoru/yandex-direct-api",
-            "version": "2020.06.03",
+            "version": "2020.06.04",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sitkoru/yandex-direct-api.git",
-                "reference": "bad4169851b2db1ee3876527c9b39364415317fa"
+                "reference": "35c7c7726f0cf019f2b6eda3ed00642b39545b2c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sitkoru/yandex-direct-api/zipball/bad4169851b2db1ee3876527c9b39364415317fa",
-                "reference": "bad4169851b2db1ee3876527c9b39364415317fa",
+                "url": "https://api.github.com/repos/sitkoru/yandex-direct-api/zipball/35c7c7726f0cf019f2b6eda3ed00642b39545b2c",
+                "reference": "35c7c7726f0cf019f2b6eda3ed00642b39545b2c",
                 "shasum": ""
             },
             "require": {
@@ -1175,7 +1175,7 @@
                 }
             ],
             "description": "Client for Yandex.Direct API v5",
-            "time": "2020-06-09T10:49:21+00:00"
+            "time": "2020-06-09T11:26:18+00:00"
         },
         {
             "name": "symfony/deprecation-contracts",
