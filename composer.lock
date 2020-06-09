@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "287466403a568cde9fcb9ac9246cdc12",
+    "content-hash": "f0a37a23aa9ffae8a26d32af6a4bde30",
     "packages": [
         {
             "name": "doctrine/annotations",
@@ -1125,16 +1125,16 @@
         },
         {
             "name": "sitkoru/yandex-direct-api",
-            "version": "2020.06.01",
+            "version": "2020.06.02",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sitkoru/yandex-direct-api.git",
-                "reference": "1464d2b86595c86c983a2c4b3bac20b46bfc9763"
+                "reference": "c3add55376ec70ed6975264219326770bd5e92f9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sitkoru/yandex-direct-api/zipball/1464d2b86595c86c983a2c4b3bac20b46bfc9763",
-                "reference": "1464d2b86595c86c983a2c4b3bac20b46bfc9763",
+                "url": "https://api.github.com/repos/sitkoru/yandex-direct-api/zipball/c3add55376ec70ed6975264219326770bd5e92f9",
+                "reference": "c3add55376ec70ed6975264219326770bd5e92f9",
                 "shasum": ""
             },
             "require": {
@@ -1148,9 +1148,13 @@
                 "symfony/validator": "^4.3 || ^5.0"
             },
             "require-dev": {
-                "phpstan/phpstan": "^0.12.25",
+                "friendsofphp/php-cs-fixer": "^2.16",
+                "phpstan/extension-installer": "^1.0",
+                "phpstan/phpstan": "^0.12.27",
+                "phpstan/phpstan-doctrine": "^0.12.14",
                 "phpstan/phpstan-strict-rules": "^0.12.2",
-                "phpunit/phpunit": "^8.5",
+                "phpstan/phpstan-symfony": "^0.12.6",
+                "phpunit/phpunit": "^7.3",
                 "roave/security-advisories": "dev-master",
                 "thecodingmachine/phpstan-strict-rules": "^0.12.0"
             },
@@ -1171,7 +1175,7 @@
                 }
             ],
             "description": "Client for Yandex.Direct API v5",
-            "time": "2020-06-05T13:30:27+00:00"
+            "time": "2020-06-09T08:20:50+00:00"
         },
         {
             "name": "symfony/deprecation-contracts",
@@ -2610,16 +2614,16 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "0.12.25",
+            "version": "0.12.27",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "9619551d68b2d4c0d681a8df73f3c847c798ee64"
+                "reference": "2abbd3253e38a258137f647f4e5fdbcb13142c3e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/9619551d68b2d4c0d681a8df73f3c847c798ee64",
-                "reference": "9619551d68b2d4c0d681a8df73f3c847c798ee64",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/2abbd3253e38a258137f647f4e5fdbcb13142c3e",
+                "reference": "2abbd3253e38a258137f647f4e5fdbcb13142c3e",
                 "shasum": ""
             },
             "require": {
@@ -2662,7 +2666,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2020-05-10T20:36:16+00:00"
+            "time": "2020-06-08T21:28:12+00:00"
         },
         {
             "name": "phpstan/phpstan-strict-rules",

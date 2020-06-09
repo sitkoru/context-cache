@@ -12,6 +12,7 @@ use directapi\services\ads\enum\DynamicTextAdFieldEnum;
 use directapi\services\ads\enum\MobileAppAdBuilderAdFieldEnum;
 use directapi\services\ads\enum\MobileAppAdFieldEnum;
 use directapi\services\ads\enum\MobileAppImageAdFieldEnum;
+use directapi\services\ads\enum\SmartAdBuilderAdFieldEnum;
 use directapi\services\ads\enum\TextAdBuilderAdFieldEnum;
 use directapi\services\ads\enum\TextAdFieldEnum;
 use directapi\services\ads\enum\TextAdPriceExtensionFieldEnum;
@@ -40,8 +41,7 @@ class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvi
         DirectApiService $directApiService,
         ICacheProvider $cacheProvider,
         ContextEntitiesLogger $logger
-    )
-    {
+    ) {
         parent::__construct($directApiService, $cacheProvider, $logger);
         $this->collection = 'ads';
         $this->keyField = 'AdGroupId';
@@ -82,7 +82,9 @@ class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvi
                     TextAdPriceExtensionFieldEnum::getValues(),
                     CpcVideoAdBuilderAdFieldEnum::getValues(),
                     CpmBannerAdBuilderAdFieldEnum::getValues(),
-                    CpmVideoAdBuilderAdFieldEnum::getValues());
+                    CpmVideoAdBuilderAdFieldEnum::getValues(),
+                    SmartAdBuilderAdFieldEnum::getValues()
+                );
                 foreach ($fromService as $adGetItem) {
                     $ads[$adGetItem->Id] = $adGetItem;
                 }
@@ -127,7 +129,9 @@ class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvi
                     TextAdPriceExtensionFieldEnum::getValues(),
                     CpcVideoAdBuilderAdFieldEnum::getValues(),
                     CpmBannerAdBuilderAdFieldEnum::getValues(),
-                    CpmVideoAdBuilderAdFieldEnum::getValues());
+                    CpmVideoAdBuilderAdFieldEnum::getValues(),
+                    SmartAdBuilderAdFieldEnum::getValues()
+                );
                 foreach ($fromService as $adGetItem) {
                     $ads[$adGetItem->Id] = $adGetItem;
                 }
@@ -192,7 +196,8 @@ class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvi
                     TextAdPriceExtensionFieldEnum::getValues(),
                     CpcVideoAdBuilderAdFieldEnum::getValues(),
                     CpmBannerAdBuilderAdFieldEnum::getValues(),
-                    CpmVideoAdBuilderAdFieldEnum::getValues()
+                    CpmVideoAdBuilderAdFieldEnum::getValues(),
+                    SmartAdBuilderAdFieldEnum::getValues()
                 );
                 foreach ($fromService as $adGetItem) {
                     $ads[$adGetItem->Id] = $adGetItem;

@@ -5,7 +5,10 @@ namespace sitkoru\contextcache\direct;
 use directapi\DirectApiService;
 use directapi\services\campaigns\criterias\CampaignsSelectionCriteria;
 use directapi\services\campaigns\enum\CampaignFieldEnum;
+use directapi\services\campaigns\enum\CpmBannerCampaignFieldEnum;
+use directapi\services\campaigns\enum\DynamicCampaignFieldEnum;
 use directapi\services\campaigns\enum\MobileAppCampaignFieldEnum;
+use directapi\services\campaigns\enum\SmartCampaignFieldEnum;
 use directapi\services\campaigns\enum\TextCampaignFieldEnum;
 use directapi\services\campaigns\models\CampaignGetItem;
 use directapi\services\campaigns\models\CampaignUpdateItem;
@@ -49,7 +52,12 @@ class DirectCampaignsProvider extends DirectEntitiesProvider implements IEntitie
         $criteria = new CampaignsSelectionCriteria();
         $fromService = $this->directApiService->getCampaignsService()->get($criteria,
             CampaignFieldEnum::getValues(),
-            TextCampaignFieldEnum::getValues(), MobileAppCampaignFieldEnum::getValues());
+            TextCampaignFieldEnum::getValues(),
+            MobileAppCampaignFieldEnum::getValues(),
+            DynamicCampaignFieldEnum::getValues(),
+            CpmBannerCampaignFieldEnum::getValues(),
+            SmartCampaignFieldEnum::getValues()
+        );
         foreach ($fromService as $campaignGetItem) {
             $campaigns[$campaignGetItem->Id] = $campaignGetItem;
         }
@@ -67,7 +75,7 @@ class DirectCampaignsProvider extends DirectEntitiesProvider implements IEntitie
      * @throws \directapi\exceptions\RequestValidationException
      * @throws \directapi\exceptions\UnknownPropertyException
      */
-    public function getOne($id): CampaignGetItem
+    public function getOne($id): ?CampaignGetItem
     {
         $entities = $this->getAll([$id]);
         if ($entities) {
@@ -101,7 +109,12 @@ class DirectCampaignsProvider extends DirectEntitiesProvider implements IEntitie
                 $criteria->Ids = $idsChunk;
                 $fromService = $this->directApiService->getCampaignsService()->get($criteria,
                     CampaignFieldEnum::getValues(),
-                    TextCampaignFieldEnum::getValues(), MobileAppCampaignFieldEnum::getValues());
+                    TextCampaignFieldEnum::getValues(),
+                    MobileAppCampaignFieldEnum::getValues(),
+                    DynamicCampaignFieldEnum::getValues(),
+                    CpmBannerCampaignFieldEnum::getValues(),
+                    SmartCampaignFieldEnum::getValues()
+                );
                 foreach ($fromService as $campaignGetItem) {
                     $campaigns[$campaignGetItem->Id] = $campaignGetItem;
                 }

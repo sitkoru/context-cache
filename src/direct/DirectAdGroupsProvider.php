@@ -6,7 +6,10 @@ namespace sitkoru\contextcache\direct;
 use directapi\DirectApiService;
 use directapi\services\adgroups\criterias\AdGroupsSelectionCriteria;
 use directapi\services\adgroups\enum\AdGroupFieldEnum;
+use directapi\services\adgroups\enum\DynamicTextAdGroupFieldEnum;
+use directapi\services\adgroups\enum\DynamicTextFeedAdGroupFieldEnum;
 use directapi\services\adgroups\enum\MobileAppAdGroupFieldEnum;
+use directapi\services\adgroups\enum\SmartAdGroupFieldEnum;
 use directapi\services\adgroups\models\AdGroupGetItem;
 use directapi\services\adgroups\models\AdGroupUpdateItem;
 use directapi\services\changes\enum\FieldNamesEnum;
@@ -73,7 +76,11 @@ class DirectAdGroupsProvider extends DirectEntitiesProvider implements IEntities
                 $criteria->Ids = $idsChunk;
                 $fromService = $this->directApiService->getAdGroupsService()->get($criteria,
                     AdGroupFieldEnum::getValues(),
-                    MobileAppAdGroupFieldEnum::getValues());
+                    MobileAppAdGroupFieldEnum::getValues(),
+                    DynamicTextAdGroupFieldEnum::getValues(),
+                    DynamicTextFeedAdGroupFieldEnum::getValues(),
+                    SmartAdGroupFieldEnum::getValues()
+                );
                 foreach ($fromService as $adGroupGetItem) {
                     $adGroups[$adGroupGetItem->Id] = $adGroupGetItem;
                 }
@@ -103,7 +110,11 @@ class DirectAdGroupsProvider extends DirectEntitiesProvider implements IEntities
                 $criteria->CampaignIds = $campaignIdsChunk;
                 $fromService = $this->directApiService->getAdGroupsService()->get($criteria,
                     AdGroupFieldEnum::getValues(),
-                    MobileAppAdGroupFieldEnum::getValues());
+                    MobileAppAdGroupFieldEnum::getValues(),
+                    DynamicTextAdGroupFieldEnum::getValues(),
+                    DynamicTextFeedAdGroupFieldEnum::getValues(),
+                    SmartAdGroupFieldEnum::getValues()
+                );
                 foreach ($fromService as $adGroupGetItem) {
                     $adGroups[$adGroupGetItem->Id] = $adGroupGetItem;
                 }
