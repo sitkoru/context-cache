@@ -376,10 +376,10 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
 
         $this->logger->info(
             sprintf(
-            "%d entities were skipped and should be retried: %s\n",
-            count($skipped),
-            implode(', ', $skipped)
-        )
+                "%d entities were skipped and should be retried: %s\n",
+                count($skipped),
+                implode(', ', $skipped)
+            )
         );
         if (count($failed)) {
             $result->success = false;
