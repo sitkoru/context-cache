@@ -2,6 +2,7 @@
 
 namespace sitkoru\contextcache\adwords;
 
+use function count;
 use ErrorException;
 use Google\AdsApi\AdWords\AdWordsServices;
 use Google\AdsApi\AdWords\AdWordsSession;
@@ -19,6 +20,8 @@ use Google\AdsApi\AdWords\v201809\cm\PolicyViolationError;
 use Google\AdsApi\AdWords\v201809\cm\Predicate;
 use Google\AdsApi\AdWords\v201809\cm\PredicateOperator;
 use Google\AdsApi\AdWords\v201809\cm\Selector;
+use function in_array;
+use function is_array;
 use sitkoru\contextcache\common\ContextEntitiesLogger;
 use sitkoru\contextcache\common\EntitiesProvider;
 use sitkoru\contextcache\common\ICacheProvider;
@@ -26,9 +29,6 @@ use sitkoru\contextcache\common\models\UpdateResult;
 use SoapFault;
 use Throwable;
 use UnexpectedValueException;
-use function count;
-use function in_array;
-use function is_array;
 
 abstract class AdWordsEntitiesProvider extends EntitiesProvider
 {
@@ -42,6 +42,7 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
      * @var BatchJobService
      */
     private $batchJobService;
+
     /**
      * @var AdWordsSession
      */
@@ -51,8 +52,7 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
         ICacheProvider $cacheProvider,
         AdWordsSession $adWordsSession,
         ContextEntitiesLogger $logger
-    )
-    {
+    ) {
         parent::__construct($cacheProvider, $logger);
         $this->serviceKey = 'google';
         $this->adWordsSession = $adWordsSession;
@@ -69,9 +69,11 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
      * @param $operations
      *
      * @return bool|MutateResult[]
+     *
      * @throws ApiException
      * @throws UnexpectedValueException
      * @throws AdWordsBatchJobCancelledException
+     * @throws ErrorException
      */
     public function runMutateJob(array $operations)
     {
@@ -86,7 +88,6 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
             $result = $this->batchJobService->mutate([$addOp]);
             $job = $result->getValue()[0];
         } catch (SoapFault $ex) {
-
             return false;
         }
 
@@ -96,9 +97,11 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
         try {
             $batchJobs->uploadBatchJobOperations($operations, $uploadUrl);
         } catch (Throwable $ex) {
-            $this->logger->error('Произошла ошибка при загрузке данных в Google AdWords. Попробуйте ещё раз немного позже');
-
-            return false;
+            throw new ErrorException(
+                'Произошла ошибка при загрузке данных в Google AdWords. Попробуйте ещё раз немного позже',
+                $ex->getCode(),
+                $ex
+            );
         }
 
         // Poll for completion of the batch job using an exponential back off.
@@ -134,8 +137,11 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
         } while ($isPending && $pollAttempts <= self::MAX_POLL_ATTEMPTS);
         if ($isPending) {
             throw new UnexpectedValueException(
-                sprintf('Job is still pending state after polling %d times.',
-                    self::MAX_POLL_ATTEMPTS));
+                sprintf(
+                    'Job is still pending state after polling %d times.',
+                    self::MAX_POLL_ATTEMPTS
+                )
+            );
         }
         if ($batchJob->getStatus() === BatchJobStatus::CANCELED) {
             throw new AdWordsBatchJobCancelledException('Task was cancelled');
@@ -171,6 +177,7 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
      * @param MutateResult[] $jobResult
      *
      * @return array
+     *
      * @throws ErrorException
      */
     protected function processErrors($jobResult): array
@@ -190,7 +197,13 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
                         $error = $error[0];
                     }
 
-                    list($skipped, $failed, $errors, $genericErrors) = $this->fillErrors($error, $skipped, $failed, $errors, $genericErrors);
+                    [$skipped, $failed, $errors, $genericErrors] = $this->fillErrors(
+                        $error,
+                        $skipped,
+                        $failed,
+                        $errors,
+                        $genericErrors
+                    );
                 }
             }
         }
@@ -199,23 +212,32 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
 
     /**
      * Get the index of source operation that failed.
+     *
      * @param ApiError $error
+     *
      * @return mixed|null
      */
     private static function getSourceOperationIndex(ApiError $error)
     {
         $matches = [];
         // Get the index of operations that has a problem.
-        if (preg_match('/^operations\[(\d+)]/', $error->getFieldPath(),
-            $matches)) {
+        if (preg_match(
+            '/^operations\[(\d+)]/',
+            $error->getFieldPath(),
+            $matches
+        )) {
             return $matches[1];
         }
         // No field path was returned from the server.
         return null;
     }
 
-    protected function processMutateResult(UpdateResult $result, array $operations, array $entities = [], ?array $mutateErrors = []): UpdateResult
-    {
+    protected function processMutateResult(
+        UpdateResult $result,
+        array $operations,
+        array $entities = [],
+        ?array $mutateErrors = []
+    ): UpdateResult {
         /**
          * @var int[]   $failed
          * @var int[]   $skipped
@@ -242,6 +264,7 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
 
     /**
      * @param ApiError[] $mutateErrors
+     *
      * @return array
      */
     protected function processMutateErrors(?array $mutateErrors = []): array
@@ -253,7 +276,13 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
 
         if ($mutateErrors) {
             foreach ($mutateErrors as $mutateError) {
-                list($skipped, $failed, $errors, $genericErrors) = $this->fillErrors($mutateError, $skipped, $failed, $errors, $genericErrors);
+                [$skipped, $failed, $errors, $genericErrors] = $this->fillErrors(
+                    $mutateError,
+                    $skipped,
+                    $failed,
+                    $errors,
+                    $genericErrors
+                );
             }
         }
 
@@ -263,7 +292,9 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
     /**
      * @param UpdateResult   $jobResult
      * @param MutateResult[] $mutateResults
+     *
      * @return UpdateResult
+     *
      * @throws ErrorException
      */
     protected function processJobResult(UpdateResult $jobResult, $mutateResults): UpdateResult
@@ -296,7 +327,9 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
      * @param callable $request
      * @param int      $try
      * @param int      $maxTry
+     *
      * @return mixed
+     *
      * @throws ApiException
      */
     protected function doRequest(callable $request, int $try = 0, int $maxTry = 10)
@@ -319,6 +352,7 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
 
     /**
      * @param Operand $operand
+     *
      * @return mixed
      */
     abstract protected function getOperandEntity(Operand $operand);
@@ -330,14 +364,22 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
      * @param array        $failed
      * @param array        $errors
      */
-    protected function logJobResult(UpdateResult $result, array $succeeded, array $skipped, array $failed, array $errors): void
-    {
+    protected function logJobResult(
+        UpdateResult $result,
+        array $succeeded,
+        array $skipped,
+        array $failed,
+        array $errors
+    ): void {
         // Display the results of the job.
         $this->logger->info(sprintf('%d entities were added/updated successfully', count($succeeded)));
 
-        $this->logger->info(sprintf("%d entities were skipped and should be retried: %s\n", count($skipped),
-                implode(', ', $skipped)
-            )
+        $this->logger->info(
+            sprintf(
+            "%d entities were skipped and should be retried: %s\n",
+            count($skipped),
+            implode(', ', $skipped)
+        )
         );
         if (count($failed)) {
             $result->success = false;
@@ -377,10 +419,16 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
      * @param array    $failed
      * @param array    $errors
      * @param array    $genericErrors
+     *
      * @return array
      */
-    protected function fillErrors(ApiError $error, array $skipped, array $failed, array $errors, array $genericErrors): array
-    {
+    protected function fillErrors(
+        ApiError $error,
+        array $skipped,
+        array $failed,
+        array $errors,
+        array $genericErrors
+    ): array {
         $index = self::getSourceOperationIndex($error);
         if ($index !== null) {
             $type = explode('.', $error->getErrorString())[1];
@@ -398,6 +446,6 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
         } else {
             $genericErrors[] = $error;
         }
-        return array($skipped, $failed, $errors, $genericErrors);
+        return [$skipped, $failed, $errors, $genericErrors];
     }
 }

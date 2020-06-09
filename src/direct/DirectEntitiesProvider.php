@@ -2,7 +2,6 @@
 
 namespace sitkoru\contextcache\direct;
 
-
 use directapi\DirectApiService;
 use directapi\services\changes\models\CheckResponse;
 use directapi\services\changes\models\CheckResponseIds;

@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace sitkoru\contextcache\tests\unit;
 
-
 use Google\AdsApi\AdWords\v201809\cm\AdGroup;
 use Google\AdsApi\AdWords\v201809\cm\AdGroupAd;
 use Google\AdsApi\AdWords\v201809\cm\AdGroupCriterion;
@@ -35,6 +34,7 @@ class AdWordsTest extends TestCase
 
     /**
      * @dataProvider cacheProvider
+     *
      * @param bool $clearCache
      */
     public function testLoadCampaigns(bool $clearCache): void
@@ -52,6 +52,7 @@ class AdWordsTest extends TestCase
 
     /**
      * @dataProvider cacheProvider
+     *
      * @param bool $clearCache
      */
     public function testLoadGroups(bool $clearCache): void
@@ -69,6 +70,7 @@ class AdWordsTest extends TestCase
 
     /**
      * @dataProvider cacheProvider
+     *
      * @param bool $clearCache
      */
     public function testLoadGroupsByCampaignIds($clearCache): void
@@ -86,6 +88,7 @@ class AdWordsTest extends TestCase
 
     /**
      * @dataProvider cacheProvider
+     *
      * @param bool $clearCache
      */
     public function testLoadAds($clearCache): void
@@ -103,6 +106,7 @@ class AdWordsTest extends TestCase
 
     /**
      * @dataProvider cacheProvider
+     *
      * @param bool $clearCache
      */
     public function testLoadAdsByGroupIds($clearCache): void
@@ -120,6 +124,7 @@ class AdWordsTest extends TestCase
 
     /**
      * @dataProvider cacheProvider
+     *
      * @param bool $clearCache
      */
     public function testLoadCriterions($clearCache): void
@@ -137,6 +142,7 @@ class AdWordsTest extends TestCase
 
     /**
      * @dataProvider cacheProvider
+     *
      * @param bool $clearCache
      */
     public function testLoadCriterionsByGroupIds($clearCache): void

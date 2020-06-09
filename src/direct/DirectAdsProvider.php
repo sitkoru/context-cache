@@ -36,7 +36,6 @@ class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvi
     public const CRITERIA_MAX_AD_GROUP_IDS = 1000;
     public const CRITERIA_MAX_AD_IDS = 10000;
 
-
     public function __construct(
         DirectApiService $directApiService,
         ICacheProvider $cacheProvider,
@@ -49,7 +48,9 @@ class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvi
 
     /**
      * @param array $ids
+     *
      * @return AdGetItem[]
+     *
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \ReflectionException
      * @throws \directapi\exceptions\DirectAccountNotExistException
@@ -70,7 +71,8 @@ class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvi
             foreach (array_chunk($notFound, self::CRITERIA_MAX_AD_GROUP_IDS) as $idsChunk) {
                 $criteria = new AdsSelectionCriteria();
                 $criteria->AdGroupIds = $idsChunk;
-                $fromService = $this->directApiService->getAdsService()->get($criteria,
+                $fromService = $this->directApiService->getAdsService()->get(
+                    $criteria,
                     AdFieldEnum::getValues(),
                     TextAdFieldEnum::getValues(),
                     MobileAppAdFieldEnum::getValues(),
@@ -96,7 +98,9 @@ class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvi
 
     /**
      * @param array $ids
+     *
      * @return AdGetItem[]
+     *
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \ReflectionException
      * @throws \directapi\exceptions\DirectAccountNotExistException
@@ -117,7 +121,8 @@ class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvi
             foreach (array_chunk($notFound, self::CRITERIA_MAX_CAMPAIGN_IDS) as $idsChunk) {
                 $criteria = new AdsSelectionCriteria();
                 $criteria->CampaignIds = $idsChunk;
-                $fromService = $this->directApiService->getAdsService()->get($criteria,
+                $fromService = $this->directApiService->getAdsService()->get(
+                    $criteria,
                     AdFieldEnum::getValues(),
                     TextAdFieldEnum::getValues(),
                     MobileAppAdFieldEnum::getValues(),
@@ -143,7 +148,9 @@ class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvi
 
     /**
      * @param int $id
+     *
      * @return AdGetItem|null
+     *
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \ReflectionException
      * @throws \directapi\exceptions\DirectAccountNotExistException
@@ -163,7 +170,9 @@ class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvi
 
     /**
      * @param array $ids
+     *
      * @return AdGetItem[]
+     *
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \ReflectionException
      * @throws \directapi\exceptions\DirectAccountNotExistException
@@ -184,7 +193,8 @@ class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvi
             foreach (array_chunk($notFound, self::CRITERIA_MAX_AD_IDS) as $idsChunk) {
                 $criteria = new AdsSelectionCriteria();
                 $criteria->Ids = $idsChunk;
-                $fromService = $this->directApiService->getAdsService()->get($criteria,
+                $fromService = $this->directApiService->getAdsService()->get(
+                    $criteria,
                     AdFieldEnum::getValues(),
                     TextAdFieldEnum::getValues(),
                     MobileAppAdFieldEnum::getValues(),
@@ -210,7 +220,9 @@ class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvi
 
     /**
      * @param AdGetItem[] $entities
+     *
      * @return UpdateResult
+     *
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \JsonMapper_Exception
      * @throws \directapi\exceptions\DirectAccountNotExistException
@@ -229,7 +241,6 @@ class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvi
             $this->logger->info('Chunk: ' . $index . '. Uploaded.');
             foreach ($chunkResults as $i => $chunkResult) {
                 if (!array_key_exists($i, $updEntities)) {
-
                     continue;
                 }
                 /**
@@ -254,7 +265,9 @@ class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvi
     /**
      * @param array  $ids
      * @param string $date
+     *
      * @return CheckResponse
+     *
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \JsonMapper_Exception
      * @throws \directapi\exceptions\DirectAccountNotExistException

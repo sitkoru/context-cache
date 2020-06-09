@@ -2,7 +2,6 @@
 
 namespace sitkoru\contextcache\common;
 
-
 use Psr\Log\LoggerInterface;
 
 class ContextEntitiesLogger
@@ -14,7 +13,6 @@ class ContextEntitiesLogger
 
     public function __construct(?LoggerInterface $logger = null)
     {
-
         $this->logger = $logger;
     }
 

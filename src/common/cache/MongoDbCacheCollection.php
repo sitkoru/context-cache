@@ -2,7 +2,7 @@
 
 namespace sitkoru\contextcache\common\cache;
 
-
+use function count;
 use MongoDB\Client;
 use MongoDB\Collection;
 use MongoDB\Driver\Exception\RuntimeException;
@@ -14,7 +14,6 @@ use sitkoru\contextcache\helpers\ArrayHelper;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\Normalizer\ArrayDenormalizer;
 use Symfony\Component\Serializer\Serializer;
-use function count;
 
 class MongoDbCacheCollection implements ICacheCollection
 {
@@ -27,6 +26,7 @@ class MongoDbCacheCollection implements ICacheCollection
      * @var string
      */
     protected $keyField;
+
     /**
      * @var LoggerInterface|null
      */
@@ -49,7 +49,6 @@ class MongoDbCacheCollection implements ICacheCollection
      */
     private static function getSerializer(): Serializer
     {
-
         if (!self::$serializer) {
             self::$serializer = new Serializer([new ContextNormalizer(), new ArrayDenormalizer()]);
         }
@@ -60,7 +59,9 @@ class MongoDbCacheCollection implements ICacheCollection
      * @param string $field
      * @param array  $ids
      * @param mixed  $indexBy
+     *
      * @return array
+     *
      * @throws UnsupportedException
      * @throws InvalidArgumentException
      * @throws RuntimeException
@@ -83,6 +84,7 @@ class MongoDbCacheCollection implements ICacheCollection
 
     /**
      * @param array $entities
+     *
      * @throws RuntimeException
      * @throws InvalidArgumentException
      * @throws UnsupportedException
@@ -96,7 +98,7 @@ class MongoDbCacheCollection implements ICacheCollection
                 $operations[] = [
                     'updateOne' => [
                         $this->prepareOperationFilter($entity),
-                        ['$set' => $entity],
+                        ['$set'   => $entity],
                         ['upsert' => true]
                     ]
                 ];
@@ -121,6 +123,7 @@ class MongoDbCacheCollection implements ICacheCollection
     /**
      * @param array $array
      * @param array $arrayKeysNesting
+     *
      * @return array|mixed
      */
     private function getArrayLastValueByArrayKeysNesting(array $array, array $arrayKeysNesting)
@@ -159,7 +162,6 @@ class MongoDbCacheCollection implements ICacheCollection
                         . $this->collection->getCollectionName() . ": " . $e->getMessage());
                 }
             }
-
         }
         return $preparedEntities;
     }
@@ -181,7 +183,6 @@ class MongoDbCacheCollection implements ICacheCollection
                             . $this->collection->getCollectionName() . ": " . $e->getMessage());
                     }
                 }
-
             }
         }
         return $entities;

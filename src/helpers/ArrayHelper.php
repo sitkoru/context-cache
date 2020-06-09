@@ -2,13 +2,13 @@
 
 namespace sitkoru\contextcache\helpers;
 
-
 class ArrayHelper
 {
     /**
      * @param array $array
-     * @param mixed      $name
+     * @param mixed $name
      * @param bool  $keepKeys
+     *
      * @return array
      */
     public static function getColumn(array $array, $name, bool $keepKeys = true): array
@@ -30,6 +30,7 @@ class ArrayHelper
     /**
      * @param array $array
      * @param mixed $key
+     *
      * @return array
      */
     public static function index(array $array, $key): array
@@ -56,6 +57,7 @@ class ArrayHelper
      * @param array|object $array
      * @param mixed        $key
      * @param mixed        $default
+     *
      * @return mixed|null
      */
     public static function getValue($array, $key, $default = null)

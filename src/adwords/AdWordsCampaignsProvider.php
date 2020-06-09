@@ -2,7 +2,7 @@
 
 namespace sitkoru\contextcache\adwords;
 
-
+use function count;
 use ErrorException;
 use Google\AdsApi\AdWords\AdWordsSession;
 use Google\AdsApi\AdWords\v201809\cm\ApiException;
@@ -19,7 +19,6 @@ use sitkoru\contextcache\common\ICacheProvider;
 use sitkoru\contextcache\common\IEntitiesProvider;
 use sitkoru\contextcache\common\models\UpdateResult;
 use UnexpectedValueException;
-use function count;
 
 class AdWordsCampaignsProvider extends AdWordsEntitiesProvider implements IEntitiesProvider
 {
@@ -81,7 +80,6 @@ class AdWordsCampaignsProvider extends AdWordsEntitiesProvider implements IEntit
         'VanityPharmaText'
     ];
 
-
     public function __construct(
         CampaignService $campaignService,
         ICacheProvider $cacheProvider,
@@ -96,7 +94,9 @@ class AdWordsCampaignsProvider extends AdWordsEntitiesProvider implements IEntit
 
     /**
      * @param array $ids
+     *
      * @return Campaign[]
+     *
      * @throws ApiException
      */
     public function getAll(array $ids): array
@@ -129,7 +129,9 @@ class AdWordsCampaignsProvider extends AdWordsEntitiesProvider implements IEntit
 
     /**
      * @param int $id
+     *
      * @return Campaign
+     *
      * @throws ApiException
      */
     public function getOne($id): ?Campaign
@@ -143,6 +145,7 @@ class AdWordsCampaignsProvider extends AdWordsEntitiesProvider implements IEntit
 
     /**
      * @return array
+     *
      * @throws ApiException
      */
     public function getForService(): array
@@ -162,7 +165,9 @@ class AdWordsCampaignsProvider extends AdWordsEntitiesProvider implements IEntit
 
     /**
      * @param Campaign[] $entities
+     *
      * @return UpdateResult
+     *
      * @throws ErrorException
      * @throws ApiException
      * @throws UnexpectedValueException
@@ -189,8 +194,12 @@ class AdWordsCampaignsProvider extends AdWordsEntitiesProvider implements IEntit
             }
         } else {
             $mutateResult = $this->campaignService->mutate($addOperations);
-            $this->processMutateResult($result, $addOperations, $mutateResult->getValue(),
-                $mutateResult->getPartialFailureErrors());
+            $this->processMutateResult(
+                $result,
+                $addOperations,
+                $mutateResult->getValue(),
+                $mutateResult->getPartialFailureErrors()
+            );
         }
         $this->logger->info('Done');
         $this->clearCache();
@@ -199,6 +208,7 @@ class AdWordsCampaignsProvider extends AdWordsEntitiesProvider implements IEntit
 
     /**
      * @param Operand $operand
+     *
      * @return Campaign|mixed
      */
     protected function getOperandEntity(Operand $operand)

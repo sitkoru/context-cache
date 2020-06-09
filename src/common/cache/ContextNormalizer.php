@@ -2,7 +2,6 @@
 
 namespace sitkoru\contextcache\common\cache;
 
-
 use directapi\components\Enum;
 use Symfony\Component\Serializer\Normalizer\GetSetMethodNormalizer;
 
@@ -11,6 +10,7 @@ class ContextNormalizer extends GetSetMethodNormalizer
     /**
      * @param mixed $data
      * @param null  $format
+     *
      * @return bool
      */
     public function supportsNormalization($data, $format = null): bool
@@ -22,6 +22,7 @@ class ContextNormalizer extends GetSetMethodNormalizer
      * @param mixed $data
      * @param mixed $type
      * @param null  $format
+     *
      * @return bool
      */
     public function supportsDenormalization($data, $type, $format = null): bool
@@ -33,6 +34,7 @@ class ContextNormalizer extends GetSetMethodNormalizer
      * @param object $object
      * @param null   $format
      * @param array  $context
+     *
      * @return array|bool|float|int|string
      */
     public function normalize($object, $format = null, array $context = [])
@@ -55,6 +57,7 @@ class ContextNormalizer extends GetSetMethodNormalizer
      * @param string       $class
      * @param null         $format
      * @param array        $context
+     *
      * @return object
      */
     public function denormalize($data, $class, $format = null, array $context = [])
@@ -74,7 +77,9 @@ class ContextNormalizer extends GetSetMethodNormalizer
      * @param mixed       $value
      * @param null|string $format
      * @param array       $context
+     *
      * @return void
+     *
      * @throws \ReflectionException
      *
      */
@@ -118,8 +123,12 @@ class ContextNormalizer extends GetSetMethodNormalizer
 
         $reflClass = new \ReflectionClass($object);
         foreach ($reflClass->getProperties(\ReflectionProperty::IS_PUBLIC) as $reflProperty) {
-            if ($reflProperty->name !== $attribute || !$reflProperty->isPublic() || $reflProperty->isStatic() || !$this->isAllowedAttribute($object,
-                    $reflProperty->name, $format, $context)) {
+            if ($reflProperty->name !== $attribute || !$reflProperty->isPublic() || $reflProperty->isStatic() || !$this->isAllowedAttribute(
+                $object,
+                $reflProperty->name,
+                $format,
+                $context
+            )) {
                 continue;
             }
 
@@ -136,6 +145,7 @@ class ContextNormalizer extends GetSetMethodNormalizer
      * @param array            $context
      * @param \ReflectionClass $reflectionClass
      * @param array|bool       $allowedAttributes
+     *
      * @return null|\ReflectionMethod
      */
     protected function getConstructor(
@@ -155,7 +165,9 @@ class ContextNormalizer extends GetSetMethodNormalizer
      * @param object $object
      * @param null   $format
      * @param array  $context
+     *
      * @return array|string[]
+     *
      * @throws \ReflectionException
      */
     protected function extractAttributes($object, $format = null, array $context = []): array
@@ -164,8 +176,12 @@ class ContextNormalizer extends GetSetMethodNormalizer
 
         $reflClass = new \ReflectionClass($object);
         foreach ($reflClass->getProperties(\ReflectionProperty::IS_PUBLIC) as $reflProperty) {
-            if ($reflProperty->isStatic() || !$this->isAllowedAttribute($object, $reflProperty->name, $format,
-                    $context)) {
+            if ($reflProperty->isStatic() || !$this->isAllowedAttribute(
+                $object,
+                $reflProperty->name,
+                $format,
+                $context
+            )) {
                 continue;
             }
 
@@ -180,7 +196,9 @@ class ContextNormalizer extends GetSetMethodNormalizer
      * @param string $attribute
      * @param null   $format
      * @param array  $context
+     *
      * @return mixed
+     *
      * @throws \ReflectionException
      */
     protected function getAttributeValue($object, $attribute, $format = null, array $context = [])
@@ -189,8 +207,12 @@ class ContextNormalizer extends GetSetMethodNormalizer
 
         $reflClass = new \ReflectionClass($object);
         foreach ($reflClass->getProperties(\ReflectionProperty::IS_PUBLIC) as $reflProperty) {
-            if ($reflProperty->name !== $attribute || !$reflProperty->isPublic() || $reflProperty->isStatic() || !$this->isAllowedAttribute($object,
-                    $reflProperty->name, $format, $context)) {
+            if ($reflProperty->name !== $attribute || !$reflProperty->isPublic() || $reflProperty->isStatic() || !$this->isAllowedAttribute(
+                $object,
+                $reflProperty->name,
+                $format,
+                $context
+            )) {
                 continue;
             }
             $value = $object->$attribute;
@@ -198,5 +220,4 @@ class ContextNormalizer extends GetSetMethodNormalizer
 
         return $value;
     }
-
 }

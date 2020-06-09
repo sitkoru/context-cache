@@ -2,7 +2,6 @@
 
 namespace sitkoru\contextcache\common;
 
-
 abstract class EntitiesProvider
 {
     /**
@@ -49,8 +48,11 @@ abstract class EntitiesProvider
     private function getCacheCollection(): ICacheCollection
     {
         if (!$this->cacheCollection) {
-            $this->cacheCollection = $this->cacheProvider->collection($this->serviceKey, $this->collection,
-                $this->keyField);
+            $this->cacheCollection = $this->cacheProvider->collection(
+                $this->serviceKey,
+                $this->collection,
+                $this->keyField
+            );
         }
         return $this->cacheCollection;
     }
@@ -59,6 +61,7 @@ abstract class EntitiesProvider
      * @param array  $ids
      * @param string $field
      * @param mixed  $indexBy
+     *
      * @return array
      */
     protected function getFromCache(array $ids, string $field, $indexBy = null): array
@@ -89,6 +92,7 @@ abstract class EntitiesProvider
      * @param array  $ids
      * @param string $field
      * @param mixed  $indexBy
+     *
      * @return array
      */
     protected function getEntitiesFromCache(array $ids, string $field, $indexBy = null): array

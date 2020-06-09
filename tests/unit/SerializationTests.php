@@ -23,7 +23,8 @@ class SerializationTests extends TestCase
         $this->assertTrue($deserialized->compare(PriorityEnum::HIGH));
     }
 
-    public function testEnumInEntity(){
+    public function testEnumInEntity()
+    {
         $serializer = new Serializer([new ContextNormalizer(), new ArrayDenormalizer()]);
         $entity = new AudienceTargetGetItem();
         $entity->StrategyPriority = new PriorityEnum(PriorityEnum::HIGH);
@@ -33,7 +34,8 @@ class SerializationTests extends TestCase
         $this->assertTrue($deserialized->StrategyPriority->compare(PriorityEnum::HIGH));
     }
 
-    public function testNullEnumInEntity(){
+    public function testNullEnumInEntity()
+    {
         $serializer = new Serializer([new ContextNormalizer(), new ArrayDenormalizer()]);
         $entity = new AudienceTargetGetItem();
         $entity->StrategyPriority = null;
@@ -43,7 +45,8 @@ class SerializationTests extends TestCase
         $this->assertEquals($deserialized->StrategyPriority, null);
     }
 
-    public function testEnumInEntitiesArray(){
+    public function testEnumInEntitiesArray()
+    {
         $serializer = new Serializer([new ContextNormalizer(), new ArrayDenormalizer()]);
         $entity = new AudienceTargetGetItem();
         $entity->StrategyPriority = new PriorityEnum(PriorityEnum::HIGH);

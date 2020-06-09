@@ -2,6 +2,7 @@
 
 namespace sitkoru\contextcache\adwords;
 
+use function count;
 use Exception;
 use Google\AdsApi\AdWords\AdWordsSession;
 use Google\AdsApi\AdWords\v201809\cm\AdGroup;
@@ -18,7 +19,6 @@ use sitkoru\contextcache\common\ICacheProvider;
 use sitkoru\contextcache\common\IEntitiesProvider;
 use sitkoru\contextcache\common\models\UpdateResult;
 use sitkoru\contextcache\helpers\ArrayHelper;
-use function count;
 
 class AdWordsAdGroupsProvider extends AdWordsEntitiesProvider implements IEntitiesProvider
 {
@@ -56,7 +56,6 @@ class AdWordsAdGroupsProvider extends AdWordsEntitiesProvider implements IEntiti
         'UrlCustomParameters'
     ];
 
-
     public function __construct(
         AdGroupService $adGroupService,
         ICacheProvider $cacheProvider,
@@ -72,7 +71,9 @@ class AdWordsAdGroupsProvider extends AdWordsEntitiesProvider implements IEntiti
     /**
      * @param array $ids
      * @param array $predicates
+     *
      * @return AdGroup[]
+     *
      * @throws ApiException
      */
     public function getAll(array $ids, array $predicates = []): array
@@ -105,7 +106,9 @@ class AdWordsAdGroupsProvider extends AdWordsEntitiesProvider implements IEntiti
 
     /**
      * @param int $id
+     *
      * @return AdGroup|null
+     *
      * @throws Exception
      */
     public function getOne($id): ?AdGroup
@@ -120,7 +123,9 @@ class AdWordsAdGroupsProvider extends AdWordsEntitiesProvider implements IEntiti
     /**
      * @param array $campaignIds
      * @param array $predicates
+     *
      * @return AdGroup[]
+     *
      * @throws ApiException
      */
     public function getByCampaignIds(array $campaignIds, array $predicates = []): array
@@ -153,7 +158,9 @@ class AdWordsAdGroupsProvider extends AdWordsEntitiesProvider implements IEntiti
 
     /**
      * @param AdGroup[] $entities
+     *
      * @return UpdateResult
+     *
      * @throws Exception
      */
     public function update(array $entities): UpdateResult
@@ -180,8 +187,12 @@ class AdWordsAdGroupsProvider extends AdWordsEntitiesProvider implements IEntiti
             }
         } else {
             $mutateResult = $this->adGroupService->mutate($addOperations);
-            $this->processMutateResult($result, $addOperations, $mutateResult->getValue(),
-                $mutateResult->getPartialFailureErrors());
+            $this->processMutateResult(
+                $result,
+                $addOperations,
+                $mutateResult->getValue(),
+                $mutateResult->getPartialFailureErrors()
+            );
         }
         $this->logger->info('Done');
         $this->clearCache();
@@ -190,6 +201,7 @@ class AdWordsAdGroupsProvider extends AdWordsEntitiesProvider implements IEntiti
 
     /**
      * @param Operand $operand
+     *
      * @return AdGroup|mixed
      */
     protected function getOperandEntity(Operand $operand)

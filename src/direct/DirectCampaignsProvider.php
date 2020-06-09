@@ -38,6 +38,7 @@ class DirectCampaignsProvider extends DirectEntitiesProvider implements IEntitie
 
     /**
      * @return CampaignGetItem[]
+     *
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \ReflectionException
      * @throws \directapi\exceptions\DirectAccountNotExistException
@@ -50,7 +51,8 @@ class DirectCampaignsProvider extends DirectEntitiesProvider implements IEntitie
     {
         $campaigns = [];
         $criteria = new CampaignsSelectionCriteria();
-        $fromService = $this->directApiService->getCampaignsService()->get($criteria,
+        $fromService = $this->directApiService->getCampaignsService()->get(
+            $criteria,
             CampaignFieldEnum::getValues(),
             TextCampaignFieldEnum::getValues(),
             MobileAppCampaignFieldEnum::getValues(),
@@ -66,7 +68,9 @@ class DirectCampaignsProvider extends DirectEntitiesProvider implements IEntitie
 
     /**
      * @param int $id
+     *
      * @return CampaignGetItem|null
+     *
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \ReflectionException
      * @throws \directapi\exceptions\DirectAccountNotExistException
@@ -86,7 +90,9 @@ class DirectCampaignsProvider extends DirectEntitiesProvider implements IEntitie
 
     /**
      * @param array $ids
+     *
      * @return CampaignGetItem[]
+     *
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \ReflectionException
      * @throws \directapi\exceptions\DirectAccountNotExistException
@@ -107,7 +113,8 @@ class DirectCampaignsProvider extends DirectEntitiesProvider implements IEntitie
             foreach (array_chunk($notFound, self::CRITERIA_MAX_CAMPAIGN_IDS) as $idsChunk) {
                 $criteria = new CampaignsSelectionCriteria();
                 $criteria->Ids = $idsChunk;
-                $fromService = $this->directApiService->getCampaignsService()->get($criteria,
+                $fromService = $this->directApiService->getCampaignsService()->get(
+                    $criteria,
                     CampaignFieldEnum::getValues(),
                     TextCampaignFieldEnum::getValues(),
                     MobileAppCampaignFieldEnum::getValues(),
@@ -126,7 +133,9 @@ class DirectCampaignsProvider extends DirectEntitiesProvider implements IEntitie
 
     /**
      * @param CampaignGetItem[] $entities
+     *
      * @return UpdateResult
+     *
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \JsonMapper_Exception
      * @throws \directapi\exceptions\DirectAccountNotExistException
@@ -145,7 +154,6 @@ class DirectCampaignsProvider extends DirectEntitiesProvider implements IEntitie
             $this->logger->info('Chunk: ' . $index . '. Uploaded.');
             foreach ($chunkResults as $i => $chunkResult) {
                 if (!array_key_exists($i, $updEntities)) {
-
                     continue;
                 }
                 /**
@@ -170,7 +178,9 @@ class DirectCampaignsProvider extends DirectEntitiesProvider implements IEntitie
     /**
      * @param array  $ids
      * @param string $date
+     *
      * @return CheckResponse
+     *
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \JsonMapper_Exception
      * @throws \directapi\exceptions\DirectAccountNotExistException

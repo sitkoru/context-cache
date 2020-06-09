@@ -2,7 +2,7 @@
 
 namespace sitkoru\contextcache\adwords;
 
-
+use function count;
 use Exception;
 use Google\AdsApi\AdWords\AdWordsSession;
 use Google\AdsApi\AdWords\v201809\cm\AdGroupCriterion;
@@ -21,11 +21,9 @@ use sitkoru\contextcache\common\ICacheProvider;
 use sitkoru\contextcache\common\IEntitiesProvider;
 use sitkoru\contextcache\common\models\UpdateResult;
 use sitkoru\contextcache\helpers\ArrayHelper;
-use function count;
 
 class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implements IEntitiesProvider
 {
-
     /**
      * @var AdGroupCriterionService
      */
@@ -113,7 +111,9 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
     /**
      * @param array $ids
      * @param array $predicates
+     *
      * @return AdGroupCriterion[]
+     *
      * @throws ApiException
      */
     public function getAll(array $ids, array $predicates = []): array
@@ -155,7 +155,9 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
 
     /**
      * @param int $id
+     *
      * @return AdGroupCriterion
+     *
      * @throws ApiException
      */
     public function getOne($id): ?AdGroupCriterion
@@ -170,7 +172,9 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
     /**
      * @param array $adGroupIds
      * @param array $predicates
+     *
      * @return AdGroupCriterion[]
+     *
      * @throws ApiException
      */
     public function getByAdGroupIds(array $adGroupIds, array $predicates = []): array
@@ -209,7 +213,9 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
     /**
      * @param array $campaignIds
      * @param array $predicates
+     *
      * @return AdGroupCriterion[]
+     *
      * @throws ApiException
      */
     public function getByCampaignIds(array $campaignIds, array $predicates = []): array
@@ -256,7 +262,9 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
 
     /**
      * @param AdGroupCriterion[] $entities
+     *
      * @return UpdateResult
+     *
      * @throws Exception
      */
     public function update(array $entities): UpdateResult
@@ -284,8 +292,12 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
             }
         } else {
             $mutateResult = $this->adGroupCriterionService->mutate($updateOperations);
-            $this->processMutateResult($result, $updateOperations, $mutateResult->getValue(),
-                $mutateResult->getPartialFailureErrors());
+            $this->processMutateResult(
+                $result,
+                $updateOperations,
+                $mutateResult->getValue(),
+                $mutateResult->getPartialFailureErrors()
+            );
         }
 
         $this->logger->info('Done');
@@ -295,6 +307,7 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
 
     /**
      * @param Operand $operand
+     *
      * @return AdGroupCriterion|mixed
      */
     protected function getOperandEntity(Operand $operand)

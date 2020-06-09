@@ -2,7 +2,6 @@
 
 namespace sitkoru\contextcache\common;
 
-
 use sitkoru\contextcache\common\models\UpdateResult;
 
 interface IEntitiesProvider
@@ -11,6 +10,7 @@ interface IEntitiesProvider
 
     /**
      * @param mixed $id
+     *
      * @return mixed
      */
     public function getOne($id);

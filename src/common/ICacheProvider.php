@@ -2,7 +2,6 @@
 
 namespace sitkoru\contextcache\common;
 
-
 interface ICacheProvider
 {
     public function getTimeStamp(string $service): int;

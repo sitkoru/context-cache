@@ -2,7 +2,6 @@
 
 namespace sitkoru\contextcache\common\models;
 
-
 class UpdateResult
 {
     /**

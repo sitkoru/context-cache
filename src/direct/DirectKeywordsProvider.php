@@ -36,7 +36,9 @@ class DirectKeywordsProvider extends DirectEntitiesProvider implements IEntities
 
     /**
      * @param int $id
+     *
      * @return KeywordGetItem|null
+     *
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \ReflectionException
      * @throws \directapi\exceptions\DirectAccountNotExistException
@@ -56,7 +58,9 @@ class DirectKeywordsProvider extends DirectEntitiesProvider implements IEntities
 
     /**
      * @param array $ids
+     *
      * @return KeywordGetItem[]
+     *
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \ReflectionException
      * @throws \directapi\exceptions\DirectAccountNotExistException
@@ -77,8 +81,10 @@ class DirectKeywordsProvider extends DirectEntitiesProvider implements IEntities
             foreach (array_chunk($notFound, self::CRITERIA_MAX_IDS) as $idsChunk) {
                 $criteria = new KeywordsSelectionCriteria();
                 $criteria->Ids = $idsChunk;
-                $fromService = $this->directApiService->getKeywordsService()->get($criteria,
-                    KeywordFieldEnum::getValues());
+                $fromService = $this->directApiService->getKeywordsService()->get(
+                    $criteria,
+                    KeywordFieldEnum::getValues()
+                );
                 foreach ($fromService as $keywordGetItem) {
                     $keywords[$keywordGetItem->Id] = $keywordGetItem;
                 }
@@ -90,7 +96,9 @@ class DirectKeywordsProvider extends DirectEntitiesProvider implements IEntities
 
     /**
      * @param int[] $ids
+     *
      * @return KeywordGetItem[]
+     *
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \ReflectionException
      * @throws \directapi\exceptions\DirectAccountNotExistException
@@ -111,8 +119,10 @@ class DirectKeywordsProvider extends DirectEntitiesProvider implements IEntities
             foreach (array_chunk($notFound, self::CRITERIA_MAX_AD_GROUP_IDS) as $idsChunk) {
                 $criteria = new KeywordsSelectionCriteria();
                 $criteria->AdGroupIds = $idsChunk;
-                $fromService = $this->directApiService->getKeywordsService()->get($criteria,
-                    KeywordFieldEnum::getValues());
+                $fromService = $this->directApiService->getKeywordsService()->get(
+                    $criteria,
+                    KeywordFieldEnum::getValues()
+                );
                 foreach ($fromService as $keywordGetItem) {
                     $keywords[$keywordGetItem->Id] = $keywordGetItem;
                 }
@@ -124,7 +134,9 @@ class DirectKeywordsProvider extends DirectEntitiesProvider implements IEntities
 
     /**
      * @param int[] $ids
+     *
      * @return KeywordGetItem[]
+     *
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \ReflectionException
      * @throws \directapi\exceptions\DirectAccountNotExistException
@@ -145,8 +157,10 @@ class DirectKeywordsProvider extends DirectEntitiesProvider implements IEntities
             foreach (array_chunk($notFound, self::CRITERIA_MAX_CAMPAIGN_IDS) as $idsChunk) {
                 $criteria = new KeywordsSelectionCriteria();
                 $criteria->CampaignIds = $idsChunk;
-                $fromService = $this->directApiService->getKeywordsService()->get($criteria,
-                    KeywordFieldEnum::getValues());
+                $fromService = $this->directApiService->getKeywordsService()->get(
+                    $criteria,
+                    KeywordFieldEnum::getValues()
+                );
                 foreach ($fromService as $keywordGetItem) {
                     $keywords[$keywordGetItem->Id] = $keywordGetItem;
                 }
@@ -158,7 +172,9 @@ class DirectKeywordsProvider extends DirectEntitiesProvider implements IEntities
 
     /**
      * @param KeywordGetItem[] $entities
+     *
      * @return UpdateResult
+     *
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \JsonMapper_Exception
      * @throws \directapi\exceptions\DirectAccountNotExistException
@@ -177,7 +193,6 @@ class DirectKeywordsProvider extends DirectEntitiesProvider implements IEntities
             $this->logger->info('Chunk: ' . $index . '. Uploaded.');
             foreach ($chunkResults as $i => $chunkResult) {
                 if (!array_key_exists($i, $updEntities)) {
-
                     continue;
                 }
                 /**
@@ -202,7 +217,9 @@ class DirectKeywordsProvider extends DirectEntitiesProvider implements IEntities
     /**
      * @param array  $ids
      * @param string $date
+     *
      * @return CheckResponse
+     *
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \JsonMapper_Exception
      * @throws \directapi\exceptions\DirectAccountNotExistException

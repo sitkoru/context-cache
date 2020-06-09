@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace sitkoru\contextcache\tests\unit;
 
-
 use directapi\services\adgroups\models\AdGroupGetItem;
 use directapi\services\ads\models\AdGetItem;
 use directapi\services\campaigns\models\CampaignGetItem;
@@ -36,6 +35,7 @@ class DirectTest extends TestCase
 
     /**
      * @dataProvider cacheProvider
+     *
      * @param bool $clearCache
      */
     public function testLoadCampaigns(bool $clearCache): void
@@ -53,6 +53,7 @@ class DirectTest extends TestCase
 
     /**
      * @dataProvider cacheProvider
+     *
      * @param bool $clearCache
      */
     public function testLoadGroups(bool $clearCache): void
@@ -70,6 +71,7 @@ class DirectTest extends TestCase
 
     /**
      * @dataProvider cacheProvider
+     *
      * @param bool $clearCache
      */
     public function testLoadGroupsByCampaignIds($clearCache): void
@@ -87,6 +89,7 @@ class DirectTest extends TestCase
 
     /**
      * @dataProvider cacheProvider
+     *
      * @param bool $clearCache
      */
     public function testLoadAds($clearCache): void
@@ -104,6 +107,7 @@ class DirectTest extends TestCase
 
     /**
      * @dataProvider cacheProvider
+     *
      * @param bool $clearCache
      */
     public function testLoadAdsByGroupIds($clearCache): void
@@ -121,6 +125,7 @@ class DirectTest extends TestCase
 
     /**
      * @dataProvider cacheProvider
+     *
      * @param bool $clearCache
      */
     public function testLoadAdsByCampaignIds($clearCache): void
@@ -138,6 +143,7 @@ class DirectTest extends TestCase
 
     /**
      * @dataProvider cacheProvider
+     *
      * @param bool $clearCache
      */
     public function testLoadCriterions($clearCache): void
@@ -155,6 +161,7 @@ class DirectTest extends TestCase
 
     /**
      * @dataProvider cacheProvider
+     *
      * @param bool $clearCache
      */
     public function testLoadCriterionsByGroupIds($clearCache): void
@@ -180,6 +187,7 @@ class DirectTest extends TestCase
 
     /**
      * @dataProvider cacheProvider
+     *
      * @param bool $clearCache
      */
     public function testLoadRetargetingLists($clearCache): void

@@ -2,7 +2,6 @@
 
 namespace sitkoru\contextcache\tests\unit;
 
-
 use Google\AdsApi\AdWords\v201809\cm\Ad;
 use Google\AdsApi\AdWords\v201809\cm\ExpandedTextAd;
 use Google\AdsApi\AdWords\v201809\cm\Keyword;
@@ -25,8 +24,10 @@ class AdWordsUpdateTest extends TestCase
         $logger->pushHandler(new ErrorLogHandler());
         $cacheProvider = new MongoDbCacheProvider('mongodb://mongodb', $logger);
         $contextEntitiesProvider = new ContextEntitiesProvider($cacheProvider, $logger);
-        $this->provider = $contextEntitiesProvider->getAdWordsProvider(ADWORDS_UPDATE_CUSTOMER_ID,
-            ADWORDS_AUTH_FILE_PATH);
+        $this->provider = $contextEntitiesProvider->getAdWordsProvider(
+            ADWORDS_UPDATE_CUSTOMER_ID,
+            ADWORDS_AUTH_FILE_PATH
+        );
     }
 
     public function testUpdateCampaign()
@@ -115,7 +116,7 @@ class AdWordsUpdateTest extends TestCase
         $newAd->setId($textAd->getId());
         $newAd->setType($textAd->getType());
         $newAd->setFinalUrls([$newUrl]);
-        $result = $this->provider->ads->mutate([$newAd],Operator::SET);
+        $result = $this->provider->ads->mutate([$newAd], Operator::SET);
         $this->assertTrue($result->success);
 
         $newGroupAds = $this->provider->ads->getByAdGroupIds([GAUpdateAdGroupId]);
@@ -132,7 +133,7 @@ class AdWordsUpdateTest extends TestCase
         $this->assertNotNull($updGroupAd);
 
         $newAd->setFinalUrls([$oldUrl]);
-        $result = $this->provider->ads->mutate([$newAd],Operator::SET);
+        $result = $this->provider->ads->mutate([$newAd], Operator::SET);
         $this->assertTrue($result->success);
     }
 
@@ -179,5 +180,4 @@ class AdWordsUpdateTest extends TestCase
         $this->assertNotEmpty($result->errors);
         $this->assertCount(1, $result->errors[0]);
     }
-
 }

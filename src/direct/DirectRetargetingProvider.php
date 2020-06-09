@@ -32,7 +32,9 @@ class DirectRetargetingProvider extends DirectEntitiesProvider implements IEntit
 
     /**
      * @param int $id
+     *
      * @return RetargetingListGetItem|null
+     *
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \ReflectionException
      * @throws \directapi\exceptions\DirectAccountNotExistException
@@ -52,7 +54,9 @@ class DirectRetargetingProvider extends DirectEntitiesProvider implements IEntit
 
     /**
      * @param array $ids
+     *
      * @return RetargetingListGetItem[]
+     *
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \ReflectionException
      * @throws \directapi\exceptions\DirectAccountNotExistException
@@ -73,8 +77,10 @@ class DirectRetargetingProvider extends DirectEntitiesProvider implements IEntit
             foreach (array_chunk($notFound, self::CRITERIA_MAX_IDS) as $idsChunk) {
                 $criteria = new RetargetingListSelectionCriteria();
                 $criteria->Ids = $idsChunk;
-                $fromService = $this->directApiService->getRetargetingListsService()->get($criteria,
-                    RetargetingListFieldEnum::getValues());
+                $fromService = $this->directApiService->getRetargetingListsService()->get(
+                    $criteria,
+                    RetargetingListFieldEnum::getValues()
+                );
                 foreach ($fromService as $listGetItem) {
                     $lists[$listGetItem->Id] = $listGetItem;
                 }
@@ -86,7 +92,9 @@ class DirectRetargetingProvider extends DirectEntitiesProvider implements IEntit
 
     /**
      * @param RetargetingListGetItem[] $entities
+     *
      * @return UpdateResult
+     *
      * @throws \ErrorException
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \directapi\exceptions\DirectAccountNotExistException
@@ -105,7 +113,6 @@ class DirectRetargetingProvider extends DirectEntitiesProvider implements IEntit
             $this->logger->info('Chunk: ' . $index . '. Uploaded.');
             foreach ($chunkResults as $i => $chunkResult) {
                 if (!array_key_exists($i, $updEntities)) {
-
                     continue;
                 }
                 /**
@@ -130,7 +137,9 @@ class DirectRetargetingProvider extends DirectEntitiesProvider implements IEntit
     /**
      * @param array  $ids
      * @param string $date
+     *
      * @return CheckResponse
+     *
      * @throws \directapi\exceptions\UnknownPropertyException
      */
     protected function getChanges(array $ids, string $date): CheckResponse

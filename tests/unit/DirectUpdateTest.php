@@ -2,7 +2,6 @@
 
 namespace sitkoru\contextcache\tests\unit;
 
-
 use Monolog\Handler\ErrorLogHandler;
 use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
@@ -111,5 +110,4 @@ class DirectUpdateTest extends TestCase
         $this->assertNotEmpty($result->errors);
         $this->assertCount(1, $result->errors[$ad->Id]);
     }
-
 }

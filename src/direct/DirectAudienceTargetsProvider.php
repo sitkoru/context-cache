@@ -18,7 +18,6 @@ class DirectAudienceTargetsProvider extends DirectEntitiesProvider implements IE
 {
     public const CRITERIA_MAX_IDS = 10000;
 
-
     public function __construct(
         DirectApiService $directApiService,
         ICacheProvider $cacheProvider,
@@ -31,7 +30,9 @@ class DirectAudienceTargetsProvider extends DirectEntitiesProvider implements IE
 
     /**
      * @param int $id
+     *
      * @return AudienceTargetGetItem|null
+     *
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \ReflectionException
      * @throws \directapi\exceptions\DirectAccountNotExistException
@@ -51,7 +52,9 @@ class DirectAudienceTargetsProvider extends DirectEntitiesProvider implements IE
 
     /**
      * @param array $ids
+     *
      * @return AudienceTargetGetItem[]
+     *
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \ReflectionException
      * @throws \directapi\exceptions\DirectAccountNotExistException
@@ -72,8 +75,10 @@ class DirectAudienceTargetsProvider extends DirectEntitiesProvider implements IE
             foreach (array_chunk($notFound, self::CRITERIA_MAX_IDS) as $idsChunk) {
                 $criteria = new AudienceTargetSelectionCriteria();
                 $criteria->Ids = $idsChunk;
-                $fromService = $this->directApiService->getAudienceTargetsService()->get($criteria,
-                    AudienceTargetFieldEnum::getValues());
+                $fromService = $this->directApiService->getAudienceTargetsService()->get(
+                    $criteria,
+                    AudienceTargetFieldEnum::getValues()
+                );
                 foreach ($fromService as $target) {
                     $targets[$target->Id] = $target;
                 }
@@ -85,18 +90,22 @@ class DirectAudienceTargetsProvider extends DirectEntitiesProvider implements IE
 
     /**
      * @param array $entities
+     *
      * @return UpdateResult
+     *
      * @throws \Exception
      */
     public function update(array $entities): UpdateResult
     {
-        throw new \Exception('This sevice does not support updates');
+        throw new \ErrorException('This service does not support updates');
     }
 
     /**
      * @param array  $ids
      * @param string $date
+     *
      * @return CheckResponse
+     *
      * @throws \directapi\exceptions\UnknownPropertyException
      */
     protected function getChanges(array $ids, string $date): CheckResponse

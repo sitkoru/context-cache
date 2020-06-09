@@ -2,7 +2,6 @@
 
 namespace sitkoru\contextcache\adwords;
 
-
 use Google\AdsApi\AdWords\AdWordsServices;
 use Google\AdsApi\AdWords\AdWordsSession;
 use Google\AdsApi\AdWords\AdWordsSessionBuilder;
@@ -18,7 +17,6 @@ use sitkoru\contextcache\common\ICacheProvider;
 
 class AdWordsProvider
 {
-
     /**
      * @var AdWordsAdGroupsProvider
      */
@@ -48,6 +46,7 @@ class AdWordsProvider
      * @var int
      */
     private $customerId;
+
     /**
      * @var string
      */
@@ -55,6 +54,7 @@ class AdWordsProvider
 
     /**
      * GoogleProvider constructor.
+     *
      * @param int                   $customerId
      * @param string                $oAuthFilePath
      * @param null|string           $refreshToken
@@ -68,7 +68,6 @@ class AdWordsProvider
         ICacheProvider $cacheProvider,
         ContextEntitiesLogger $logger
     ) {
-
         $this->customerId = $customerId;
         $this->refreshToken = $refreshToken;
         $this->oAuthFilePath = $oAuthFilePath;
@@ -102,10 +101,12 @@ class AdWordsProvider
          * @var AdGroupCriterionService $adGroupCriterionService
          */
         $adGroupCriterionService = $services->get($session, AdGroupCriterionService::class);
-        $this->criterions = new AdWordsAdGroupCriterionsProvider($adGroupCriterionService, $cacheProvider, $session,
-            $logger);
-
-
+        $this->criterions = new AdWordsAdGroupCriterionsProvider(
+            $adGroupCriterionService,
+            $cacheProvider,
+            $session,
+            $logger
+        );
     }
 
     private function getSession(): AdWordsSession
@@ -117,7 +118,6 @@ class AdWordsProvider
 
     private function getSessionBuilder(): AdWordsSessionBuilder
     {
-
         $oAuth2Credential = $this->getOAuthCredentials();
 
         $builder = (new AdWordsSessionBuilder())

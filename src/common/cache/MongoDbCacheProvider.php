@@ -2,7 +2,6 @@
 
 namespace sitkoru\contextcache\common\cache;
 
-
 use MongoDB\Client;
 use Psr\Log\LoggerInterface;
 use sitkoru\contextcache\common\ICacheCollection;
@@ -14,6 +13,7 @@ class MongoDbCacheProvider implements ICacheProvider
      * @var Client
      */
     private $client;
+
     /**
      * @var LoggerInterface|null
      */
@@ -38,10 +38,11 @@ class MongoDbCacheProvider implements ICacheProvider
     public function setTimeStamp(string $service, int $timestamp): void
     {
         $collection = $this->client->selectCollection($service, 'settings');
-        $collection->updateOne([
+        $collection->updateOne(
+            [
             'name' => 'timestamp'
         ],
-            ['$set' => ['value' => $timestamp]],
+            ['$set'   => ['value' => $timestamp]],
             ['upsert' => true]
         );
     }

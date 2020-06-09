@@ -15,6 +15,7 @@ class ContextEntitiesProvider
      * @var ICacheProvider
      */
     private $cache;
+
     /**
      * @var ContextEntitiesLogger
      */
@@ -50,7 +51,6 @@ class ContextEntitiesProvider
             }
         }
     }
-
 
     public function getDirectProvider(
         string $accessToken,

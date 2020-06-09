@@ -2,7 +2,7 @@
 
 namespace sitkoru\contextcache\adwords;
 
-
+use function count;
 use ErrorException;
 use Exception;
 use Google\AdsApi\AdWords\AdWordsSession;
@@ -27,7 +27,6 @@ use sitkoru\contextcache\common\IEntitiesProvider;
 use sitkoru\contextcache\common\models\UpdateResult;
 use sitkoru\contextcache\helpers\ArrayHelper;
 use Throwable;
-use function count;
 
 class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesProvider
 {
@@ -35,7 +34,6 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
      * @var AdGroupAdService
      */
     private $adGroupAdService;
-
 
     /**
      * @var array
@@ -175,6 +173,7 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
         'Width',
         'YouTubeVideoIdString'
     ];
+
     /**
      * @var AdService
      */
@@ -197,7 +196,9 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
     /**
      * @param array $ids
      * @param array $predicates
+     *
      * @return AdGroupAd[]
+     *
      * @throws ApiException
      */
     public function getAll(array $ids, array $predicates = []): array
@@ -230,7 +231,9 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
 
     /**
      * @param int $id
+     *
      * @return AdGroupAd
+     *
      * @throws ApiException
      */
     public function getOne($id): ?AdGroupAd
@@ -245,7 +248,9 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
     /**
      * @param int[] $campaignIds
      * @param array $predicates
+     *
      * @return AdGroupAd[]
+     *
      * @throws ApiException
      */
     public function getByCampaignIds(array $campaignIds, array $predicates = []): array
@@ -283,7 +288,9 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
     /**
      * @param array $adGroupIds
      * @param array $predicates
+     *
      * @return AdGroupAd[]
+     *
      * @throws ApiException
      */
     public function getByAdGroupIds(array $adGroupIds, array $predicates = []): array
@@ -320,7 +327,9 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
 
     /**
      * @param AdGroupAd[] $entities
+     *
      * @return UpdateResult
+     *
      * @throws Exception
      * @throws Throwable
      */
@@ -395,8 +404,12 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
             }
         } else {
             $mutateResult = $this->adGroupAdService->mutate($addOperations);
-            $this->processMutateResult($result, $addOperations, $mutateResult->getValue(),
-                $mutateResult->getPartialFailureErrors());
+            $this->processMutateResult(
+                $result,
+                $addOperations,
+                $mutateResult->getValue(),
+                $mutateResult->getPartialFailureErrors()
+            );
             if (!$result->success) {
                 foreach ($result->errors as $adOperationId => $errors) {
                     $adOperation = $addOperations[$adOperationId];
@@ -421,8 +434,12 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
                         }
                     }
                 }
-                $this->processMutateResult($result, array_values($deleteOperations), $jobResults->getValue(),
-                    $jobResults->getPartialFailureErrors());
+                $this->processMutateResult(
+                    $result,
+                    array_values($deleteOperations),
+                    $jobResults->getValue(),
+                    $jobResults->getPartialFailureErrors()
+                );
             }
         }
 
@@ -435,7 +452,9 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
     /**
      * @param array  $ads
      * @param string $operator
+     *
      * @return UpdateResult
+     *
      * @throws ErrorException
      * @throws ApiException
      */
@@ -455,8 +474,12 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
 
         $mutateResult = $this->adService->mutate($operations);
         $result = new UpdateResult();
-        $this->processMutateResult($result, $operations, $mutateResult->getValue(),
-            $mutateResult->getPartialFailureErrors());
+        $this->processMutateResult(
+            $result,
+            $operations,
+            $mutateResult->getValue(),
+            $mutateResult->getPartialFailureErrors()
+        );
         $this->logger->info('Done');
         $this->clearCache();
         return $result;
@@ -464,6 +487,7 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
 
     /**
      * @param Operand $operand
+     *
      * @return AdGroupAd|mixed
      */
     protected function getOperandEntity(Operand $operand)
