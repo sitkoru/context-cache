@@ -11,11 +11,11 @@
   ],
   "minimum-stability": "stable",
   "require": {
-    "sitkoru/yandex-direct-api": "^2020.06.07",
+    "sitkoru/yandex-direct-api": "^2020.06.09",
     "googleads/googleads-php-lib": "^47.0.0",
     "mongodb/mongodb": "^1.6.0",
     "psr/log": "^1.0",
-    "guzzlehttp/guzzle": "^6.5.4",
+    "guzzlehttp/guzzle": "^6.5.5",
     "php": "^7.2",
     "ext-json": "*",
     "ext-soap": "*",
