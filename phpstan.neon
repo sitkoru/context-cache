@@ -5,6 +5,14 @@ parameters:
           - '#Variable property access on .*#'
           - '#Variable method call on .*#'
           - '#Instantiated class directapi\\components\\Enum is abstract#'
+          - '#.*should be covariant with return type.*#'
+          - '#.*should be contravariant with parameter.*#'
+          - '#.*expects array<*#'
+          - '#.*does not accept array<*#'
+    checkMissingIterableValueType: false
+    treatPhpDocTypesAsCertain: false
+    checkGenericClassInNonGenericObjectType: false
+    reportUnmatchedIgnoredErrors: false
 services:
   -
     class: TheCodingMachine\PHPStan\Rules\Exceptions\EmptyExceptionRule
