@@ -20,7 +20,7 @@ abstract class EntitiesProvider
     protected $collection;
 
     /**
-     * @var ICacheCollection
+     * @var ICacheCollection|null
      */
     private $cacheCollection;
 
@@ -47,7 +47,7 @@ abstract class EntitiesProvider
 
     private function getCacheCollection(): ICacheCollection
     {
-        if (!$this->cacheCollection) {
+        if ($this->cacheCollection === null) {
             $this->cacheCollection = $this->cacheProvider->collection(
                 $this->serviceKey,
                 $this->collection,
@@ -102,7 +102,7 @@ abstract class EntitiesProvider
 
     protected function addToCache(array $entities): void
     {
-        if ($this->isCacheEnabled && $entities) {
+        if ($this->isCacheEnabled && count($entities) > 0) {
             $this->getCacheCollection()->set($entities);
             $this->cacheProvider->setTimeStamp($this->serviceKey, time());
         }

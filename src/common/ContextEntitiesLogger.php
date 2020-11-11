@@ -23,28 +23,28 @@ class ContextEntitiesLogger
 
     public function info(string $message, array $context = []): void
     {
-        if ($this->logger) {
+        if ($this->logger !== null) {
             $this->logger->info($message, $context);
         }
     }
 
     public function error(string $message, array $context = []): void
     {
-        if ($this->logger) {
+        if ($this->logger !== null) {
             $this->logger->error($message, $context);
         }
     }
 
     public function debug(string $message, array $context = []): void
     {
-        if ($this->logger) {
+        if ($this->logger !== null) {
             $this->logger->debug($message, $context);
         }
     }
 
     public function warning(string $message, array $context = []): void
     {
-        if ($this->logger) {
+        if ($this->logger !== null) {
             $this->logger->warning($message, $context);
         }
     }

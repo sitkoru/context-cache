@@ -29,7 +29,7 @@ class MongoDbCacheProvider implements ICacheProvider
     {
         $collection = $this->client->selectCollection($service, 'settings');
         $setting = $collection->findOne(['name' => 'timestamp']);
-        if ($setting) {
+        if (is_object($setting) && property_exists($setting, 'value')) {
             return $setting->value;
         }
         return 0;
@@ -40,8 +40,8 @@ class MongoDbCacheProvider implements ICacheProvider
         $collection = $this->client->selectCollection($service, 'settings');
         $collection->updateOne(
             [
-            'name' => 'timestamp'
-        ],
+                'name' => 'timestamp'
+            ],
             ['$set'   => ['value' => $timestamp]],
             ['upsert' => true]
         );

@@ -32,15 +32,20 @@ class MongoDbCacheCollection implements ICacheCollection
      */
     private $logger;
 
-    public function __construct(Client $client, string $service, string $collection, string $keyField, ?LoggerInterface $logger)
-    {
+    public function __construct(
+        Client $client,
+        string $service,
+        string $collection,
+        string $keyField,
+        ?LoggerInterface $logger
+    ) {
         $this->keyField = $keyField;
         $this->collection = $client->selectCollection($service, $collection);
         $this->logger = $logger;
     }
 
     /**
-     * @var Serializer
+     * @var Serializer|null
      */
     private static $serializer;
 
@@ -49,7 +54,7 @@ class MongoDbCacheCollection implements ICacheCollection
      */
     private static function getSerializer(): Serializer
     {
-        if (!self::$serializer) {
+        if (self::$serializer === null) {
             self::$serializer = new Serializer([new ContextNormalizer(), new ArrayDenormalizer()]);
         }
         return self::$serializer;
@@ -154,7 +159,7 @@ class MongoDbCacheCollection implements ICacheCollection
                 $preparedEntity = self::getSerializer()->normalize($entity, 'json');
                 $preparedEntities[] = $preparedEntity;
             } catch (ExceptionInterface $e) {
-                if ($this->logger) {
+                if ($this->logger !== null) {
                     $keyField = $this->keyField;
                     $this->logger->error("Can't serialize entry "
                         . $entity->$keyField
@@ -175,7 +180,7 @@ class MongoDbCacheCollection implements ICacheCollection
                     $entity = self::getSerializer()->denormalize($entry, $entry->_class, 'json');
                     $entities[] = $entity;
                 } catch (ExceptionInterface $e) {
-                    if ($this->logger) {
+                    if ($this->logger !== null) {
                         $keyField = $this->keyField;
                         $this->logger->error("Can't deserialize entry "
                             . $entry->$keyField

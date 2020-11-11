@@ -13,6 +13,7 @@ use Google\AdsApi\AdWords\v201809\cm\BatchJob;
 use Google\AdsApi\AdWords\v201809\cm\BatchJobOperation;
 use Google\AdsApi\AdWords\v201809\cm\BatchJobService;
 use Google\AdsApi\AdWords\v201809\cm\BatchJobStatus;
+use Google\AdsApi\AdWords\v201809\cm\ErrorList;
 use Google\AdsApi\AdWords\v201809\cm\MutateResult;
 use Google\AdsApi\AdWords\v201809\cm\Operand;
 use Google\AdsApi\AdWords\v201809\cm\Operator;
@@ -20,8 +21,7 @@ use Google\AdsApi\AdWords\v201809\cm\PolicyViolationError;
 use Google\AdsApi\AdWords\v201809\cm\Predicate;
 use Google\AdsApi\AdWords\v201809\cm\PredicateOperator;
 use Google\AdsApi\AdWords\v201809\cm\Selector;
-use function in_array;
-use function is_array;
+use Google\AdsApi\AdWords\v201809\cm\TemporaryUrl;
 use sitkoru\contextcache\common\ContextEntitiesLogger;
 use sitkoru\contextcache\common\EntitiesProvider;
 use sitkoru\contextcache\common\ICacheProvider;
@@ -56,17 +56,21 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
         parent::__construct($cacheProvider, $logger);
         $this->serviceKey = 'google';
         $this->adWordsSession = $adWordsSession;
-        $this->batchJobService = (new AdWordsServices())->get($adWordsSession, BatchJobService::class);
+        /**
+         * @var BatchJobService
+         */
+        $batchJobService = (new AdWordsServices())->get($adWordsSession, BatchJobService::class);
+        $this->batchJobService = $batchJobService;
     }
 
     protected function hasChanges(array $ids): bool
     {
         $ts = $this->getLastCacheTimestamp();
-        return !$ts || $ts < time() - 60 * 30;
+        return $ts === 0 || $ts < time() - 60 * 30;
     }
 
     /**
-     * @param $operations
+     * @param array $operations
      *
      * @return bool|MutateResult[]
      *
@@ -82,10 +86,10 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
         $addOp->setOperand(new BatchJob());
 
         try {
+            $result = $this->batchJobService->mutate([$addOp]);
             /**
              * @var BatchJob $job
              */
-            $result = $this->batchJobService->mutate([$addOp]);
             $job = $result->getValue()[0];
         } catch (SoapFault $ex) {
             return false;
@@ -100,6 +104,9 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
             throw new ErrorException(
                 'Произошла ошибка при загрузке данных в Google AdWords. Попробуйте ещё раз немного позже',
                 $ex->getCode(),
+                1,
+                __FILE__,
+                __LINE__,
                 $ex
             );
         }
@@ -113,7 +120,7 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
                 $sleepSeconds = self::MAX_POLL_FREQUENCY;
             }
             $this->logger->debug("Sleeping {$sleepSeconds} seconds...");
-            sleep($sleepSeconds);
+            sleep((int)$sleepSeconds);
             $selector = new Selector();
             $selector->setFields([
                 'Id',
@@ -146,7 +153,7 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
         if ($batchJob->getStatus() === BatchJobStatus::CANCELED) {
             throw new AdWordsBatchJobCancelledException('Task was cancelled');
         }
-        if ($batchJob->getProcessingErrors() !== null) {
+        if (count($batchJob->getProcessingErrors()) > 0) {
             $i = 0;
             foreach ($batchJob->getProcessingErrors() as $processingError) {
                 $this->logger->error(
@@ -155,9 +162,11 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
                 );
             }
         }
-        if ($batchJob->getDownloadUrl() !== null
-            && $batchJob->getDownloadUrl()->getUrl() !== null
-        ) {
+        /**
+         * @var TemporaryUrl|null
+         */
+        $tempUrl = $batchJob->getDownloadUrl();
+        if ($tempUrl !== null) {
             $mutateResults = $batchJobs->downloadBatchJobResults($batchJob->getDownloadUrl()->getUrl());
             $this->logger->info("Downloaded results from {$batchJob->getDownloadUrl()->getUrl()}:");
 
@@ -191,8 +200,15 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
         }
 
         foreach ($jobResult as $mutateResult) {
-            if ($mutateResult->getErrorList()) {
-                foreach ($mutateResult->getErrorList()->getErrors() as $error) {
+            /**
+             * @var ErrorList|null
+             */
+            $errorList = $mutateResult->getErrorList();
+            if ($errorList !== null) {
+                foreach ($errorList->getErrors() as $error) {
+                    /**
+                     * @var ApiError|array $error
+                     */
                     if (is_array($error)) {
                         $error = $error[0];
                     }
@@ -225,7 +241,7 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
             '/^operations\[(\d+)]/',
             $error->getFieldPath(),
             $matches
-        )) {
+        ) === 1) {
             return $matches[1];
         }
         // No field path was returned from the server.
@@ -274,7 +290,7 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
         $errors = [];
         $genericErrors = [];
 
-        if ($mutateErrors) {
+        if ($mutateErrors !== null && count($mutateErrors) > 0) {
             foreach ($mutateErrors as $mutateError) {
                 [$skipped, $failed, $errors, $genericErrors] = $this->fillErrors(
                     $mutateError,
@@ -308,8 +324,11 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
 
         $succeeded = [];
         foreach ($mutateResults as $i => $mutateResult) {
+            /**
+             * @var Operand|null
+             */
             $entryResult = $mutateResult->getResult();
-            if (!$entryResult) {
+            if ($entryResult === null) {
                 continue;
             }
             $result = $this->getOperandEntity($entryResult);
@@ -381,17 +400,14 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
                 implode(', ', $skipped)
             )
         );
-        if (count($failed)) {
+        if (count($failed) > 0) {
             $result->success = false;
         }
         $this->logger->error(sprintf("%d entities were not added due to errors:\n", count($failed)));
         foreach ($failed as $errorIndex) {
             $text = "Entity {$errorIndex} errors:" . PHP_EOL;
             foreach ($errors[$errorIndex] as $i => $error) {
-                /**
-                 * @var ApiError $error
-                 */
-                $path = substr($error->getFieldPath(), strrpos($error->getFieldPath(), '.') + 1);
+                $path = substr($error->getFieldPath(), (int)strrpos($error->getFieldPath(), '.') + 1);
                 switch (true) {
                     case $error instanceof PolicyViolationError:
                         /**

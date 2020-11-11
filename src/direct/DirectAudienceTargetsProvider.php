@@ -44,7 +44,7 @@ class DirectAudienceTargetsProvider extends DirectEntitiesProvider implements IE
     public function getOne($id): ?AudienceTargetGetItem
     {
         $entities = $this->getAll([$id]);
-        if ($entities) {
+        if (count($entities) > 0) {
             return reset($entities);
         }
         return null;
@@ -71,7 +71,7 @@ class DirectAudienceTargetsProvider extends DirectEntitiesProvider implements IE
         $targets = $this->getFromCache($ids, 'Id');
         $found = array_keys($targets);
         $notFound = array_values(array_diff($ids, $found));
-        if ($notFound) {
+        if (count($notFound) > 0) {
             foreach (array_chunk($notFound, self::CRITERIA_MAX_IDS) as $idsChunk) {
                 $criteria = new AudienceTargetSelectionCriteria();
                 $criteria->Ids = $idsChunk;
@@ -104,13 +104,11 @@ class DirectAudienceTargetsProvider extends DirectEntitiesProvider implements IE
      * @param array  $ids
      * @param string $date
      *
-     * @return CheckResponse
-     *
      * @throws \directapi\exceptions\UnknownPropertyException
      */
-    protected function getChanges(array $ids, string $date): CheckResponse
+    protected function getChanges(array $ids, string $date): ?CheckResponse
     {
-        return new CheckResponse();
+        return null;
     }
 
     protected function getChangesCount(?CheckResponseModified $modified, ?CheckResponseIds $notFound): int

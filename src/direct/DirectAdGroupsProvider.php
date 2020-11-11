@@ -49,7 +49,7 @@ class DirectAdGroupsProvider extends DirectEntitiesProvider implements IEntities
     public function getOne($id): ?AdGroupGetItem
     {
         $ads = $this->getAll([$id]);
-        if ($ads) {
+        if (count($ads) > 0) {
             return reset($ads);
         }
         return null;
@@ -71,7 +71,7 @@ class DirectAdGroupsProvider extends DirectEntitiesProvider implements IEntities
         $adGroups = $this->getFromCache($ids, 'Id');
         $found = array_keys($adGroups);
         $notFound = array_values(array_diff($ids, $found));
-        if ($notFound) {
+        if (count($notFound) > 0) {
             foreach (array_chunk($notFound, self::CRITERIA_MAX_AD_GROUP_IDS) as $idsChunk) {
                 $criteria = new AdGroupsSelectionCriteria();
                 $criteria->Ids = $idsChunk;
@@ -108,7 +108,7 @@ class DirectAdGroupsProvider extends DirectEntitiesProvider implements IEntities
         $adGroups = $this->getFromCache($ids, 'CampaignId', 'Id');
         $found = array_unique(ArrayHelper::getColumn($adGroups, 'CampaignId'));
         $notFound = array_values(array_diff($ids, $found));
-        if ($notFound) {
+        if (count($notFound) > 0) {
             foreach (array_chunk($notFound, self::CRITERIA_MAX_CAMPAIGN_IDS) as $campaignIdsChunk) {
                 $criteria = new AdGroupsSelectionCriteria();
                 $criteria->CampaignIds = $campaignIdsChunk;
@@ -154,7 +154,7 @@ class DirectAdGroupsProvider extends DirectEntitiesProvider implements IEntities
                  * @var AdGroupUpdateItem $adGroup
                  */
                 $adGroup = $updEntities[$i];
-                if ($chunkResult->Errors) {
+                if (count($chunkResult->Errors) > 0) {
                     $result->success = false;
                     $adGroupErrors = [];
                     foreach ($chunkResult->Errors as $error) {
@@ -173,8 +173,6 @@ class DirectAdGroupsProvider extends DirectEntitiesProvider implements IEntities
      * @param array  $ids
      * @param string $date
      *
-     * @return CheckResponse
-     *
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \JsonMapper_Exception
      * @throws \directapi\exceptions\DirectAccountNotExistException
@@ -182,7 +180,7 @@ class DirectAdGroupsProvider extends DirectEntitiesProvider implements IEntities
      * @throws \directapi\exceptions\DirectApiNotEnoughUnitsException
      * @throws \directapi\exceptions\RequestValidationException
      */
-    protected function getChanges(array $ids, string $date): CheckResponse
+    protected function getChanges(array $ids, string $date): ?CheckResponse
     {
         return $this->directApiService->getChangesService()->check(
             [],
@@ -196,11 +194,11 @@ class DirectAdGroupsProvider extends DirectEntitiesProvider implements IEntities
     protected function getChangesCount(?CheckResponseModified $modified, ?CheckResponseIds $notFound): int
     {
         $count = 0;
-        if ($modified && \is_array($modified->AdGroupIds)) {
-            $count += \count($modified->AdGroupIds);
+        if ($modified !== null && $modified->AdGroupIds !== null) {
+            $count += count($modified->AdGroupIds);
         }
-        if ($notFound && \is_array($notFound->AdGroupIds)) {
-            $count += \count($notFound->AdGroupIds);
+        if ($notFound !== null && $notFound->AdGroupIds !== null) {
+            $count += count($notFound->AdGroupIds);
         }
         return $count;
     }

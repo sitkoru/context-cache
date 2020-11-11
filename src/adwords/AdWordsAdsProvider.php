@@ -208,16 +208,19 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
          * @var AdGroupAd[] $adGroupAds
          */
         $adGroupAds = $this->getFromCache($ids, 'ad.id');
-        if ($adGroupAds) {
+        if (count($adGroupAds) > 0) {
             $found = array_keys($adGroupAds);
             $notFound = array_values(array_diff($ids, $found));
         }
-        if ($notFound) {
+        if (count($notFound) > 0) {
             $selector = new Selector();
             $selector->setFields(self::$fields);
             $predicates[] = new Predicate('Id', PredicateOperator::IN, $ids);
             $selector->setPredicates($predicates);
             $fromService = $this->doRequest(function () use ($selector): array {
+                /**
+                 * @var null|array
+                 */
                 $entries = $this->adGroupAdService->get($selector)->getEntries();
                 return $entries !== null ? $entries : [];
             });
@@ -239,7 +242,7 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
     public function getOne($id): ?AdGroupAd
     {
         $ads = $this->getAll([$id]);
-        if ($ads) {
+        if (count($ads) > 0) {
             return reset($ads);
         }
         return null;
@@ -261,16 +264,19 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
          * @var AdGroupAd[] $adGroupAds
          */
         $adGroupAds = $this->getFromCache($campaignIds, 'campaignId', 'ad.id');
-        if ($adGroupAds) {
+        if (count($adGroupAds) > 0) {
             $found = array_unique(ArrayHelper::getColumn($adGroupAds, 'campaignId'));
             $notFound = array_values(array_diff($campaignIds, $found));
         }
-        if ($notFound) {
+        if (count($notFound) > 0) {
             $selector = new Selector();
             $selector->setFields(self::$fields);
             $predicates[] = new Predicate('CampaignId', PredicateOperator::IN, $notFound);
             $selector->setPredicates($predicates);
             $fromService = $this->doRequest(function () use ($selector): array {
+                /**
+                 * @var null|array
+                 */
                 $entries = $this->adGroupAdService->get($selector)->getEntries();
                 return $entries !== null ? $entries : [];
             });
@@ -301,16 +307,19 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
          * @var AdGroupAd[] $adGroupAds
          */
         $adGroupAds = $this->getFromCache($adGroupIds, 'adGroupId', 'ad.id');
-        if ($adGroupAds) {
+        if (count($adGroupAds) > 0) {
             $found = array_unique(ArrayHelper::getColumn($adGroupAds, 'adGroupId'));
             $notFound = array_values(array_diff($adGroupIds, $found));
         }
-        if ($notFound) {
+        if (count($notFound) > 0) {
             $selector = new Selector();
             $selector->setFields(self::$fields);
             $predicates[] = new Predicate('AdGroupId', PredicateOperator::IN, $notFound);
             $selector->setPredicates($predicates);
             $fromService = $this->doRequest(function () use ($selector): array {
+                /**
+                 * @var null|array
+                 */
                 $entries = $this->adGroupAdService->get($selector)->getEntries();
                 return $entries !== null ? $entries : [];
             });
@@ -348,6 +357,7 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
             $deleteOperation = new AdGroupAdOperation();
             $deleteOperation->setOperand($entity);
             $deleteOperation->setOperator(Operator::REMOVE);
+            // @phpstan-ignore-next-line
             $newAd->setId(null);
             if ($newAd instanceof TemplateAd) {
                 $newAd->setAdUnionId(new TempAdUnionId());
@@ -418,7 +428,7 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
                 }
             }
 
-            if ($deleteOperations) {
+            if (count($deleteOperations) > 0) {
                 $this->logger->info('Delete succeeded ads: ' . count($deleteOperations));
                 $try = 0;
                 $maxTry = 5;
@@ -434,12 +444,14 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
                         }
                     }
                 }
-                $this->processMutateResult(
-                    $result,
-                    array_values($deleteOperations),
-                    $jobResults->getValue(),
-                    $jobResults->getPartialFailureErrors()
-                );
+                if ($jobResults !== null) {
+                    $this->processMutateResult(
+                        $result,
+                        array_values($deleteOperations),
+                        $jobResults->getValue(),
+                        $jobResults->getPartialFailureErrors()
+                    );
+                }
             }
         }
 

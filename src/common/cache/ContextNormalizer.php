@@ -2,6 +2,7 @@
 
 namespace sitkoru\contextcache\common\cache;
 
+use ArrayObject;
 use directapi\components\Enum;
 use Symfony\Component\Serializer\Normalizer\GetSetMethodNormalizer;
 
@@ -19,9 +20,9 @@ class ContextNormalizer extends GetSetMethodNormalizer
     }
 
     /**
-     * @param mixed $data
-     * @param mixed $type
-     * @param null  $format
+     * @param object|array $data
+     * @param mixed        $type
+     * @param null         $format
      *
      * @return bool
      */
@@ -31,39 +32,37 @@ class ContextNormalizer extends GetSetMethodNormalizer
     }
 
     /**
-     * @param object $object
-     * @param null   $format
-     * @param array  $context
-     *
-     * @return array|bool|float|int|string
+     * {@inheritdoc}
      */
     public function normalize($object, $format = null, array $context = [])
     {
         $data = parent::normalize($object, $format, $context);
-        $data['_class'] = \get_class($object);
-        if (\is_subclass_of($data['_class'], Enum::class)) {
-            /**
-             * @var Enum $object
-             */
-            $data['type'] = $object ? $object->__toString() : null;
+        if (is_array($data)) {
+            $data['_class'] = \get_class($object);
+            if (\is_subclass_of($data['_class'], Enum::class)) {
+                /**
+                 * @var Enum|null $enum
+                 */
+                $enum = $object;
+                $data['type'] = $enum !== null ? $enum->__toString() : null;
+            }
+            return array_filter($data, function ($value): bool {
+                return $value !== null;
+            });
         }
-        return array_filter($data, function ($value): bool {
-            return $value !== null;
-        });
+        return $data;
     }
 
     /**
-     * @param array|object $data
-     * @param string       $class
-     * @param null         $format
-     * @param array        $context
-     *
-     * @return object
+     * {@inheritdoc}
      */
     public function denormalize($data, $class, $format = null, array $context = [])
     {
         if (\is_object($data)) {
-            $data = json_decode(json_encode($data), true);
+            $json = json_encode($data);
+            if ($json !== false) {
+                $data = json_decode($json, true);
+            }
         }
         if (\is_array($data) && isset($data['_class'])) {
             $class = $data['_class'];

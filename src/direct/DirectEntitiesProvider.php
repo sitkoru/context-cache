@@ -30,11 +30,11 @@ abstract class DirectEntitiesProvider extends EntitiesProvider
     protected function hasChanges(array $ids): bool
     {
         $ts = $this->getLastCacheTimestamp();
-        if (!$ts || $ts < time() - 60) {
+        if ($ts === 0 || $ts < time() - 60) {
             $date = date('Y-m-d\TH:i:s\Z', $ts);
             $changes = $this->getChanges($ids, $date);
             $count = 0;
-            if ($changes) {
+            if ($changes !== null) {
                 $count = $this->getChangesCount($changes->Modified, $changes->NotFound);
             }
             if ($count === 0) {
@@ -46,7 +46,7 @@ abstract class DirectEntitiesProvider extends EntitiesProvider
         return false;
     }
 
-    abstract protected function getChanges(array $ids, string $date): CheckResponse;
+    abstract protected function getChanges(array $ids, string $date): ?CheckResponse;
 
     abstract protected function getChangesCount(?CheckResponseModified $modified, ?CheckResponseIds $notFound): int;
 }

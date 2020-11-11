@@ -9,6 +9,7 @@ use Google\AdsApi\AdWords\v201809\cm\AdGroup;
 use Google\AdsApi\AdWords\v201809\cm\AdGroupOperation;
 use Google\AdsApi\AdWords\v201809\cm\AdGroupService;
 use Google\AdsApi\AdWords\v201809\cm\ApiException;
+use Google\AdsApi\AdWords\v201809\cm\BiddingStrategyConfiguration;
 use Google\AdsApi\AdWords\v201809\cm\Operand;
 use Google\AdsApi\AdWords\v201809\cm\Operator;
 use Google\AdsApi\AdWords\v201809\cm\Predicate;
@@ -83,16 +84,19 @@ class AdWordsAdGroupsProvider extends AdWordsEntitiesProvider implements IEntiti
          * @var AdGroup[] $adGroups
          */
         $adGroups = $this->getFromCache($ids, 'id');
-        if ($adGroups) {
+        if (count($adGroups) > 0) {
             $found = array_keys($adGroups);
             $notFound = array_values(array_diff($ids, $found));
         }
-        if ($notFound) {
+        if (count($notFound) > 0) {
             $selector = new Selector();
             $selector->setFields(self::$fields);
             $predicates[] = new Predicate('Id', PredicateOperator::IN, $ids);
             $selector->setPredicates($predicates);
             $fromService = $this->doRequest(function () use ($selector): array {
+                /**
+                 * @var null|array
+                 */
                 $entries = $this->adGroupService->get($selector)->getEntries();
                 return $entries !== null ? $entries : [];
             });
@@ -114,7 +118,7 @@ class AdWordsAdGroupsProvider extends AdWordsEntitiesProvider implements IEntiti
     public function getOne($id): ?AdGroup
     {
         $adGroups = $this->getAll([$id]);
-        if ($adGroups) {
+        if (count($adGroups) > 0) {
             return reset($adGroups);
         }
         return null;
@@ -135,16 +139,19 @@ class AdWordsAdGroupsProvider extends AdWordsEntitiesProvider implements IEntiti
          * @var AdGroup[] $adGroups
          */
         $adGroups = $this->getFromCache($campaignIds, 'campaignId', 'id');
-        if ($adGroups) {
+        if (count($adGroups) > 0) {
             $found = array_unique(ArrayHelper::getColumn($adGroups, 'campaignId'));
             $notFound = array_values(array_diff($campaignIds, $found));
         }
-        if ($notFound) {
+        if (count($notFound) > 0) {
             $selector = new Selector();
             $selector->setFields(self::$fields);
             $predicates[] = new Predicate('CampaignId', PredicateOperator::IN, $notFound);
             $selector->setPredicates($predicates);
             $fromService = $this->doRequest(function () use ($selector): array {
+                /**
+                 * @var null|array
+                 */
                 $entries = $this->adGroupService->get($selector)->getEntries();
                 return $entries !== null ? $entries : [];
             });
@@ -170,7 +177,12 @@ class AdWordsAdGroupsProvider extends AdWordsEntitiesProvider implements IEntiti
         $this->logger->info('Build operations');
         foreach ($entities as $entity) {
             $addOperation = new AdGroupOperation();
-            if ($entity->getBiddingStrategyConfiguration() !== null) {
+            /**
+             * @var BiddingStrategyConfiguration|null
+             */
+            $configuration = $entity->getBiddingStrategyConfiguration();
+            if ($configuration !== null) {
+                // @phpstan-ignore-next-line
                 $entity->setBiddingStrategyConfiguration(null);
             }
             $addOperation->setOperand($entity);

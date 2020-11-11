@@ -67,7 +67,7 @@ class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvi
         $ads = $this->getFromCache($ids, 'AdGroupId', 'Id');
         $found = array_unique(ArrayHelper::getColumn($ads, 'AdGroupId'));
         $notFound = array_values(array_diff($ids, $found));
-        if ($notFound) {
+        if (count($notFound) > 0) {
             foreach (array_chunk($notFound, self::CRITERIA_MAX_AD_GROUP_IDS) as $idsChunk) {
                 $criteria = new AdsSelectionCriteria();
                 $criteria->AdGroupIds = $idsChunk;
@@ -117,7 +117,7 @@ class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvi
         $ads = $this->getFromCache($ids, 'CampaignId', 'Id');
         $found = array_unique(ArrayHelper::getColumn($ads, 'CampaignId'));
         $notFound = array_values(array_diff($ids, $found));
-        if ($notFound) {
+        if (count($notFound) > 0) {
             foreach (array_chunk($notFound, self::CRITERIA_MAX_CAMPAIGN_IDS) as $idsChunk) {
                 $criteria = new AdsSelectionCriteria();
                 $criteria->CampaignIds = $idsChunk;
@@ -162,7 +162,7 @@ class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvi
     public function getOne($id): ?AdGetItem
     {
         $entities = $this->getAll([$id]);
-        if ($entities) {
+        if (count($entities) > 0) {
             return reset($entities);
         }
         return null;
@@ -189,7 +189,7 @@ class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvi
         $ads = $this->getFromCache($ids, 'Id');
         $found = array_keys($ads);
         $notFound = array_values(array_diff($ids, $found));
-        if ($notFound) {
+        if (count($notFound) > 0) {
             foreach (array_chunk($notFound, self::CRITERIA_MAX_AD_IDS) as $idsChunk) {
                 $criteria = new AdsSelectionCriteria();
                 $criteria->Ids = $idsChunk;
@@ -243,11 +243,9 @@ class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvi
                 if (!array_key_exists($i, $updEntities)) {
                     continue;
                 }
-                /**
-                 * @var AdUpdateItem $ad
-                 */
+
                 $ad = $updEntities[$i];
-                if ($chunkResult->Errors) {
+                if (count($chunkResult->Errors) > 0) {
                     $result->success = false;
                     $adErrors = [];
                     foreach ($chunkResult->Errors as $error) {
@@ -266,8 +264,6 @@ class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvi
      * @param array  $ids
      * @param string $date
      *
-     * @return CheckResponse
-     *
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \JsonMapper_Exception
      * @throws \directapi\exceptions\DirectAccountNotExistException
@@ -275,7 +271,7 @@ class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvi
      * @throws \directapi\exceptions\DirectApiNotEnoughUnitsException
      * @throws \directapi\exceptions\RequestValidationException
      */
-    protected function getChanges(array $ids, string $date): CheckResponse
+    protected function getChanges(array $ids, string $date): ?CheckResponse
     {
         return $this->directApiService->getChangesService()->check([], [], $ids, [FieldNamesEnum::AD_IDS], $date);
     }
@@ -283,11 +279,11 @@ class DirectAdsProvider extends DirectEntitiesProvider implements IEntitiesProvi
     protected function getChangesCount(?CheckResponseModified $modified, ?CheckResponseIds $notFound): int
     {
         $count = 0;
-        if ($modified && \is_array($modified->AdIds)) {
-            $count += \count($modified->AdIds);
+        if ($modified !== null && $modified->AdIds !== null) {
+            $count += count($modified->AdIds);
         }
-        if ($notFound && \is_array($notFound->AdIds)) {
-            $count += \count($notFound->AdIds);
+        if ($notFound !== null && $notFound->AdIds !== null) {
+            $count += count($notFound->AdIds);
         }
         return $count;
     }

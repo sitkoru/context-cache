@@ -127,19 +127,22 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
          * @var AdGroupCriterion[] $criterions
          */
         $criterions = $this->getFromCache($ids, 'criterion.id', $indexBy);
-        if ($criterions) {
+        if (count($criterions) > 0) {
             $found = array_unique(ArrayHelper::getColumn($criterions, function (AdGroupCriterion $criterion): int {
                 return $criterion->getCriterion()->getId();
             }));
             $notFound = array_values(array_diff($ids, $found));
         }
-        if ($notFound) {
+        if (count($notFound) > 0) {
             foreach (array_chunk($ids, self::MAX_RESPONSE_COUNT) as $idsChunk) {
                 $selector = new Selector();
                 $selector->setFields(self::$fields);
                 $predicates[] = new Predicate('Id', PredicateOperator::IN, $idsChunk);
                 $selector->setPredicates($predicates);
                 $fromService = $this->doRequest(function () use ($selector): array {
+                    /**
+                     * @var null|array
+                     */
                     $entries = $this->adGroupCriterionService->get($selector)->getEntries();
                     return $entries !== null ? $entries : [];
                 });
@@ -163,7 +166,7 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
     public function getOne($id): ?AdGroupCriterion
     {
         $criterions = $this->getAll([$id]);
-        if ($criterions) {
+        if (count($criterions) > 0) {
             return reset($criterions);
         }
         return null;
@@ -181,23 +184,26 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
     {
         $notFound = $adGroupIds;
 
-        $indexBy = function (AdGroupCriterion $criterion): int {
+        $indexBy = function (AdGroupCriterion $criterion): string {
             return $criterion->getAdGroupId() . $criterion->getCriterion()->getId();
         };
         /**
          * @var AdGroupCriterion[] $criterions
          */
         $criterions = $this->getFromCache($adGroupIds, 'adGroupId', $indexBy);
-        if ($criterions) {
+        if (count($criterions) > 0) {
             $found = array_unique(ArrayHelper::getColumn($criterions, 'adGroupId'));
             $notFound = array_values(array_diff($adGroupIds, $found));
         }
-        if ($notFound) {
+        if (count($notFound) > 0) {
             $selector = new Selector();
             $selector->setFields(self::$fields);
             $predicates[] = new Predicate('AdGroupId', PredicateOperator::IN, $notFound);
             $selector->setPredicates($predicates);
             $fromService = $this->doRequest(function () use ($selector): array {
+                /**
+                 * @var null|array
+                 */
                 $entries = $this->adGroupCriterionService->get($selector)->getEntries();
                 return $entries !== null ? $entries : [];
             });
@@ -229,11 +235,11 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
          * @var AdGroupCriterion[] $criterions
          */
         $criterions = $this->getFromCache($campaignIds, 'campaignId', $indexBy);
-        if ($criterions) {
+        if (count($criterions) > 0) {
             $found = array_unique(ArrayHelper::getColumn($criterions, 'campaignId'));
             $notFound = array_values(array_diff($campaignIds, $found));
         }
-        if ($notFound) {
+        if (count($notFound) > 0) {
             $selector = new Selector();
             $selector->setFields(self::$fields);
             $predicates[] = new Predicate('CampaignId', PredicateOperator::IN, $notFound);

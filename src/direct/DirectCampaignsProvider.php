@@ -82,7 +82,7 @@ class DirectCampaignsProvider extends DirectEntitiesProvider implements IEntitie
     public function getOne($id): ?CampaignGetItem
     {
         $entities = $this->getAll([$id]);
-        if ($entities) {
+        if (count($entities) > 0) {
             return reset($entities);
         }
         return null;
@@ -109,7 +109,7 @@ class DirectCampaignsProvider extends DirectEntitiesProvider implements IEntitie
         $campaigns = $this->getFromCache($ids, 'Id');
         $found = array_keys($campaigns);
         $notFound = array_values(array_diff($ids, $found));
-        if ($notFound) {
+        if (count($notFound) > 0) {
             foreach (array_chunk($notFound, self::CRITERIA_MAX_CAMPAIGN_IDS) as $idsChunk) {
                 $criteria = new CampaignsSelectionCriteria();
                 $criteria->Ids = $idsChunk;
@@ -160,7 +160,7 @@ class DirectCampaignsProvider extends DirectEntitiesProvider implements IEntitie
                  * @var CampaignUpdateItem $campaign
                  */
                 $campaign = $updEntities[$i];
-                if ($chunkResult->Errors) {
+                if (count($chunkResult->Errors) > 0) {
                     $result->success = false;
                     $campaignErrors = [];
                     foreach ($chunkResult->Errors as $error) {
@@ -179,8 +179,6 @@ class DirectCampaignsProvider extends DirectEntitiesProvider implements IEntitie
      * @param array  $ids
      * @param string $date
      *
-     * @return CheckResponse
-     *
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \JsonMapper_Exception
      * @throws \directapi\exceptions\DirectAccountNotExistException
@@ -188,7 +186,7 @@ class DirectCampaignsProvider extends DirectEntitiesProvider implements IEntitie
      * @throws \directapi\exceptions\DirectApiNotEnoughUnitsException
      * @throws \directapi\exceptions\RequestValidationException
      */
-    protected function getChanges(array $ids, string $date): CheckResponse
+    protected function getChanges(array $ids, string $date): ?CheckResponse
     {
         return $this->directApiService->getChangesService()->check([], [], $ids, [FieldNamesEnum::CAMPAIGN_IDS], $date);
     }
@@ -196,10 +194,10 @@ class DirectCampaignsProvider extends DirectEntitiesProvider implements IEntitie
     protected function getChangesCount(?CheckResponseModified $modified, ?CheckResponseIds $notFound): int
     {
         $count = 0;
-        if ($modified && \is_array($modified->CampaignIds)) {
+        if ($modified !== null && $modified->CampaignIds !== null) {
             $count += \count($modified->CampaignIds);
         }
-        if ($notFound && \is_array($notFound->CampaignIds)) {
+        if ($notFound !== null && $notFound->CampaignIds !== null) {
             $count += \count($notFound->CampaignIds);
         }
         return $count;

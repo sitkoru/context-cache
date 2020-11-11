@@ -48,7 +48,7 @@ class AdWordsProvider
     private $customerId;
 
     /**
-     * @var string
+     * @var string|null
      */
     private $refreshToken;
 
@@ -123,7 +123,7 @@ class AdWordsProvider
         $builder = (new AdWordsSessionBuilder())
             ->fromFile($this->oAuthFilePath)
             ->withOAuth2Credential($oAuth2Credential)
-            ->withClientCustomerId($this->customerId);
+            ->withClientCustomerId($this->customerId . '');
 
         return $builder;
     }
@@ -133,7 +133,7 @@ class AdWordsProvider
         $authFile = $this->oAuthFilePath;
         $oauthBuilder = (new OAuth2TokenBuilder())
             ->fromFile($authFile);
-        if ($this->refreshToken) {
+        if ($this->refreshToken !== null) {
             $oauthBuilder->withRefreshToken($this->refreshToken);
         }
 

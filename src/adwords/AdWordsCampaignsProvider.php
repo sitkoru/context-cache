@@ -106,18 +106,21 @@ class AdWordsCampaignsProvider extends AdWordsEntitiesProvider implements IEntit
          * @var Campaign[] $campaigns
          */
         $campaigns = $this->getFromCache($ids, 'id');
-        if ($campaigns) {
+        if (count($campaigns) > 0) {
             $found = array_keys($campaigns);
             $notFound = array_values(array_diff($ids, $found));
         }
-        if ($notFound) {
+        if (count($notFound) > 0) {
             $selector = new Selector();
             $selector->setFields(self::$fields);
             $predicates = [new Predicate('Id', PredicateOperator::IN, $ids)];
             $selector->setPredicates($predicates);
             $fromService = $this->doRequest(function () use ($selector): array {
+                /**
+                 * @var array|null
+                 */
                 $entries = $this->campaignService->get($selector)->getEntries();
-                return $entries !== null ? $entries : [];
+                return is_array($entries) && count($entries) > 0 ? $entries : [];
             });
             foreach ($fromService as $campaignItem) {
                 $campaigns[$campaignItem->getId()] = $campaignItem;
@@ -137,7 +140,7 @@ class AdWordsCampaignsProvider extends AdWordsEntitiesProvider implements IEntit
     public function getOne($id): ?Campaign
     {
         $campaigns = $this->getAll([$id]);
-        if ($campaigns) {
+        if (count($campaigns) > 0) {
             return reset($campaigns);
         }
         return null;
@@ -154,6 +157,9 @@ class AdWordsCampaignsProvider extends AdWordsEntitiesProvider implements IEntit
         $selector = new Selector();
         $selector->setFields(self::$fields);
         $fromService = $this->doRequest(function () use ($selector): array {
+            /**
+             * @var null|array
+             */
             $entries = $this->campaignService->get($selector)->getEntries();
             return $entries !== null ? $entries : [];
         });

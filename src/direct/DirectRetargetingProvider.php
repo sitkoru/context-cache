@@ -31,7 +31,7 @@ class DirectRetargetingProvider extends DirectEntitiesProvider implements IEntit
     }
 
     /**
-     * @param int $id
+     * @param mixed $id
      *
      * @return RetargetingListGetItem|null
      *
@@ -46,7 +46,7 @@ class DirectRetargetingProvider extends DirectEntitiesProvider implements IEntit
     public function getOne($id): ?RetargetingListGetItem
     {
         $entities = $this->getAll([$id]);
-        if ($entities) {
+        if (count($entities) > 0) {
             return reset($entities);
         }
         return null;
@@ -73,7 +73,7 @@ class DirectRetargetingProvider extends DirectEntitiesProvider implements IEntit
         $lists = $this->getFromCache($ids, 'Id');
         $found = array_keys($lists);
         $notFound = array_values(array_diff($ids, $found));
-        if ($notFound) {
+        if (count($notFound) > 0) {
             foreach (array_chunk($notFound, self::CRITERIA_MAX_IDS) as $idsChunk) {
                 $criteria = new RetargetingListSelectionCriteria();
                 $criteria->Ids = $idsChunk;
@@ -119,7 +119,7 @@ class DirectRetargetingProvider extends DirectEntitiesProvider implements IEntit
                  * @var RetargetingListUpdateItem $list
                  */
                 $list = $updEntities[$i];
-                if ($chunkResult->Errors) {
+                if (count($chunkResult->Errors) > 0) {
                     $result->success = false;
                     $keywordErrors = [];
                     foreach ($chunkResult->Errors as $error) {
@@ -138,13 +138,11 @@ class DirectRetargetingProvider extends DirectEntitiesProvider implements IEntit
      * @param array  $ids
      * @param string $date
      *
-     * @return CheckResponse
-     *
      * @throws \directapi\exceptions\UnknownPropertyException
      */
-    protected function getChanges(array $ids, string $date): CheckResponse
+    protected function getChanges(array $ids, string $date): ?CheckResponse
     {
-        return new CheckResponse();
+        return null;
     }
 
     protected function getChangesCount(?CheckResponseModified $modified, ?CheckResponseIds $notFound): int
