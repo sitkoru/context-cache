@@ -12,8 +12,8 @@ jobs:
     container: php:7.4-cli
     steps:
       - uses: actions/checkout@v2
-      - name: Install zip
-        run: apt update && apt install -y unzip
+      - name: Install debian packages
+        run: apt update && apt install -y unzip libxml2-dev
       - name: Install soap extension
         run: docker-php-ext-install soap
       - name: Install mongodb extension
