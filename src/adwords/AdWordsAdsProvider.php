@@ -271,7 +271,9 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
         if (count($notFound) > 0) {
             $selector = new Selector();
             $selector->setFields(self::$fields);
-            $predicates[] = new Predicate('CampaignId', PredicateOperator::IN, $notFound);
+            $predicates[] = new Predicate('CampaignId', PredicateOperator::IN, array_map(function (int $id): string {
+                return $id . '';
+            }, $notFound));
             $selector->setPredicates($predicates);
             $fromService = $this->doRequest(function () use ($selector): array {
                 /**
@@ -314,7 +316,9 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
         if (count($notFound) > 0) {
             $selector = new Selector();
             $selector->setFields(self::$fields);
-            $predicates[] = new Predicate('AdGroupId', PredicateOperator::IN, $notFound);
+            $predicates[] = new Predicate('AdGroupId', PredicateOperator::IN, array_map(function (int $id): string {
+                return $id . '';
+            }, $notFound));
             $selector->setPredicates($predicates);
             $fromService = $this->doRequest(function () use ($selector): array {
                 /**
@@ -383,13 +387,17 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
                  */
                 $this->logger->info('Add chunk #' . $i . '. Size: ' . count($addChunk));
                 $jobResults = $this->runMutateJob($addChunk);
-                $this->processJobResult($result, $jobResults);
-                if (!$result->success) {
-                    foreach ($result->errors as $adOperationId => $errors) {
-                        $adOperation = $addChunk[$adOperationId];
-                        $adId = $adOperation->getOperand()->getAd()->getId();
-                        unset($deleteOperations[$adId]);
+                if (is_array($jobResults)) {
+                    $this->processJobResult($result, $jobResults);
+                    if (!$result->success) {
+                        foreach ($result->errors as $adOperationId => $errors) {
+                            $adOperation = $addChunk[$adOperationId];
+                            $adId = $adOperation->getOperand()->getAd()->getId();
+                            unset($deleteOperations[$adId]);
+                        }
                     }
+                } else {
+                    throw new ErrorException('Empty result from google');
                 }
             }
 
@@ -410,7 +418,11 @@ class AdWordsAdsProvider extends AdWordsEntitiesProvider implements IEntitiesPro
                         }
                     }
                 }
-                $this->processJobResult($result, $jobResults);
+                if (is_array($jobResults)) {
+                    $this->processJobResult($result, $jobResults);
+                } else {
+                    throw new ErrorException('Empty result from google');
+                }
             }
         } else {
             $mutateResult = $this->adGroupAdService->mutate($addOperations);

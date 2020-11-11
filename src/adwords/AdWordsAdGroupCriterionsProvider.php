@@ -3,6 +3,7 @@
 namespace sitkoru\contextcache\adwords;
 
 use function count;
+use ErrorException;
 use Exception;
 use Google\AdsApi\AdWords\AdWordsSession;
 use Google\AdsApi\AdWords\v201809\cm\AdGroupCriterion;
@@ -198,7 +199,9 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
         if (count($notFound) > 0) {
             $selector = new Selector();
             $selector->setFields(self::$fields);
-            $predicates[] = new Predicate('AdGroupId', PredicateOperator::IN, $notFound);
+            $predicates[] = new Predicate('AdGroupId', PredicateOperator::IN, array_map(function (int $id): string {
+                return $id . '';
+            }, $notFound));
             $selector->setPredicates($predicates);
             $fromService = $this->doRequest(function () use ($selector): array {
                 /**
@@ -242,7 +245,9 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
         if (count($notFound) > 0) {
             $selector = new Selector();
             $selector->setFields(self::$fields);
-            $predicates[] = new Predicate('CampaignId', PredicateOperator::IN, $notFound);
+            $predicates[] = new Predicate('CampaignId', PredicateOperator::IN, array_map(function (int $id): string {
+                return $id . '';
+            }, $notFound));
             $selector->setPredicates($predicates);
             $perPageSize = 10000;
             $selector->setPaging(new Paging(0, $perPageSize));
@@ -294,7 +299,11 @@ class AdWordsAdGroupCriterionsProvider extends AdWordsEntitiesProvider implement
                  */
                 $this->logger->info('Update chunk #' . $i . '. Size: ' . count($updateChunk));
                 $jobResults = $this->runMutateJob($updateChunk);
-                $this->processJobResult($result, $jobResults);
+                if (is_array($jobResults)) {
+                    $this->processJobResult($result, $jobResults);
+                } else {
+                    throw new ErrorException('Empty result from google');
+                }
             }
         } else {
             $mutateResult = $this->adGroupCriterionService->mutate($updateOperations);

@@ -188,6 +188,7 @@ class DirectCampaignsProvider extends DirectEntitiesProvider implements IEntitie
      */
     protected function getChanges(array $ids, string $date): ?CheckResponse
     {
+        // @phpstan-ignore-next-line
         return $this->directApiService->getChangesService()->check([], [], $ids, [FieldNamesEnum::CAMPAIGN_IDS], $date);
     }
 

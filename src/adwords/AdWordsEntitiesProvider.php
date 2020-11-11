@@ -129,7 +129,7 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
                 'ProcessingErrors',
                 'ProgressStats'
             ]);
-            $selector->setPredicates([new Predicate('Id', PredicateOperator::EQUALS, [$job->getId()])]);
+            $selector->setPredicates([new Predicate('Id', PredicateOperator::EQUALS, [$job->getId() . ''])]);
             $batchJob = $this->batchJobService->get($selector)->getEntries()[0];
             $this->logger->info('Batch job ID ' . $batchJob->getId() . " has status '{$batchJob->getStatus()}'. Last sleep {$sleepSeconds}");
             $this->logger->debug('Batch job ID ' . $batchJob->getId() . " has status '{$batchJob->getStatus()}'");
@@ -186,18 +186,13 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
      * @param MutateResult[] $jobResult
      *
      * @return array
-     *
-     * @throws ErrorException
      */
-    protected function processErrors($jobResult): array
+    protected function processErrors(array $jobResult): array
     {
         $skipped = [];
         $failed = [];
         $errors = [];
         $genericErrors = [];
-        if (!is_array($jobResult)) {
-            throw new ErrorException('Empty result from google');
-        }
 
         foreach ($jobResult as $mutateResult) {
             /**
@@ -310,10 +305,8 @@ abstract class AdWordsEntitiesProvider extends EntitiesProvider
      * @param MutateResult[] $mutateResults
      *
      * @return UpdateResult
-     *
-     * @throws ErrorException
      */
-    protected function processJobResult(UpdateResult $jobResult, $mutateResults): UpdateResult
+    protected function processJobResult(UpdateResult $jobResult, array $mutateResults): UpdateResult
     {
         /**
          * @var int[]   $failed

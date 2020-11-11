@@ -227,6 +227,7 @@ class DirectKeywordsProvider extends DirectEntitiesProvider implements IEntities
      */
     protected function getChanges(array $ids, string $date): ?CheckResponse
     {
+        // @phpstan-ignore-next-line
         return $this->directApiService->getChangesService()->check([], [], $ids, [FieldNamesEnum::AD_IDS], $date);
     }
 

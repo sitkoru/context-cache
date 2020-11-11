@@ -196,7 +196,11 @@ class AdWordsCampaignsProvider extends AdWordsEntitiesProvider implements IEntit
             foreach (array_chunk($addOperations, self::MAX_OPERATIONS_SIZE) as $i => $addChunk) {
                 $this->logger->info('Update chunk #' . $i . '. Size: ' . count($addChunk));
                 $jobResults = $this->runMutateJob($addChunk);
-                $this->processJobResult($result, $jobResults);
+                if (is_array($jobResults)) {
+                    $this->processJobResult($result, $jobResults);
+                } else {
+                    throw new ErrorException('Empty result from google');
+                }
             }
         } else {
             $mutateResult = $this->campaignService->mutate($addOperations);

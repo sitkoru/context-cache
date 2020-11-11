@@ -28,7 +28,7 @@ class ContextNormalizer extends GetSetMethodNormalizer
      */
     public function supportsDenormalization($data, $type, $format = null): bool
     {
-        return array_key_exists('_class', $data);
+        return is_array($data) && array_key_exists('_class', $data);
     }
 
     /**
